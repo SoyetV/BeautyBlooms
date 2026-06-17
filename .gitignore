@@ -1,0 +1,21 @@
+# Dependencies (Never push this, it's too large!)
+node_modules/
+
+# Environment variables / Secrets (Important files)
+.env
+.env.local
+.env.production
+*.env
+
+# Build outputs
+dist/
+build/
+.next/
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+
+# OS-specific files
+.DS_Store
+Thumbs.db

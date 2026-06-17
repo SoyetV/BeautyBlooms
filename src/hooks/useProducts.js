@@ -1,0 +1,132 @@
+// src/hooks/useProducts.js
+// Encapsulates all Supabase product CRUD operations.
+// Components stay thin; data logic lives here.
+
+import { useCallback, useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabaseClient'
+
+export function useProducts({ adminMode = false } = {}) {
+  const [products, setProducts] = useState([])
+  const [loading,  setLoading]  = useState(true)
+  const [error,    setError]    = useState(null)
+
+  // ── READ ──────────────────────────────────────────────
+  const fetchProducts = useCallback(async (filters = {}) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      let query = supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      // Public catalog shows only available products unless admin
+      if (!adminMode) {
+        query = query.eq('is_available', true)
+      }
+
+      // Optional category filter
+      if (filters.category && filters.category !== 'All') {
+        query = query.eq('category', filters.category)
+      }
+
+      // Optional text search on name/description
+      if (filters.search) {
+        query = query.or(
+          `name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`
+        )
+      }
+
+      const { data, error: sbError } = await query
+      if (sbError) throw sbError
+      setProducts(data)
+    } catch (err) {
+      console.error('[useProducts] fetchProducts:', err.message)
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [adminMode])
+
+  useEffect(() => {
+    fetchProducts()
+  }, [fetchProducts])
+
+  // ── CREATE ────────────────────────────────────────────
+  // imageFile is a File object (optional). Returns created product or throws.
+  async function createProduct(fields, imageFile = null) {
+    let image_url = null
+
+    if (imageFile) {
+      const ext      = imageFile.name.split('.').pop()
+      const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { error: uploadErr } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, imageFile, { upsert: false })
+      if (uploadErr) throw uploadErr
+
+      const { data: urlData } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath)
+      image_url = urlData.publicUrl
+    }
+
+    const { data, error } = await supabase
+      .from('products')
+      .insert({ ...fields, image_url })
+      .select()
+      .single()
+
+    if (error) throw error
+    setProducts(prev => [data, ...prev])
+    return data
+  }
+
+  // ── UPDATE ────────────────────────────────────────────
+  async function updateProduct(id, fields, imageFile = null) {
+    let image_url = fields.image_url ?? null
+
+    if (imageFile) {
+      const ext      = imageFile.name.split('.').pop()
+      const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { error: uploadErr } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, imageFile, { upsert: false })
+      if (uploadErr) throw uploadErr
+
+      const { data: urlData } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath)
+      image_url = urlData.publicUrl
+    }
+
+    const { data, error } = await supabase
+      .from('products')
+      .update({ ...fields, image_url })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    setProducts(prev => prev.map(p => (p.id === id ? data : p)))
+    return data
+  }
+
+  // ── DELETE ────────────────────────────────────────────
+  async function deleteProduct(id) {
+    const { error } = await supabase.from('products').delete().eq('id', id)
+    if (error) throw error
+    setProducts(prev => prev.filter(p => p.id !== id))
+  }
+
+  return {
+    products,
+    loading,
+    error,
+    fetchProducts,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+  }
+}
