@@ -57,19 +57,20 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
 
   return (
     <div className="space-y-3">
-      {orders.map(order => {
+      {orders.map((order, idx) => {
         const isExpanded = expandedId === order.id
         const isUpdating = updatingId === order.id
 
         return (
           <article
             key={order.id}
-            className="card overflow-hidden"
+            className="card overflow-hidden opacity-0 animate-fade-in-up"
+            style={{ animationDelay: `${idx * 75}ms` }}
             aria-label={`Order from ${order.customer_name}`}
           >
             {/* Order header row */}
             <div
-              className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
+              className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 cursor-pointer hover:bg-petal-100 transition-colors duration-500"
               onClick={() => setExpandedId(isExpanded ? null : order.id)}
               role="button"
               aria-expanded={isExpanded}
@@ -105,7 +106,7 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
 
             {/* Expanded detail panel */}
             {isExpanded && (
-              <div className="border-t border-gray-100 bg-gray-50 px-4 py-4 space-y-4">
+              <div className="border-t border-gold-100 bg-petal-50/50 px-5 py-6 space-y-6 animate-fade-in">
                 {/* Customer details */}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
                   <div>

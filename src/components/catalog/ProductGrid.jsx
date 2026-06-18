@@ -119,10 +119,15 @@ export function ProductGrid({ products, loading, error, onRetry }) {
           }
         />
       ) : (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filtered.map((product, idx) => {
+            const staggerDelay = idx < 12 ? `${idx * 100}ms` : '0ms';
+            return (
+              <div key={product.id} className="opacity-0 animate-fade-in-up" style={{ animationDelay: staggerDelay }}>
+                <ProductCard product={product} />
+              </div>
+            )
+          })}
         </div>
       )}
     </section>

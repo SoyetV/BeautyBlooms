@@ -2,9 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .page-enter {
+    @apply opacity-0 animate-fade-in-up;
+  }
+}
+
 @layer base {
   html {
-    @apply font-body text-gray-800 antialiased;
+    @apply font-body text-charcoal-900 antialiased bg-petal-50;
   }
 
   h1, h2, h3, h4 {
@@ -64,6 +70,6 @@
   }
 
   .card {
-    @apply rounded-2xl bg-white shadow-sm ring-1 ring-gray-100;
+    @apply rounded-2xl bg-white shadow-sm ring-1 ring-gold-200/50 hover:shadow-lg hover:ring-gold-300 transition-all duration-500;
   }
 }

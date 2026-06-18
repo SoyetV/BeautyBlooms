@@ -4,16 +4,16 @@ import { Link } from 'react-router-dom'
 
 export function Footer() {
   return (
-    <footer className="border-t border-gray-100 bg-white mt-auto">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+    <footer className="border-t border-gold-200/50 bg-petal-50 mt-auto">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16">
+        <div className="grid grid-cols-1 gap-12 sm:grid-cols-3">
           {/* Brand */}
           <div>
-            <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold text-bloom-600">
-              <span aria-hidden="true">🌸</span> Bloom
+            <Link to="/" className="flex items-center gap-2 font-display text-2xl font-bold text-charcoal-900 tracking-tight">
+              <span aria-hidden="true">🌸</span> Beauty Blooms
             </Link>
-            <p className="mt-2 text-sm text-gray-500 max-w-xs">
-              Fresh-cut flowers, arranged with care and delivered to your door.
+            <p className="mt-4 text-sm text-charcoal-600 max-w-xs leading-relaxed font-light">
+              Premium, fresh-cut flowers, arranged with care and delivered to your door with elegance.
             </p>
           </div>
 

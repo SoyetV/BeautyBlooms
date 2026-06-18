@@ -31,13 +31,13 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-petal-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-petal-50 px-4 page-enter">
       <div className="w-full max-w-sm">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <span className="text-5xl" aria-hidden="true">🌸</span>
-          <h1 className="font-display text-2xl font-bold text-bloom-600 mt-2">Bloom Admin</h1>
-          <p className="text-sm text-gray-500 mt-1">Sign in to manage your shop.</p>
+        <div className="text-center mb-10">
+          <span className="text-5xl drop-shadow-sm inline-block animate-scale-in" aria-hidden="true">🌸</span>
+          <h1 className="font-display text-3xl font-bold text-charcoal-900 mt-4 tracking-tight">Beauty Blooms</h1>
+          <p className="text-sm text-charcoal-600 font-light mt-2">Sign in to the Admin Dashboard.</p>
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="card px-6 py-7 space-y-5">

@@ -58,25 +58,25 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl ring-1 ring-gray-100">
-      <table className="min-w-full divide-y divide-gray-100 text-sm" aria-label="Product inventory">
-        <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-400">
+    <div className="overflow-x-auto card">
+      <table className="min-w-full divide-y divide-gold-100 text-sm" aria-label="Product inventory">
+        <thead className="bg-petal-50/80 text-xs font-semibold uppercase tracking-wider text-charcoal-500">
           <tr>
-            <th scope="col" className="px-4 py-3 text-left">Product</th>
-            <th scope="col" className="px-4 py-3 text-left hidden sm:table-cell">Category</th>
-            <th scope="col" className="px-4 py-3 text-right">Price</th>
-            <th scope="col" className="px-4 py-3 text-left hidden md:table-cell">Stock</th>
-            <th scope="col" className="px-4 py-3 text-left hidden lg:table-cell">Status</th>
-            <th scope="col" className="px-4 py-3 text-right">Actions</th>
+            <th scope="col" className="px-5 py-4 text-left">Product</th>
+            <th scope="col" className="px-5 py-4 text-left hidden sm:table-cell">Category</th>
+            <th scope="col" className="px-5 py-4 text-right">Price</th>
+            <th scope="col" className="px-5 py-4 text-left hidden md:table-cell">Stock</th>
+            <th scope="col" className="px-5 py-4 text-left hidden lg:table-cell">Status</th>
+            <th scope="col" className="px-5 py-4 text-right">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-50 bg-white">
-          {products.map(product => (
-            <tr key={product.id} className="group hover:bg-gray-50 transition-colors">
+        <tbody className="divide-y divide-gold-50 bg-white">
+          {products.map((product, idx) => (
+            <tr key={product.id} className="group hover:bg-petal-50 transition-colors duration-500 opacity-0 animate-fade-in-up" style={{ animationDelay: `${idx * 50}ms` }}>
               {/* Product name + image */}
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-petal-50">
+              <td className="px-5 py-4">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-petal-100">
                     {product.image_url
                       ? <img src={product.image_url} alt="" className="h-full w-full object-cover" aria-hidden="true" />
                       : <div className="flex h-full w-full items-center justify-center text-lg" aria-hidden="true">🌸</div>

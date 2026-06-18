@@ -34,35 +34,37 @@ export function ProductCard({ product }) {
       : null
 
   return (
-    <article className="card group flex flex-col overflow-hidden transition-shadow hover:shadow-md">
+    <article className="card group flex flex-col overflow-hidden rounded-2xl bg-white border border-gold-100 transition-all duration-500 hover:shadow-xl hover:shadow-gold-200/30 hover:-translate-y-1">
       {/* Product image */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-petal-50">
+      <div className="relative aspect-[4/3] overflow-hidden bg-petal-100">
         <img
           src={imgError || !product.image_url ? PLACEHOLDER : product.image_url}
           alt={product.name}
           onError={() => setImgError(true)}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="h-full w-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110"
           loading="lazy"
         />
+        {/* Elegant overlay on hover */}
+        <div className="absolute inset-0 bg-gold-200/0 transition-colors duration-700 group-hover:bg-gold-200/10 pointer-events-none" />
         {/* Category pill */}
-        <span className="absolute left-3 top-3 rounded-full bg-white/80 px-2.5 py-0.5 text-xs font-medium text-gray-700 backdrop-blur-sm shadow-sm">
+        <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold tracking-wider uppercase text-charcoal-800 backdrop-blur-md shadow-sm border border-white/20">
           {product.category}
         </span>
       </div>
 
       {/* Card body */}
-      <div className="flex flex-1 flex-col gap-2 p-4">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="font-display font-semibold text-gray-900 leading-tight line-clamp-2">
+      <div className="flex flex-1 flex-col gap-3 p-6">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="font-display text-xl font-bold text-charcoal-900 leading-tight line-clamp-2">
             {product.name}
           </h3>
-          <span className="shrink-0 text-base font-semibold text-bloom-600">
+          <span className="shrink-0 text-lg font-semibold text-bloom-600">
             {formatCurrency(product.price)}
           </span>
         </div>
 
         {product.description && (
-          <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">
+          <p className="text-sm text-charcoal-500 line-clamp-2 leading-relaxed font-light">
             {product.description}
           </p>
         )}
@@ -81,14 +83,14 @@ export function ProductCard({ product }) {
                 ? `Add another ${product.name} to cart`
                 : `Add ${product.name} to cart`
           }
-          className={`mt-auto flex w-full items-center justify-center gap-2 rounded-full py-2.5 text-sm font-medium transition-all
+          className={`mt-6 flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-bold uppercase tracking-wider transition-all
             ${isOutOfStock
-              ? 'cursor-not-allowed bg-gray-100 text-gray-400'
+              ? 'cursor-not-allowed bg-charcoal-100 text-charcoal-400'
               : adding
-                ? 'bg-green-500 text-white'
+                ? 'bg-leaf-500 text-white shadow-md'
                 : inCart
-                  ? 'bg-bloom-50 text-bloom-700 ring-1 ring-bloom-200 hover:bg-bloom-100'
-                  : 'bg-bloom-500 text-white hover:bg-bloom-600 active:bg-bloom-700'
+                  ? 'bg-petal-100 text-bloom-700 ring-1 ring-gold-200 hover:bg-gold-50'
+                  : 'bg-charcoal-900 text-white hover:bg-bloom-600 shadow-md hover:shadow-bloom-500/30'
             }`}
         >
           {adding ? (

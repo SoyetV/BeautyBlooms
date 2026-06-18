@@ -10,37 +10,41 @@ export default function HomePage() {
   const featured = products.slice(0, 4)
 
   return (
-    <div>
+    <div className="page-enter">
       {/* Hero */}
       <section
-        className="relative overflow-hidden bg-gradient-to-br from-bloom-50 via-petal-50 to-white"
-        aria-label="Welcome to Bloom"
+        className="relative flex items-center justify-center min-h-[85vh] bg-charcoal-900 overflow-hidden"
+        aria-label="Welcome to Beauty Blooms"
       >
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-20 sm:py-28 text-center">
-          <p className="text-sm font-medium uppercase tracking-widest text-bloom-400 mb-3">
-            Fresh from the farm
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="https://images.pexels.com/photos/10772718/pexels-photo-10772718.jpeg" 
+            alt="Luxurious floral arrangement" 
+            className="w-full h-full object-cover object-center opacity-60 mix-blend-overlay"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950/80 via-charcoal-900/40 to-transparent"></div>
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-20 sm:py-28 text-center flex flex-col items-center">
+          <p className="text-sm font-medium uppercase tracking-[0.3em] text-gold-300 mb-6 drop-shadow-sm">
+            Exquisite & Fresh
           </p>
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-            Flowers that speak<br />
-            <span className="text-bloom-500 italic">without words.</span>
+          <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-petal-50 leading-tight drop-shadow-md">
+            Elegance in <span className="text-bloom-300 italic font-light">every petal.</span>
           </h1>
-          <p className="mt-5 max-w-xl mx-auto text-gray-500 text-lg leading-relaxed">
-            Hand-arranged bouquets using the freshest seasonal blooms.
-            Order before noon for same-day delivery in Cebu City.
+          <p className="mt-8 max-w-2xl mx-auto text-petal-100 text-lg sm:text-xl font-light leading-relaxed opacity-90">
+            Hand-arranged, premium bouquets crafted with the most luxurious seasonal blooms. 
+            Elevate your moments with Beauty Blooms.
           </p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to="/catalog" className="btn-primary px-8 py-3 text-base">
-              Shop all flowers
+          <div className="mt-12 flex flex-col sm:flex-row gap-5 justify-center w-full sm:w-auto">
+            <Link to="/catalog" className="inline-flex items-center justify-center gap-2 rounded-full bg-bloom-600 px-8 py-4 text-sm tracking-wider uppercase font-semibold text-white shadow-lg transition-all hover:bg-bloom-500 hover:shadow-bloom-500/25 active:scale-95">
+              Discover the Collection
             </Link>
-            <a href="#featured" className="btn-secondary px-8 py-3 text-base">
-              See what's fresh
+            <a href="#featured" className="inline-flex items-center justify-center gap-2 rounded-full border border-gold-300/30 bg-white/10 backdrop-blur-sm px-8 py-4 text-sm tracking-wider uppercase font-semibold text-petal-50 transition-all hover:bg-white/20 active:scale-95">
+              View Featured
             </a>
           </div>
         </div>
-
-        {/* Decorative blobs */}
-        <div className="pointer-events-none absolute -top-20 -right-20 h-72 w-72 rounded-full bg-bloom-100 opacity-40 blur-3xl" aria-hidden="true" />
-        <div className="pointer-events-none absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-petal-200 opacity-30 blur-2xl" aria-hidden="true" />
       </section>
 
       {/* Featured products */}

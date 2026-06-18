@@ -109,13 +109,13 @@ export default function OrderStatusPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 sm:px-6 py-10">
+    <div className="mx-auto max-w-2xl px-4 sm:px-6 py-16 page-enter">
       {/* Header */}
-      <div className="text-center mb-10">
-        <span className="text-5xl" aria-hidden="true">
+      <div className="text-center mb-12">
+        <span className="text-5xl drop-shadow-sm inline-block animate-scale-in" aria-hidden="true">
           {order.status === 'Delivered' ? '🎉' : isCancelled ? '❌' : '🌸'}
         </span>
-        <h1 className="font-display text-2xl font-bold text-gray-900 mt-3">
+        <h1 className="font-display text-3xl sm:text-4xl font-bold text-charcoal-900 mt-4 tracking-tight">
           {order.status === 'Delivered'
             ? 'Your order has arrived!'
             : isCancelled

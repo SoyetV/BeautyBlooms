@@ -91,15 +91,15 @@ export default function CheckoutPage() {
   const DELIVERY_FEE = 80
 
   return (
-    <div className="mx-auto max-w-4xl px-4 sm:px-6 py-10">
-      <Link to="/catalog" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-bloom-500 mb-6 transition-colors">
+    <div className="mx-auto max-w-4xl px-4 sm:px-6 py-16 page-enter">
+      <Link to="/catalog" className="inline-flex items-center gap-1 text-sm tracking-wider uppercase font-semibold text-charcoal-500 hover:text-bloom-600 mb-8 transition-colors">
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
         </svg>
-        Back to catalog
+        Back to Collection
       </Link>
 
-      <h1 className="font-display text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+      <h1 className="font-display text-4xl font-bold text-charcoal-900 mb-10 tracking-tight">Secure Checkout</h1>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
         {/* Delivery form */}

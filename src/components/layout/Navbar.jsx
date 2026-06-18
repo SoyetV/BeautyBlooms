@@ -41,16 +41,16 @@ export function Navbar({ onCartOpen }) {
   }
 
   const navLink = ({ isActive }) =>
-    `text-sm font-medium transition-colors ${isActive ? 'text-bloom-600' : 'text-gray-600 hover:text-bloom-500'}`
+    `text-sm font-medium uppercase tracking-widest transition-colors ${isActive ? 'text-bloom-600' : 'text-charcoal-600 hover:text-bloom-600'}`
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-100 bg-white/90 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+    <header className="sticky top-0 z-40 border-b border-gold-200/40 bg-petal-50/80 backdrop-blur-xl">
+      <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
 
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold text-bloom-600">
+        <Link to="/" className="flex items-center gap-2 font-display text-2xl font-bold text-charcoal-900 tracking-tight">
           <span className="text-2xl" aria-hidden="true">🌸</span>
-          Bloom
+          Beauty Blooms
         </Link>
 
         {/* Desktop nav */}
@@ -77,7 +77,7 @@ export function Navbar({ onCartOpen }) {
           {/* Cart button */}
           <button
             onClick={onCartOpen}
-            className="relative rounded-full p-2 text-gray-600 transition-colors hover:bg-bloom-50 hover:text-bloom-600"
+            className="relative rounded-full p-2 text-charcoal-600 transition-colors hover:bg-gold-100/50 hover:text-bloom-600"
             aria-label={`Open cart, ${totalItems} items`}
           >
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -94,11 +94,11 @@ export function Navbar({ onCartOpen }) {
           {/* Auth button (desktop) */}
           <div className="hidden sm:block">
             {user ? (
-              <button onClick={handleSignOut} className="btn-secondary py-1.5 text-xs px-4">
+              <button onClick={handleSignOut} className="btn-secondary py-2 text-xs uppercase tracking-wider px-5 rounded-full border-gold-200 hover:bg-gold-50 transition-colors">
                 Sign out
               </button>
             ) : (
-              <Link to="/admin/login" className="btn-primary py-1.5 text-xs px-4">
+              <Link to="/admin/login" className="btn-primary py-2 text-xs uppercase tracking-wider px-5 rounded-full shadow-md shadow-bloom-500/20">
                 Sign in
               </Link>
             )}

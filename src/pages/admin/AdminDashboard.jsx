@@ -82,14 +82,14 @@ export default function AdminDashboard() {
     .reduce((sum, o) => sum + Number(o.total_amount), 0)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-petal-50 page-enter">
       {/* Page header */}
-      <div className="bg-white border-b border-gray-100">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6">
+      <div className="bg-white/80 backdrop-blur-xl border-b border-gold-200/40">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <h1 className="font-display text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="mt-0.5 text-sm text-gray-500">Manage your flower shop inventory and orders.</p>
+              <h1 className="font-display text-3xl font-bold text-charcoal-900 tracking-tight">Admin Dashboard</h1>
+              <p className="mt-2 text-sm text-charcoal-600 font-light">Manage your exquisite inventory and incoming orders.</p>
             </div>
             {activeTab === 'products' && (
               <button onClick={openAdd} className="btn-primary">
@@ -102,16 +102,16 @@ export default function AdminDashboard() {
           </div>
 
           {/* Stats strip */}
-          <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <dl className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-4">
             {[
               { label: 'Total products',  value: totalProducts },
               { label: 'Out of stock',    value: outOfStock,   alert: outOfStock > 0 },
               { label: 'Pending orders',  value: pendingOrders, alert: pendingOrders > 0 },
               { label: 'Total revenue',   value: new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 }).format(totalRevenue) },
-            ].map(stat => (
-              <div key={stat.label} className={`card px-4 py-3 ${stat.alert ? 'ring-amber-200 bg-amber-50' : ''}`}>
-                <dt className="text-xs text-gray-500">{stat.label}</dt>
-                <dd className={`mt-0.5 text-xl font-semibold tabular-nums ${stat.alert ? 'text-amber-700' : 'text-gray-900'}`}>
+            ].map((stat, idx) => (
+              <div key={stat.label} className={`card px-5 py-4 opacity-0 animate-fade-in-up ${stat.alert ? 'ring-gold-300 bg-gold-50' : ''}`} style={{ animationDelay: `${idx * 100}ms` }}>
+                <dt className="text-xs uppercase tracking-wider text-charcoal-500">{stat.label}</dt>
+                <dd className={`mt-2 text-2xl font-semibold tabular-nums ${stat.alert ? 'text-charcoal-900' : 'text-charcoal-900'}`}>
                   {stat.value}
                 </dd>
               </div>
@@ -119,17 +119,17 @@ export default function AdminDashboard() {
           </dl>
 
           {/* Tabs */}
-          <nav className="mt-5 flex gap-1 border-b border-gray-100 -mb-px" aria-label="Admin sections">
+          <nav className="mt-8 flex gap-6 border-b border-gold-200/40 -mb-px" aria-label="Admin sections">
             {TABS.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 role="tab"
                 aria-selected={activeTab === tab.id}
-                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors border-b-2
+                className={`flex items-center gap-2 px-2 py-3 text-sm font-semibold uppercase tracking-wider transition-colors border-b-2
                   ${activeTab === tab.id
-                    ? 'border-bloom-500 text-bloom-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'border-bloom-600 text-bloom-600'
+                    : 'border-transparent text-charcoal-500 hover:text-charcoal-900 hover:border-gold-300'
                   }`}
               >
                 <span aria-hidden="true">{tab.icon}</span>
