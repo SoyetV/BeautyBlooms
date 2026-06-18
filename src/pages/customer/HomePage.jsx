@@ -13,16 +13,16 @@ export default function HomePage() {
     <div className="page-enter">
       {/* Hero */}
       <section
-        className="relative flex items-center justify-center min-h-[85vh] bg-charcoal-900 overflow-hidden"
+        className="relative flex items-center justify-center min-h-[85vh] bg-bloom-950 overflow-hidden"
         aria-label="Welcome to Beauty Blooms"
       >
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.pexels.com/photos/10772718/pexels-photo-10772718.jpeg" 
+            src="/hero-bg.png" 
             alt="Luxurious floral arrangement" 
-            className="w-full h-full object-cover object-center opacity-60 mix-blend-overlay"
+            className="w-full h-full object-cover object-center opacity-70 mix-blend-overlay"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950/80 via-charcoal-900/40 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-bloom-950/80 via-bloom-900/40 to-transparent"></div>
         </div>
 
         <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-20 sm:py-28 text-center flex flex-col items-center">

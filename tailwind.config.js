@@ -40,10 +40,10 @@ export default {
           950: '#500724',
         },
         petal: {
-          50:  '#fdfbf7', // soft ivory
-          100: '#f9f6f0',
-          200: '#f2eae1',
-          300: '#e6d5c3',
+          50:  '#fdf2f8', // soft pink ivory
+          100: '#fce7f3',
+          200: '#fbcfe8',
+          300: '#f9a8d4',
           400: '#d5bba1',
           500: '#c29d7a',
           600: '#a87f5b',
