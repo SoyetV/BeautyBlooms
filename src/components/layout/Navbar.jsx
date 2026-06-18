@@ -11,24 +11,27 @@ export function Navbar({ onCartOpen }) {
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [lastOrderId, setLastOrderId] = useState(null)
+  const [lastOrderToken, setLastOrderToken] = useState(null)
 
   useEffect(() => {
-    function syncOrderId() {
+    function syncOrderLink() {
       try {
         setLastOrderId(localStorage.getItem('lastOrderId'))
+        setLastOrderToken(localStorage.getItem('lastOrderToken'))
       } catch (e) {
         setLastOrderId(null)
+        setLastOrderToken(null)
       }
     }
 
-    syncOrderId()
+    syncOrderLink()
 
-    window.addEventListener('storage', syncOrderId)
-    window.addEventListener('lastOrderIdChanged', syncOrderId)
+    window.addEventListener('storage', syncOrderLink)
+    window.addEventListener('lastOrderIdChanged', syncOrderLink)
 
     return () => {
-      window.removeEventListener('storage', syncOrderId)
-      window.removeEventListener('lastOrderIdChanged', syncOrderId)
+      window.removeEventListener('storage', syncOrderLink)
+      window.removeEventListener('lastOrderIdChanged', syncOrderLink)
     }
   }, [])
 
@@ -54,7 +57,14 @@ export function Navbar({ onCartOpen }) {
         <nav className="hidden sm:flex items-center gap-6" aria-label="Main navigation">
           <NavLink to="/catalog" className={navLink}>Shop</NavLink>
           {user && <NavLink to="/orders" className={navLink}>My Orders</NavLink>}
-          {lastOrderId && <NavLink to={`/orders/${lastOrderId}`} className={navLink}>Track order</NavLink>}
+          {lastOrderId && (
+            <NavLink
+              to={`/orders/${lastOrderId}${lastOrderToken ? `?token=${lastOrderToken}` : ''}`}
+              className={navLink}
+            >
+              Track order
+            </NavLink>
+          )}
           {isAdmin && (
             <NavLink to="/admin" className={navLink + ' !text-bloom-600 font-semibold'}>
               Admin
@@ -118,7 +128,15 @@ export function Navbar({ onCartOpen }) {
         >
           <NavLink to="/catalog" className={navLink} onClick={() => setMenuOpen(false)}>Shop</NavLink>
           {user && <NavLink to="/orders" className={navLink} onClick={() => setMenuOpen(false)}>My Orders</NavLink>}
-          {lastOrderId && <NavLink to={`/orders/${lastOrderId}`} className={navLink} onClick={() => setMenuOpen(false)}>Track order</NavLink>}
+          {lastOrderId && (
+            <NavLink
+              to={`/orders/${lastOrderId}${lastOrderToken ? `?token=${lastOrderToken}` : ''}`}
+              className={navLink}
+              onClick={() => setMenuOpen(false)}
+            >
+              Track order
+            </NavLink>
+          )}
           {isAdmin && <NavLink to="/admin" className={navLink} onClick={() => setMenuOpen(false)}>Admin</NavLink>}
           {user
             ? <button onClick={handleSignOut} className="text-left text-sm text-gray-600">Sign out</button>

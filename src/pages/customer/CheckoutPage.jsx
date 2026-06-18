@@ -71,14 +71,16 @@ export default function CheckoutPage() {
       const order = await placeOrder(orderPayload, items)
       clearCart()
       try {
-        // Persist last order id so users can return to tracking even after
-        // navigating away (useful for guests or if state wasn't forwarded).
+        // Persist last order id and token so guests can revisit the tracking page.
         localStorage.setItem('lastOrderId', order.id)
+        if (order.tracking_token) {
+          localStorage.setItem('lastOrderToken', order.tracking_token)
+        }
         window.dispatchEvent(new Event('lastOrderIdChanged'))
       } catch (e) {
         // ignore storage failures
       }
-      navigate(`/orders/${order.id}`, { replace: true, state: { order } })
+      navigate(`/orders/${order.id}?token=${order.tracking_token}`, { replace: true, state: { order } })
     } catch (err) {
       setError(err.message)
     } finally {

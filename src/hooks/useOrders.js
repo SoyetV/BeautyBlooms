@@ -56,7 +56,8 @@ export function useOrders() {
   async function placeOrder(orderDetails, cartItems) {
     // Generate the order id client-side so we can skip Supabase row-returning.
     const orderId = orderDetails.id ?? crypto.randomUUID()
-    const orderPayload = { id: orderId, ...orderDetails }
+    const trackingToken = crypto.randomUUID()
+    const orderPayload = { id: orderId, tracking_token: trackingToken, ...orderDetails }
 
     const { error: orderErr } = await supabase
       .from('orders')
@@ -65,6 +66,7 @@ export function useOrders() {
 
     const order = {
       id: orderId,
+      tracking_token: trackingToken,
       ...orderDetails,
       order_items: cartItems.map(item => ({
         order_id:     orderId,

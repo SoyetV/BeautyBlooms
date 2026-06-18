@@ -59,6 +59,7 @@ begin
 end;
 $$;
 
+drop trigger if exists products_updated_at on public.products;
 create trigger products_updated_at
   before update on public.products
   for each row execute procedure public.set_updated_at();
@@ -68,6 +69,7 @@ create table if not exists public.orders (
   id                uuid primary key default uuid_generate_v4(),
   customer_id       uuid references public.profiles(id) on delete set null,
   -- Allow guest checkout (nullable customer_id)
+  tracking_token    uuid not null default uuid_generate_v4(),
   customer_name     text not null,
   customer_email    text not null,
   customer_phone    text,
@@ -86,9 +88,15 @@ create table if not exists public.orders (
   updated_at        timestamptz not null default now()
 );
 
+drop trigger if exists orders_updated_at on public.orders;
 create trigger orders_updated_at
   before update on public.orders
   for each row execute procedure public.set_updated_at();
+
+alter table public.orders add column if not exists tracking_token uuid;
+update public.orders set tracking_token = uuid_generate_v4() where tracking_token is null;
+alter table public.orders alter column tracking_token set not null;
+alter table public.orders alter column tracking_token set default uuid_generate_v4();
 
 -- ── 4. ORDER ITEMS ────────────────────────────────────────
 create table if not exists public.order_items (
@@ -106,6 +114,7 @@ create table if not exists public.order_items (
 create index if not exists idx_products_category   on public.products(category);
 create index if not exists idx_products_available  on public.products(is_available);
 create index if not exists idx_orders_customer     on public.orders(customer_id);
+create index if not exists idx_orders_tracking_token on public.orders(tracking_token);
 create index if not exists idx_orders_status       on public.orders(status);
 create index if not exists idx_order_items_order   on public.order_items(order_id);
 
@@ -123,6 +132,10 @@ $$;
 -- ── profiles ──────────────────────────────────────────────
 alter table public.profiles enable row level security;
 
+drop policy if exists "Users can read their own profile" on public.profiles;
+drop policy if exists "Admins can read all profiles" on public.profiles;
+drop policy if exists "Users can update their own profile" on public.profiles;
+
 create policy "Users can read their own profile"
   on public.profiles for select
   using (auth.uid() = id);
@@ -137,6 +150,12 @@ create policy "Users can update their own profile"
 
 -- ── products ──────────────────────────────────────────────
 alter table public.products enable row level security;
+
+drop policy if exists "Anyone can browse available products" on public.products;
+drop policy if exists "Admins can read all products" on public.products;
+drop policy if exists "Admins can insert products" on public.products;
+drop policy if exists "Admins can update products" on public.products;
+drop policy if exists "Admins can delete products" on public.products;
 
 -- Public read (available products only)
 create policy "Anyone can browse available products"
@@ -164,6 +183,11 @@ create policy "Admins can delete products"
 -- ── orders ────────────────────────────────────────────────
 alter table public.orders enable row level security;
 
+drop policy if exists "Customers can read own orders" on public.orders;
+drop policy if exists "Anyone can place an order" on public.orders;
+drop policy if exists "Admins can read all orders" on public.orders;
+drop policy if exists "Admins can update order status" on public.orders;
+
 -- Customers see only their own orders
 create policy "Customers can read own orders"
   on public.orders for select
@@ -183,8 +207,60 @@ create policy "Admins can update order status"
   on public.orders for update
   using (public.is_admin());
 
+create or replace function public.get_order_status(
+  p_order_id uuid,
+  p_order_token uuid
+)
+returns table (
+  id uuid,
+  customer_id uuid,
+  customer_name text,
+  customer_email text,
+  customer_phone text,
+  delivery_address text,
+  status text,
+  total_amount numeric(10, 2),
+  notes text,
+  created_at timestamptz,
+  updated_at timestamptz,
+  tracking_token uuid,
+  order_items jsonb
+)
+language sql security definer stable as $$
+  select
+    o.id,
+    o.customer_id,
+    o.customer_name,
+    o.customer_email,
+    o.customer_phone,
+    o.delivery_address,
+    o.status,
+    o.total_amount,
+    o.notes,
+    o.created_at,
+    o.updated_at,
+    o.tracking_token,
+    coalesce(jsonb_agg(jsonb_build_object(
+      'id', oi.id,
+      'order_id', oi.order_id,
+      'product_id', oi.product_id,
+      'product_name', oi.product_name,
+      'unit_price', oi.unit_price,
+      'quantity', oi.quantity,
+      'subtotal', oi.subtotal
+    )) filter (where oi.id is not null), '[]') as order_items
+  from public.orders o
+  left join public.order_items oi on oi.order_id = o.id
+  where o.id = p_order_id and o.tracking_token = p_order_token
+  group by o.id;
+$$;
+
 -- ── order_items ───────────────────────────────────────────
 alter table public.order_items enable row level security;
+
+drop policy if exists "Customers can read own order items" on public.order_items;
+drop policy if exists "Anyone can insert order items" on public.order_items;
+drop policy if exists "Admins can read all order items" on public.order_items;
 
 -- Customers can view items belonging to their orders
 create policy "Customers can read own order items"

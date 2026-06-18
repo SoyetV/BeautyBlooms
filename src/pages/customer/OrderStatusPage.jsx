@@ -2,7 +2,7 @@
 // Shows a single order's status timeline. Accessible via /orders/:orderId.
 
 import { useEffect, useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { supabase } from '@/lib/supabaseClient'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/ui/Spinner'
@@ -13,10 +13,12 @@ const STATUS_STEPS = ['Pending', 'Preparing', 'Out for Delivery', 'Delivered']
 export default function OrderStatusPage() {
   const { orderId } = useParams()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const [order,   setOrder]   = useState(location.state?.order ?? null)
   const [loading, setLoading] = useState(order ? false : true)
   const [error,   setError]   = useState(null)
   const [copyStatus, setCopyStatus] = useState('')
+  const [trackingToken, setTrackingToken] = useState(searchParams.get('token') ?? null)
 
   useEffect(() => {
     if (order) return
@@ -32,18 +34,47 @@ export default function OrderStatusPage() {
         .maybeSingle()
 
       if (err) {
-        setError(err.message)
-      } else if (!data) {
+        console.error('[OrderStatusPage] fetch order error:', err.message)
+      }
+
+      if (data) {
+        setOrder(data)
+        setLoading(false)
+        return
+      }
+
+      const token = trackingToken ?? (() => {
+        try {
+          return localStorage.getItem('lastOrderToken')
+        } catch (e) {
+          return null
+        }
+      })()
+
+      if (!token) {
+        setError(err?.message ?? 'Order not found.')
+        setLoading(false)
+        return
+      }
+
+      const { data: tokenData, error: tokenErr } = await supabase.rpc('get_order_status', {
+        p_order_id: orderId,
+        p_order_token: token,
+      })
+
+      if (tokenErr) {
+        setError(tokenErr.message)
+      } else if (!tokenData || (Array.isArray(tokenData) && tokenData.length === 0)) {
         setError('Order not found.')
       } else {
-        setOrder(data)
+        setOrder(Array.isArray(tokenData) ? tokenData[0] : tokenData)
       }
 
       setLoading(false)
     }
 
     fetchOrder()
-  }, [order, orderId])
+  }, [order, orderId, trackingToken])
 
   if (loading) {
     return (
