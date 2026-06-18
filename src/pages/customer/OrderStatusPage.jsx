@@ -16,6 +16,7 @@ export default function OrderStatusPage() {
   const [order,   setOrder]   = useState(location.state?.order ?? null)
   const [loading, setLoading] = useState(order ? false : true)
   const [error,   setError]   = useState(null)
+  const [copyStatus, setCopyStatus] = useState('')
 
   useEffect(() => {
     if (order) return
@@ -66,6 +67,16 @@ export default function OrderStatusPage() {
   const stepIndex = STATUS_STEPS.indexOf(order.status)
   const isCancelled = order.status === 'Cancelled'
 
+  async function handleCopyLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      setCopyStatus('Link copied to clipboard')
+      setTimeout(() => setCopyStatus(''), 2500)
+    } catch (err) {
+      setCopyStatus('Copy failed — please copy the URL manually.')
+    }
+  }
+
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 py-10">
       {/* Header */}
@@ -81,6 +92,18 @@ export default function OrderStatusPage() {
               : 'Your order is on its way'}
         </h1>
         <p className="mt-1 text-sm text-gray-500">Order ID: <span className="font-mono">{order.id}</span></p>
+        <div className="mt-4 flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            className="btn-secondary"
+          >
+            Copy tracking link
+          </button>
+          {copyStatus && (
+            <span className="text-sm text-gray-500">{copyStatus}</span>
+          )}
+        </div>
       </div>
 
       {/* Status timeline */}

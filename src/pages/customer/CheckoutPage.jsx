@@ -53,8 +53,8 @@ export default function CheckoutPage() {
     setLoading(true)
     setError(null)
 
-    try {
-      const orderPayload = {
+      try {
+        const orderPayload = {
         customer_name:    form.customer_name.trim(),
         customer_email:   form.customer_email.trim(),
         customer_phone:   form.customer_phone.trim() || null,
@@ -70,6 +70,14 @@ export default function CheckoutPage() {
 
       const order = await placeOrder(orderPayload, items)
       clearCart()
+      try {
+        // Persist last order id so users can return to tracking even after
+        // navigating away (useful for guests or if state wasn't forwarded).
+        localStorage.setItem('lastOrderId', order.id)
+        window.dispatchEvent(new Event('lastOrderIdChanged'))
+      } catch (e) {
+        // ignore storage failures
+      }
       navigate(`/orders/${order.id}`, { replace: true, state: { order } })
     } catch (err) {
       setError(err.message)

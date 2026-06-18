@@ -1,6 +1,6 @@
 // src/components/layout/Navbar.jsx
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { useCart } from '@/context/CartContext'
@@ -10,6 +10,27 @@ export function Navbar({ onCartOpen }) {
   const { totalItems } = useCart()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [lastOrderId, setLastOrderId] = useState(null)
+
+  useEffect(() => {
+    function syncOrderId() {
+      try {
+        setLastOrderId(localStorage.getItem('lastOrderId'))
+      } catch (e) {
+        setLastOrderId(null)
+      }
+    }
+
+    syncOrderId()
+
+    window.addEventListener('storage', syncOrderId)
+    window.addEventListener('lastOrderIdChanged', syncOrderId)
+
+    return () => {
+      window.removeEventListener('storage', syncOrderId)
+      window.removeEventListener('lastOrderIdChanged', syncOrderId)
+    }
+  }, [])
 
   async function handleSignOut() {
     await signOut()
@@ -33,6 +54,7 @@ export function Navbar({ onCartOpen }) {
         <nav className="hidden sm:flex items-center gap-6" aria-label="Main navigation">
           <NavLink to="/catalog" className={navLink}>Shop</NavLink>
           {user && <NavLink to="/orders" className={navLink}>My Orders</NavLink>}
+          {lastOrderId && <NavLink to={`/orders/${lastOrderId}`} className={navLink}>Track order</NavLink>}
           {isAdmin && (
             <NavLink to="/admin" className={navLink + ' !text-bloom-600 font-semibold'}>
               Admin
@@ -96,6 +118,7 @@ export function Navbar({ onCartOpen }) {
         >
           <NavLink to="/catalog" className={navLink} onClick={() => setMenuOpen(false)}>Shop</NavLink>
           {user && <NavLink to="/orders" className={navLink} onClick={() => setMenuOpen(false)}>My Orders</NavLink>}
+          {lastOrderId && <NavLink to={`/orders/${lastOrderId}`} className={navLink} onClick={() => setMenuOpen(false)}>Track order</NavLink>}
           {isAdmin && <NavLink to="/admin" className={navLink} onClick={() => setMenuOpen(false)}>Admin</NavLink>}
           {user
             ? <button onClick={handleSignOut} className="text-left text-sm text-gray-600">Sign out</button>

@@ -154,7 +154,8 @@ create policy "Admins can insert products"
 
 create policy "Admins can update products"
   on public.products for update
-  using (public.is_admin());
+  using (public.is_admin())
+  with check (public.is_admin());
 
 create policy "Admins can delete products"
   on public.products for delete
