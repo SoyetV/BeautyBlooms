@@ -54,7 +54,8 @@ export function useProducts({ adminMode = false } = {}) {
   }, [fetchProducts])
 
   useEffect(() => {
-    const channel = supabase.channel('products-list')
+    const channelName = `products-${Math.random().toString(36).slice(2)}`
+    const channel = supabase.channel(channelName)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
         fetchProducts()
       })
