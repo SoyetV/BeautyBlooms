@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useProducts } from '@/hooks/useProducts'
 
 const Plus = ({ size = 24, className = '' }) => (
@@ -24,13 +24,17 @@ export default function ProductMarquee({ isAdmin = false }) {
     error,
     createProduct,
     updateProduct,
+    deleteProduct,
   } = useProducts({ adminMode: isAdmin })
   const [editingId, setEditingId] = useState(null)
   const [editForm, setEditForm] = useState({})
+  const [editErrors, setEditErrors] = useState({})
   const [isAdding, setIsAdding] = useState(false)
   const [newProduct, setNewProduct] = useState({ name: '', price: '', image_url: '', imageFile: null })
+  const [newProductErrors, setNewProductErrors] = useState({})
+  const [actionLoading, setActionLoading] = useState(false)
 
-  const marqueeItems = [...products, ...products]
+  const marqueeItems = useMemo(() => [...products, ...products], [products])
 
   const handleImageUpload = (e, callback) => {
     const file = e.target.files?.[0]
@@ -43,8 +47,16 @@ export default function ProductMarquee({ isAdmin = false }) {
     reader.readAsDataURL(file)
   }
 
+  const validateProduct = ({ name, price }) => {
+    const errors = {}
+    if (!name?.trim()) errors.name = 'Product name is required.'
+    if (!price || isNaN(Number(price)) || Number(price) <= 0) errors.price = 'Enter a valid price greater than 0.'
+    return errors
+  }
+
   const handleEditClick = (product) => {
     setEditingId(product.id)
+    setEditErrors({})
     setEditForm({
       name: product.name ?? product.title ?? '',
       price: String(product.price ?? ''),
@@ -55,6 +67,13 @@ export default function ProductMarquee({ isAdmin = false }) {
 
   const handleSaveEdit = async () => {
     if (!editingId) return
+    const errors = validateProduct(editForm)
+    if (Object.keys(errors).length) {
+      setEditErrors(errors)
+      return
+    }
+
+    setActionLoading(true)
     try {
       const fields = {
         name: editForm.name,
@@ -62,10 +81,21 @@ export default function ProductMarquee({ isAdmin = false }) {
         image_url: editForm.image_url || null,
       }
       await updateProduct(editingId, fields, editForm.imageFile)
+      setEditingId(null)
     } catch (err) {
       console.error('[ProductMarquee] updateProduct failed:', err.message || err)
+      setEditErrors({ submit: err.message || 'Unable to save product.' })
     } finally {
-      setEditingId(null)
+      setActionLoading(false)
+    }
+  }
+
+  const handleDeleteProduct = async (id) => {
+    if (!window.confirm('Delete this product from the marquee?')) return
+    try {
+      await deleteProduct(id)
+    } catch (err) {
+      console.error('[ProductMarquee] deleteProduct failed:', err.message || err)
     }
   }
 
@@ -74,11 +104,17 @@ export default function ProductMarquee({ isAdmin = false }) {
   }
 
   const handleAddProduct = async () => {
-    if (!newProduct.name || !newProduct.price) return
+    const errors = validateProduct(newProduct)
+    if (Object.keys(errors).length) {
+      setNewProductErrors(errors)
+      return
+    }
+
+    setActionLoading(true)
     try {
       await createProduct(
         {
-          name: newProduct.name,
+          name: newProduct.name.trim(),
           price: Number(newProduct.price),
           image_url: newProduct.image_url || null,
           category: 'Uncategorized',
@@ -89,9 +125,13 @@ export default function ProductMarquee({ isAdmin = false }) {
         newProduct.imageFile,
       )
       setNewProduct({ name: '', price: '', image_url: '', imageFile: null })
+      setNewProductErrors({})
       setIsAdding(false)
     } catch (err) {
       console.error('[ProductMarquee] createProduct failed:', err.message || err)
+      setNewProductErrors({ submit: err.message || 'Unable to add new product.' })
+    } finally {
+      setActionLoading(false)
     }
   }
 
@@ -154,21 +194,29 @@ export default function ProductMarquee({ isAdmin = false }) {
                     <label className="label">Product name</label>
                     <input
                       type="text"
-                      className="input-field"
+                      className={`input-field ${newProductErrors.name ? 'border-red-400 focus:ring-red-200' : ''}`}
                       value={newProduct.name}
-                      onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                      onChange={(e) => {
+                        setNewProduct({ ...newProduct, name: e.target.value })
+                        if (newProductErrors.name) setNewProductErrors({ ...newProductErrors, name: null })
+                      }}
                       placeholder="E.g., Radiant Sunflowers"
                     />
+                    {newProductErrors.name && <p className="mt-1 text-xs text-red-600">{newProductErrors.name}</p>}
                   </div>
                   <div>
                     <label className="label">Price ($)</label>
                     <input
                       type="number"
-                      className="input-field"
+                      className={`input-field ${newProductErrors.price ? 'border-red-400 focus:ring-red-200' : ''}`}
                       value={newProduct.price}
-                      onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                      onChange={(e) => {
+                        setNewProduct({ ...newProduct, price: e.target.value })
+                        if (newProductErrors.price) setNewProductErrors({ ...newProductErrors, price: null })
+                      }}
                       placeholder="0.00"
                     />
+                    {newProductErrors.price && <p className="mt-1 text-xs text-red-600">{newProductErrors.price}</p>}
                   </div>
                   <div>
                     <label className="label">Upload Image</label>
@@ -180,9 +228,21 @@ export default function ProductMarquee({ isAdmin = false }) {
                     />
                   </div>
                 </div>
+                {newProductErrors.submit && (
+                  <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 mb-4">
+                    {newProductErrors.submit}
+                  </div>
+                )}
                 <div className="flex justify-end gap-3">
-                  <button onClick={() => setIsAdding(false)} className="btn-secondary">Cancel</button>
-                  <button onClick={handleAddProduct} className="btn-primary">Save Product</button>
+                  <button onClick={() => { setIsAdding(false); setNewProductErrors({}) }} className="btn-secondary">Cancel</button>
+                  <button
+                    onClick={handleAddProduct}
+                    className="btn-primary"
+                    disabled={actionLoading}
+                    type="button"
+                  >
+                    {actionLoading ? 'Saving…' : 'Save Product'}
+                  </button>
                 </div>
               </div>
             )}
@@ -200,16 +260,23 @@ export default function ProductMarquee({ isAdmin = false }) {
                       />
                       <input
                         type="number"
-                        className="input-field py-1.5 text-sm"
+                        className={`input-field py-1.5 text-sm ${editErrors.price ? 'border-red-400 focus:ring-red-200' : ''}`}
                         value={editForm.price}
-                        onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+                        onChange={(e) => {
+                          setEditForm({ ...editForm, price: e.target.value })
+                          if (editErrors.price) setEditErrors({ ...editErrors, price: null })
+                        }}
                       />
+                      {editErrors.price && <p className="mt-1 text-xs text-red-600">{editErrors.price}</p>}
                       <input
                         type="file"
                         accept="image/*"
                         className="input-field py-1.5 text-sm"
                         onChange={(e) => handleImageUpload(e, (file, url) => setEditForm({ ...editForm, image_url: url, imageFile: file }))}
                       />
+                      {editErrors.submit && (
+                        <p className="text-sm text-red-600">{editErrors.submit}</p>
+                      )}
                       <div className="flex gap-2 justify-end pt-2">
                         <button onClick={handleCancelEdit} className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-md transition-colors"><X size={16} /></button>
                         <button onClick={handleSaveEdit} className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-100 rounded-md transition-colors"><Check size={16} /></button>
@@ -226,12 +293,22 @@ export default function ProductMarquee({ isAdmin = false }) {
                           <p className="text-sm text-bloom-600">${product.price.toFixed(2)}</p>
                         </div>
                       </div>
-                      <button
-                        onClick={() => handleEditClick(product)}
-                        className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm text-gray-400 hover:text-bloom-500 opacity-0 group-hover:opacity-100 transition-all duration-300"
-                      >
-                        <Edit2 size={14} />
-                      </button>
+                      <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                        <button
+                          onClick={() => handleDeleteProduct(product.id)}
+                          className="p-2 bg-white rounded-full shadow-sm text-red-500 hover:text-red-700"
+                          type="button"
+                        >
+                          <X size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleEditClick(product)}
+                          className="p-2 bg-white rounded-full shadow-sm text-gray-400 hover:text-bloom-500"
+                          type="button"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                      </div>
                     </>
                   )}
                 </div>

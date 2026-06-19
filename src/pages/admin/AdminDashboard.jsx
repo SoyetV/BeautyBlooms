@@ -92,14 +92,6 @@ export default function AdminDashboard() {
               <h1 className="font-display text-3xl font-bold text-charcoal-900 tracking-tight">Admin Dashboard</h1>
               <p className="mt-2 text-sm text-charcoal-600 font-light">Manage your exquisite inventory and incoming orders.</p>
             </div>
-            {activeTab === 'products' && (
-              <button onClick={openAdd} className="btn-primary">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                Add product
-              </button>
-            )}
           </div>
 
           {/* Stats strip */}
@@ -153,15 +145,20 @@ export default function AdminDashboard() {
             {/* Product Marquee Management */}
             <ProductMarquee isAdmin={true} />
             
-            <div className="flex items-center justify-between mb-4 mt-8">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 mt-8">
               <p className="text-sm text-gray-500">{totalProducts} products total</p>
-              <button
-                onClick={() => fetchProducts()}
-                className="btn-secondary py-1.5 text-xs px-3"
-                aria-label="Refresh product list"
-              >
-                Refresh
-              </button>
+              <div className="flex items-center gap-3">
+                <button onClick={openAdd} className="btn-primary py-1.5 text-xs px-3">
+                  Add product
+                </button>
+                <button
+                  onClick={() => fetchProducts()}
+                  className="btn-secondary py-1.5 text-xs px-3"
+                  aria-label="Refresh product list"
+                >
+                  Refresh
+                </button>
+              </div>
             </div>
             <ProductTable
               products={products}

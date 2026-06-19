@@ -27,7 +27,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-8 sm:items-center touch-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
@@ -37,9 +37,9 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
 
       {/* Panel */}
-      <div className={`relative z-10 w-full ${maxW[size]} rounded-2xl bg-white shadow-xl`}>
+      <div className={`relative z-10 w-full ${maxW[size]} max-h-[calc(100vh-4rem)] overflow-hidden rounded-2xl bg-white shadow-xl`}>
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-6 py-4">
           <h2 id="modal-title" className="text-lg font-display font-semibold text-gray-900">
             {title}
           </h2>
@@ -55,7 +55,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
         </div>
 
         {/* Content */}
-        <div className="px-6 py-5 max-h-[75vh] overflow-y-auto">
+        <div className="px-6 py-5 overflow-y-auto max-h-[calc(100vh-7rem)] touch-auto">
           {children}
         </div>
       </div>
