@@ -45,8 +45,6 @@ function Layout() {
             <Route path="/"          element={<HomePage />} />
             <Route path="/catalog"   element={<CatalogPage />} />
             <Route path="/checkout"  element={<CheckoutPage />} />
-            <Route path="/orders" element={<OrdersPage />} />
-            <Route path="/orders/:orderId" element={<OrderStatusPage />} />
 
             {/* Admin routes */}
             <Route path="/admin"       element={<AdminDashboard />} />

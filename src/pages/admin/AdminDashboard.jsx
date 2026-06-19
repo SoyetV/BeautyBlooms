@@ -11,6 +11,7 @@ import { ProductTable } from '@/components/admin/ProductTable'
 import { ProductForm } from '@/components/admin/ProductForm'
 import { OrdersTable } from '@/components/admin/OrdersTable'
 import { Spinner } from '@/components/ui/Spinner'
+import ProductMarquee from '@/components/ui/ProductMarquee'
 
 const TABS = [
   { id: 'products', label: 'Products', icon: '🌸' },
@@ -149,7 +150,10 @@ export default function AdminDashboard() {
       <main className="mx-auto max-w-6xl px-4 sm:px-6 py-6">
         {activeTab === 'products' && (
           <section aria-label="Product inventory">
-            <div className="flex items-center justify-between mb-4">
+            {/* Product Marquee Management */}
+            <ProductMarquee isAdmin={true} />
+            
+            <div className="flex items-center justify-between mb-4 mt-8">
               <p className="text-sm text-gray-500">{totalProducts} products total</p>
               <button
                 onClick={() => fetchProducts()}

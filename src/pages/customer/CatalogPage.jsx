@@ -2,6 +2,7 @@
 
 import { useProducts } from '@/hooks/useProducts'
 import { ProductGrid } from '@/components/catalog/ProductGrid'
+import ProductMarquee from '@/components/ui/ProductMarquee'
 
 export default function CatalogPage() {
   const { products, loading, error, fetchProducts } = useProducts()
@@ -30,8 +31,11 @@ export default function CatalogPage() {
         </div>
       </section>
 
+      {/* Infinite Product Marquee */}
+      <ProductMarquee />
+
       {/* Grid Container */}
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 pb-16">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 pb-16 pt-8">
         <ProductGrid
           products={products}
           loading={loading}

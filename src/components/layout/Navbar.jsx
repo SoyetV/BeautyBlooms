@@ -56,15 +56,6 @@ export function Navbar({ onCartOpen }) {
         {/* Desktop nav */}
         <nav className="hidden sm:flex items-center gap-6" aria-label="Main navigation">
           <NavLink to="/catalog" className={navLink}>Shop</NavLink>
-          {user && <NavLink to="/orders" className={navLink}>My Orders</NavLink>}
-          {lastOrderId && (
-            <NavLink
-              to={`/orders/${lastOrderId}${lastOrderToken ? `?token=${lastOrderToken}` : ''}`}
-              className={navLink}
-            >
-              Track order
-            </NavLink>
-          )}
           {isAdmin && (
             <NavLink to="/admin" className={navLink + ' !text-bloom-600 font-semibold'}>
               Admin
@@ -127,16 +118,6 @@ export function Navbar({ onCartOpen }) {
           aria-label="Mobile navigation"
         >
           <NavLink to="/catalog" className={navLink} onClick={() => setMenuOpen(false)}>Shop</NavLink>
-          {user && <NavLink to="/orders" className={navLink} onClick={() => setMenuOpen(false)}>My Orders</NavLink>}
-          {lastOrderId && (
-            <NavLink
-              to={`/orders/${lastOrderId}${lastOrderToken ? `?token=${lastOrderToken}` : ''}`}
-              className={navLink}
-              onClick={() => setMenuOpen(false)}
-            >
-              Track order
-            </NavLink>
-          )}
           {isAdmin && <NavLink to="/admin" className={navLink} onClick={() => setMenuOpen(false)}>Admin</NavLink>}
           {user
             ? <button onClick={handleSignOut} className="text-left text-sm text-gray-600">Sign out</button>

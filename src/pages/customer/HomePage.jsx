@@ -4,6 +4,7 @@
 import { Link } from 'react-router-dom'
 import { useProducts } from '@/hooks/useProducts'
 import { ProductGrid } from '@/components/catalog/ProductGrid'
+import ProductMarquee from '@/components/ui/ProductMarquee'
 
 export default function HomePage() {
   const { products, loading, error, fetchProducts } = useProducts()
@@ -46,6 +47,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Infinite Product Marquee */}
+      <ProductMarquee />
 
       {/* Featured products */}
       <section id="featured" className="mx-auto max-w-6xl px-4 sm:px-6 py-14">
