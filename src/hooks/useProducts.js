@@ -53,6 +53,18 @@ export function useProducts({ adminMode = false } = {}) {
     fetchProducts()
   }, [fetchProducts])
 
+  useEffect(() => {
+    const channel = supabase.channel('products-list')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+        fetchProducts()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [fetchProducts])
+
   // ── CREATE ────────────────────────────────────────────
   // imageFile is a File object (optional). Returns created product or throws.
   async function createProduct(fields, imageFile = null) {
