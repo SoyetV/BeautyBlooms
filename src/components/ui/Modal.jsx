@@ -2,6 +2,7 @@
 // Accessible modal dialog built on a native <dialog>-inspired pattern.
 
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 
 export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
   const overlayRef = useRef(null)
@@ -24,17 +25,17 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
 
   const maxW = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' }
 
-  return (
+  const modalContent = (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-8 sm:items-center touch-auto"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-8 sm:items-center"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
       onClick={(e) => { if (e.target === overlayRef.current) onClose() }}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
+      <div className="absolute inset-0 bg-black/40" aria-hidden="true" />
 
       {/* Panel */}
       <div className={`relative z-10 w-full ${maxW[size]} max-h-[calc(100vh-4rem)] overflow-hidden rounded-2xl bg-white shadow-xl`}>
@@ -55,10 +56,12 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
         </div>
 
         {/* Content */}
-        <div className="px-6 py-5 overflow-y-auto max-h-[calc(100vh-7rem)] touch-auto">
+        <div className="px-6 py-5 overflow-y-auto max-h-[calc(100vh-9rem)]">
           {children}
         </div>
       </div>
     </div>
   )
+
+  return createPortal(modalContent, document.body)
 }
