@@ -28,7 +28,7 @@ export default function ProductMarquee({ isAdmin = false }) {
   const [editingId, setEditingId] = useState(null)
   const [editForm, setEditForm] = useState({})
   const [isAdding, setIsAdding] = useState(false)
-  const [newProduct, setNewProduct] = useState({ title: '', price: '', image: '', imageFile: null })
+  const [newProduct, setNewProduct] = useState({ name: '', price: '', image_url: '', imageFile: null })
 
   const marqueeItems = [...products, ...products]
 
@@ -45,16 +45,21 @@ export default function ProductMarquee({ isAdmin = false }) {
 
   const handleEditClick = (product) => {
     setEditingId(product.id)
-    setEditForm({ ...product, imageFile: null })
+    setEditForm({
+      name: product.name ?? product.title ?? '',
+      price: String(product.price ?? ''),
+      image_url: product.image_url ?? product.image ?? '',
+      imageFile: null,
+    })
   }
 
   const handleSaveEdit = async () => {
     if (!editingId) return
     try {
       const fields = {
-        title: editForm.title,
+        name: editForm.name,
         price: Number(editForm.price),
-        image_url: editForm.image,
+        image_url: editForm.image_url || null,
       }
       await updateProduct(editingId, fields, editForm.imageFile)
     } catch (err) {
@@ -69,17 +74,21 @@ export default function ProductMarquee({ isAdmin = false }) {
   }
 
   const handleAddProduct = async () => {
-    if (!newProduct.title || !newProduct.price) return
+    if (!newProduct.name || !newProduct.price) return
     try {
       await createProduct(
         {
-          title: newProduct.title,
+          name: newProduct.name,
           price: Number(newProduct.price),
-          image_url: newProduct.image,
+          image_url: newProduct.image_url || null,
+          category: 'Uncategorized',
+          stock_count: 0,
+          is_available: true,
+          description: null,
         },
         newProduct.imageFile,
       )
-      setNewProduct({ title: '', price: '', image: '', imageFile: null })
+      setNewProduct({ name: '', price: '', image_url: '', imageFile: null })
       setIsAdding(false)
     } catch (err) {
       console.error('[ProductMarquee] createProduct failed:', err.message || err)
@@ -99,10 +108,10 @@ export default function ProductMarquee({ isAdmin = false }) {
               className="card flex-shrink-0 w-72 md:w-80 overflow-hidden cursor-pointer group-hover:[animation-play-state:paused]"
             >
               <div className="relative h-80 overflow-hidden bg-gray-100">
-                {product.image ? (
+                {product.image_url || product.image ? (
                   <img
-                    src={product.image}
-                    alt={product.title}
+                    src={product.image_url || product.image}
+                    alt={product.name || product.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                 ) : (
@@ -114,7 +123,7 @@ export default function ProductMarquee({ isAdmin = false }) {
               </div>
 
               <div className="p-5 bg-white flex flex-col justify-between h-32">
-                <h3 className="font-display text-xl text-charcoal-900 font-semibold truncate">{product.title}</h3>
+                <h3 className="font-display text-xl text-charcoal-900 font-semibold truncate">{product.name || product.title}</h3>
                 <div className="flex items-center justify-between mt-auto">
                   <span className="text-lg font-medium text-bloom-600">${product.price.toFixed(2)}</span>
                   <button className="btn-secondary text-xs px-3 py-1.5 rounded-full">View Details</button>
@@ -142,12 +151,12 @@ export default function ProductMarquee({ isAdmin = false }) {
                 <h3 className="font-medium text-charcoal-800 mb-4 text-lg">Add New Marquee Item</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div>
-                    <label className="label">Title</label>
+                    <label className="label">Product name</label>
                     <input
                       type="text"
                       className="input-field"
-                      value={newProduct.title}
-                      onChange={(e) => setNewProduct({ ...newProduct, title: e.target.value })}
+                      value={newProduct.name}
+                      onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
                       placeholder="E.g., Radiant Sunflowers"
                     />
                   </div>
@@ -167,7 +176,7 @@ export default function ProductMarquee({ isAdmin = false }) {
                       type="file"
                       accept="image/*"
                       className="input-field py-1.5 text-sm"
-                      onChange={(e) => handleImageUpload(e, (file, url) => setNewProduct({ ...newProduct, image: url, imageFile: file }))}
+                      onChange={(e) => handleImageUpload(e, (file, url) => setNewProduct({ ...newProduct, image_url: url, imageFile: file }))}
                     />
                   </div>
                 </div>
@@ -186,8 +195,8 @@ export default function ProductMarquee({ isAdmin = false }) {
                       <input
                         type="text"
                         className="input-field py-1.5 text-sm"
-                        value={editForm.title}
-                        onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                        value={editForm.name}
+                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                       />
                       <input
                         type="number"
@@ -199,7 +208,7 @@ export default function ProductMarquee({ isAdmin = false }) {
                         type="file"
                         accept="image/*"
                         className="input-field py-1.5 text-sm"
-                        onChange={(e) => handleImageUpload(e, (file, url) => setEditForm({ ...editForm, image: url, imageFile: file }))}
+                        onChange={(e) => handleImageUpload(e, (file, url) => setEditForm({ ...editForm, image_url: url, imageFile: file }))}
                       />
                       <div className="flex gap-2 justify-end pt-2">
                         <button onClick={handleCancelEdit} className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-md transition-colors"><X size={16} /></button>
@@ -210,10 +219,10 @@ export default function ProductMarquee({ isAdmin = false }) {
                     <>
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0">
-                          <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
+                          <img src={product.image_url || product.image} alt={product.name || product.title} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium text-gray-900 truncate">{product.title}</h4>
+                          <h4 className="text-sm font-medium text-gray-900 truncate">{product.name || product.title}</h4>
                           <p className="text-sm text-bloom-600">${product.price.toFixed(2)}</p>
                         </div>
                       </div>
