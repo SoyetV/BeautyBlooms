@@ -17,7 +17,6 @@ const HomePage         = lazy(() => import('@/pages/customer/HomePage'))
 const CatalogPage      = lazy(() => import('@/pages/customer/CatalogPage'))
 const CheckoutPage     = lazy(() => import('@/pages/customer/CheckoutPage'))
 const OrderStatusPage  = lazy(() => import('@/pages/customer/OrderStatusPage'))
-const OrdersPage        = lazy(() => import('@/pages/customer/OrdersPage'))
 const AdminDashboard   = lazy(() => import('@/pages/admin/AdminDashboard'))
 const AdminLogin       = lazy(() => import('@/pages/admin/AdminLogin'))
 
@@ -45,6 +44,7 @@ function Layout() {
             <Route path="/"          element={<HomePage />} />
             <Route path="/catalog"   element={<CatalogPage />} />
             <Route path="/checkout"  element={<CheckoutPage />} />
+            <Route path="/orders/:id" element={<OrderStatusPage />} />
 
             {/* Admin routes */}
             <Route path="/admin"       element={<AdminDashboard />} />
