@@ -33,7 +33,7 @@ export function Footer() {
             <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Contact</h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li className="flex items-center gap-2">
-                <span aria-hidden="true">📍</span> Cebu City, Philippines
+                <span aria-hidden="true">📍</span> Bato, Leyte, Philippines
               </li>
               <li className="flex items-center gap-2">
                 <span aria-hidden="true">📞</span>

@@ -38,7 +38,7 @@ export default function HomePage() {
             Elevate your moments with Beauty Blooms.
           </p>
           <div className="mt-12 flex flex-col sm:flex-row gap-5 justify-center w-full sm:w-auto">
-            <Link to="/catalog" className="inline-flex items-center justify-center gap-2 rounded-full bg-bloom-600 px-8 py-4 text-sm tracking-wider uppercase font-semibold text-white shadow-lg transition-all hover:bg-bloom-500 hover:shadow-bloom-500/25 active:scale-95">
+            <Link to="/catalog" className="inline-flex items-center justify-center gap-2 rounded-full border border-gold-300/30 bg-white/10 backdrop-blur-sm px-8 py-4 text-sm tracking-wider uppercase font-semibold text-petal-50 transition-all hover:bg-white/20 active:scale-95">
               Discover the Collection
             </Link>
             <a href="#featured" className="inline-flex items-center justify-center gap-2 rounded-full border border-gold-300/30 bg-white/10 backdrop-blur-sm px-8 py-4 text-sm tracking-wider uppercase font-semibold text-petal-50 transition-all hover:bg-white/20 active:scale-95">
