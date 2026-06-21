@@ -89,10 +89,10 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 sm:px-6 py-16 page-enter">
+    <div className="page-enter mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-16">
       <Link
         to="/catalog"
-        className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-charcoal-500 hover:text-bloom-600 mb-10 transition-colors group"
+        className="group mb-7 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-charcoal-500 transition-colors hover:text-bloom-600 sm:mb-10"
       >
         <span className="flex h-7 w-7 items-center justify-center rounded-full transition-all group-hover:-translate-x-1" style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(249,168,212,0.3)' }}>
           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -102,15 +102,15 @@ export default function CheckoutPage() {
         Back to Collection
       </Link>
 
-      <div className="mb-10">
+      <div className="mb-7 sm:mb-10">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-bloom-500 mb-2">Almost there</p>
-        <h1 className="font-display text-4xl font-bold text-charcoal-900">Secure Checkout</h1>
+        <h1 className="font-display text-3xl font-bold text-charcoal-900 sm:text-4xl">Secure Checkout</h1>
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
         {/* Delivery form */}
         <form onSubmit={handleSubmit} noValidate className="lg:col-span-3 space-y-5">
-          <div className="rounded-3xl px-6 py-6" style={glassCard}>
+          <div className="rounded-2xl px-4 py-5 sm:rounded-3xl sm:px-6 sm:py-6" style={glassCard}>
             <h2 className="font-semibold text-charcoal-900 mb-5 flex items-center gap-2">
               <span className="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #ec4899, #be185d)' }}>1</span>
               Delivery details
@@ -191,7 +191,7 @@ export default function CheckoutPage() {
 
         {/* Order summary */}
         <aside className="lg:col-span-2" aria-label="Order summary">
-          <div className="rounded-3xl px-6 py-6 sticky top-24" style={glassCard}>
+          <div className="rounded-2xl px-4 py-5 sm:rounded-3xl sm:px-6 sm:py-6 lg:sticky lg:top-24" style={glassCard}>
             <h2 className="font-semibold text-charcoal-900 mb-5 flex items-center gap-2">
               <span className="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #ec4899, #be185d)' }}>2</span>
               Order summary
@@ -200,10 +200,10 @@ export default function CheckoutPage() {
               {items.map(item => (
                 <li
                   key={item.id}
-                  className="flex justify-between py-3 text-sm"
+                  className="flex gap-3 py-3 text-sm"
                   style={{ borderBottom: '1px solid rgba(249,168,212,0.1)' }}
                 >
-                  <span className="text-charcoal-700">
+                  <span className="min-w-0 flex-1 text-charcoal-700">
                     <span className="font-semibold text-charcoal-900">{item.quantity}×</span> {item.name}
                   </span>
                   <span className="text-charcoal-800 font-medium tabular-nums">{formatCurrency(item.price * item.quantity)}</span>

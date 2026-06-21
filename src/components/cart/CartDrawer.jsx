@@ -49,7 +49,7 @@ export function CartDrawer({ isOpen, onClose }) {
         role="dialog"
         aria-modal="true"
         aria-label="Shopping cart"
-        className={`fixed right-0 top-0 z-50 h-full w-full max-w-sm flex flex-col transition-transform duration-400 ease-out ${
+        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-sm flex-col transition-transform duration-400 ease-out sm:max-w-md ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{
@@ -62,7 +62,7 @@ export function CartDrawer({ isOpen, onClose }) {
       >
         {/* Header */}
         <div
-          className="flex items-center justify-between px-5 py-4"
+          className="flex items-center justify-between px-4 py-4 sm:px-5"
           style={{ borderBottom: '1px solid rgba(249,168,212,0.2)' }}
         >
           <div>
@@ -90,7 +90,7 @@ export function CartDrawer({ isOpen, onClose }) {
         </div>
 
         {/* Items list */}
-        <div className="flex-1 overflow-y-auto px-5 py-2">
+        <div className="flex-1 overflow-y-auto px-4 py-2 sm:px-5">
           {items.length === 0 ? (
             <EmptyState
               icon="🛒"
@@ -112,7 +112,7 @@ export function CartDrawer({ isOpen, onClose }) {
         {/* Footer */}
         {items.length > 0 && (
           <div
-            className="px-5 py-5 space-y-3"
+            className="space-y-3 px-4 py-4 sm:px-5 sm:py-5"
             style={{
               borderTop: '1px solid rgba(249,168,212,0.2)',
               background: 'rgba(255,255,255,0.5)',

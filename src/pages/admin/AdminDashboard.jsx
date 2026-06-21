@@ -14,8 +14,8 @@ import { Spinner } from '@/components/ui/Spinner'
 import ProductMarquee from '@/components/ui/ProductMarquee'
 
 const TABS = [
-  { id: 'products', label: 'Products', icon: '🌸' },
-  { id: 'orders',   label: 'Orders',   icon: '📋' },
+  { id: 'products', label: 'Products' },
+  { id: 'orders',   label: 'Orders' },
 ]
 
 export default function AdminDashboard() {
@@ -86,25 +86,25 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-petal-50 page-enter">
       {/* Page header */}
       <div className="bg-white/80 backdrop-blur-xl border-b border-gold-200/40">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10">
+        <div className="mx-auto max-w-6xl px-4 py-7 sm:px-6 sm:py-10">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <h1 className="font-display text-3xl font-bold text-charcoal-900 tracking-tight">Admin Dashboard</h1>
+              <h1 className="font-display text-2xl font-bold tracking-tight text-charcoal-900 sm:text-3xl">Admin Dashboard</h1>
               <p className="mt-2 text-sm text-charcoal-600 font-light">Manage your exquisite inventory and incoming orders.</p>
             </div>
           </div>
 
           {/* Stats strip */}
-          <dl className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-4">
+          <dl className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:grid-cols-4 sm:gap-5">
             {[
               { label: 'Total products',  value: totalProducts },
               { label: 'Out of stock',    value: outOfStock,   alert: outOfStock > 0 },
               { label: 'Pending orders',  value: pendingOrders, alert: pendingOrders > 0 },
               { label: 'Total revenue',   value: new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 }).format(totalRevenue) },
             ].map((stat, idx) => (
-              <div key={stat.label} className={`card px-5 py-4 opacity-0 animate-fade-in-up ${stat.alert ? 'ring-gold-300 bg-gold-50' : ''}`} style={{ animationDelay: `${idx * 100}ms` }}>
-                <dt className="text-xs uppercase tracking-wider text-charcoal-500">{stat.label}</dt>
-                <dd className={`mt-2 text-2xl font-semibold tabular-nums ${stat.alert ? 'text-charcoal-900' : 'text-charcoal-900'}`}>
+              <div key={stat.label} className={`card px-4 py-3 opacity-0 animate-fade-in-up sm:px-5 sm:py-4 ${stat.alert ? 'ring-gold-300 bg-gold-50' : ''}`} style={{ animationDelay: `${idx * 100}ms` }}>
+                <dt className="text-[11px] uppercase tracking-wider text-charcoal-500 sm:text-xs">{stat.label}</dt>
+                <dd className={`mt-2 text-xl font-semibold tabular-nums sm:text-2xl ${stat.alert ? 'text-charcoal-900' : 'text-charcoal-900'}`}>
                   {stat.value}
                 </dd>
               </div>
@@ -112,20 +112,19 @@ export default function AdminDashboard() {
           </dl>
 
           {/* Tabs */}
-          <nav className="mt-8 flex gap-6 border-b border-gold-200/40 -mb-px" aria-label="Admin sections">
+          <nav className="-mb-px mt-6 flex gap-2 overflow-x-auto border-b border-gold-200/40 sm:mt-8 sm:gap-6" aria-label="Admin sections">
             {TABS.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 role="tab"
                 aria-selected={activeTab === tab.id}
-                className={`flex items-center gap-2 px-2 py-3 text-sm font-semibold uppercase tracking-wider transition-colors border-b-2
+                className={`flex shrink-0 items-center gap-2 px-2 py-3 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2 sm:text-sm
                   ${activeTab === tab.id
                     ? 'border-bloom-600 text-bloom-600'
                     : 'border-transparent text-charcoal-500 hover:text-charcoal-900 hover:border-gold-300'
                   }`}
               >
-                <span aria-hidden="true">{tab.icon}</span>
                 {tab.label}
                 {tab.id === 'orders' && pendingOrders > 0 && (
                   <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-bloom-500 text-[10px] font-bold text-white">
@@ -139,21 +138,21 @@ export default function AdminDashboard() {
       </div>
 
       {/* Tab content */}
-      <main className="mx-auto max-w-6xl px-4 sm:px-6 py-6">
+      <main className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-6">
         {activeTab === 'products' && (
           <section aria-label="Product inventory">
             {/* Product Marquee Management */}
             <ProductMarquee isAdmin={true} />
             
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 mt-8">
+            <div className="mb-4 mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-gray-500">{totalProducts} products total</p>
-              <div className="flex items-center gap-3">
-                <button onClick={openAdd} className="btn-primary py-1.5 text-xs px-3">
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3">
+                <button onClick={openAdd} className="btn-primary px-3 py-2 text-xs sm:py-1.5">
                   Add product
                 </button>
                 <button
                   onClick={() => fetchProducts()}
-                  className="btn-secondary py-1.5 text-xs px-3"
+                  className="btn-secondary px-3 py-2 text-xs sm:py-1.5"
                   aria-label="Refresh product list"
                 >
                   Refresh
@@ -172,11 +171,11 @@ export default function AdminDashboard() {
 
         {activeTab === 'orders' && (
           <section aria-label="Orders dashboard">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4 flex items-center justify-between gap-3">
               <p className="text-sm text-gray-500">{orders.length} orders total</p>
               <button
                 onClick={() => fetchOrders()}
-                className="btn-secondary py-1.5 text-xs px-3"
+                className="btn-secondary px-3 py-2 text-xs sm:py-1.5"
                 aria-label="Refresh orders list"
               >
                 Refresh

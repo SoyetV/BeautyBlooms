@@ -70,7 +70,7 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
           >
             {/* Order header row */}
             <div
-              className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 cursor-pointer hover:bg-petal-100 transition-colors duration-500"
+              className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-2 px-4 py-4 transition-colors duration-500 hover:bg-petal-100 sm:gap-x-4 sm:px-5"
               onClick={() => setExpandedId(isExpanded ? null : order.id)}
               role="button"
               aria-expanded={isExpanded}
@@ -84,7 +84,7 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
               </div>
 
               {/* Total */}
-              <span className="text-sm font-semibold text-gray-900 tabular-nums">
+              <span className="text-sm font-semibold tabular-nums text-gray-900">
                 {formatCurrency(order.total_amount)}
               </span>
 
@@ -106,7 +106,7 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
 
             {/* Expanded detail panel */}
             {isExpanded && (
-              <div className="border-t border-gold-100 bg-petal-50/50 px-5 py-6 space-y-6 animate-fade-in">
+              <div className="animate-fade-in space-y-5 border-t border-gold-100 bg-petal-50/50 px-4 py-5 sm:space-y-6 sm:px-5 sm:py-6">
                 {/* Customer details */}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
                   <div>
@@ -130,8 +130,8 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
                     <p className="text-xs font-semibold uppercase text-gray-400 mb-2">Items</p>
                     <ul className="divide-y divide-gray-100 rounded-lg bg-white ring-1 ring-gray-100">
                       {order.order_items.map(item => (
-                        <li key={item.id} className="flex items-center justify-between px-3 py-2 text-sm">
-                          <span className="text-gray-700">
+                        <li key={item.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
+                          <span className="min-w-0 text-gray-700">
                             <span className="font-medium text-gray-900">{item.quantity}×</span> {item.product_name}
                           </span>
                           <span className="text-gray-500 tabular-nums">{formatCurrency(item.subtotal)}</span>
@@ -142,8 +142,8 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
                 )}
 
                 {/* Status update */}
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                     <label htmlFor={`status-${order.id}`} className="text-xs font-semibold uppercase text-gray-400">
                       Update status
                     </label>
@@ -153,7 +153,7 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
                         value={order.status}
                         onChange={e => handleStatusChange(order.id, e.target.value)}
                         disabled={isUpdating}
-                        className="input-field py-1.5 pr-8 text-xs"
+                        className="input-field py-2 pr-8 text-xs sm:py-1.5"
                         aria-label={`Change order status for ${order.customer_name}`}
                       >
                         {ORDER_STATUSES.map(s => (

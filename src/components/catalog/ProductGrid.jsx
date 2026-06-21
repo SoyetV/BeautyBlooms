@@ -61,7 +61,7 @@ export function ProductGrid({ products, loading, error, onRetry }) {
   return (
     <section aria-label="Flower catalog">
       {/* Search + filter bar */}
-      <div className="flex flex-col gap-4 mb-8">
+      <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:gap-4">
         {/* Search input */}
         <div className="relative">
           <svg
@@ -119,7 +119,7 @@ export function ProductGrid({ products, loading, error, onRetry }) {
           }
         />
       ) : (
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((product, idx) => {
             const staggerDelay = idx < 12 ? `${idx * 100}ms` : '0ms';
             return (

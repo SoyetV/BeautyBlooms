@@ -110,7 +110,7 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Edit product' : 'Add new product'} size="md">
-      <form onSubmit={handleSubmit} noValidate className="space-y-5">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4 sm:space-y-5">
 
         {/* Submit-level error */}
         {errors.submit && (
@@ -123,7 +123,7 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
         <div>
           <label className="label">Product photo</label>
           <div
-            className="mt-1 flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-5 cursor-pointer hover:border-bloom-300 transition-colors"
+            className="mt-1 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-4 transition-colors hover:border-bloom-300 sm:p-5"
             onClick={() => fileRef.current?.click()}
             onKeyDown={e => e.key === 'Enter' && fileRef.current?.click()}
             tabIndex={0}
@@ -138,7 +138,7 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                     d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M13.5 3.75h6.75M16.875 3.75v6.75M6 20.25a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                 </svg>
-                <p className="text-sm text-gray-400">Click to upload a photo <span className="text-gray-300">(PNG, JPG — max 5 MB)</span></p>
+                <p className="text-center text-sm text-gray-400">Click to upload a photo <span className="text-gray-300">(PNG, JPG - max 5 MB)</span></p>
               </>
             )}
             <input ref={fileRef} type="file" accept="image/*" className="sr-only" onChange={handleImageChange} tabIndex={-1} />
@@ -178,7 +178,7 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
         </div>
 
         {/* Price + Stock row */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="pf-price" className="label">Price (₱) <span aria-hidden="true" className="text-red-500">*</span></label>
             <input
@@ -234,7 +234,7 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
+        <div className="grid grid-cols-2 gap-2 border-t border-gray-100 pt-2 sm:flex sm:justify-end sm:gap-3">
           <button type="button" onClick={onClose} className="btn-secondary" disabled={saving}>
             Cancel
           </button>

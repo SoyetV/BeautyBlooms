@@ -200,4 +200,19 @@
       inset 0 1px 0 rgba(255,255,255,0.9);
     transform: translateY(-2px);
   }
+
+  @media (max-width: 640px) {
+    .btn-primary,
+    .btn-secondary {
+      @apply px-4 py-2.5 text-xs;
+    }
+
+    .input-field {
+      @apply px-3 py-2.5 text-sm;
+    }
+
+    .card:hover {
+      transform: none;
+    }
+  }
 }

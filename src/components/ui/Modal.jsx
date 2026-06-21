@@ -25,7 +25,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
   const modalContent = (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-8 sm:items-center"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-3 py-4 sm:items-center sm:px-4 sm:py-8"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
@@ -34,7 +34,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
     >
       {/* Panel */}
       <div
-        className={`relative z-10 w-full ${maxW[size]} max-h-[calc(100vh-4rem)] overflow-hidden rounded-3xl animate-fade-in-up`}
+        className={`relative z-10 w-full ${maxW[size]} max-h-[calc(100vh-2rem)] overflow-hidden rounded-2xl animate-fade-in-up sm:max-h-[calc(100vh-4rem)] sm:rounded-3xl`}
         style={{
           background: 'rgba(253,242,248,0.88)',
           backdropFilter: 'blur(32px) saturate(200%)',
@@ -45,14 +45,14 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
       >
         {/* Header */}
         <div
-          className="sticky top-0 z-10 flex items-center justify-between px-6 py-4"
+          className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4"
           style={{
             background: 'rgba(255,255,255,0.5)',
             backdropFilter: 'blur(12px)',
             borderBottom: '1px solid rgba(249,168,212,0.2)',
           }}
         >
-          <h2 id="modal-title" className="font-display text-xl font-bold text-charcoal-900">
+          <h2 id="modal-title" className="font-display text-lg font-bold text-charcoal-900 sm:text-xl">
             {title}
           </h2>
           <button
@@ -71,7 +71,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
         </div>
 
         {/* Content */}
-        <div className="px-6 py-5 overflow-y-auto max-h-[calc(100vh-9rem)]">
+        <div className="max-h-[calc(100vh-7rem)] overflow-y-auto px-4 py-4 sm:max-h-[calc(100vh-9rem)] sm:px-6 sm:py-5">
           {children}
         </div>
       </div>

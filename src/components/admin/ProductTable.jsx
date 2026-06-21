@@ -58,7 +58,80 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
   }
 
   return (
-    <div className="overflow-x-auto card">
+    <>
+      <div className="space-y-3 md:hidden" aria-label="Product inventory">
+        {products.map((product, idx) => (
+          <article
+            key={product.id}
+            className="card p-4 opacity-0 animate-fade-in-up"
+            style={{ animationDelay: `${idx * 50}ms` }}
+          >
+            <div className="flex gap-3">
+              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-petal-100">
+                {product.image_url
+                  ? <img src={product.image_url} alt="" className="h-full w-full object-cover" aria-hidden="true" />
+                  : <div className="flex h-full w-full items-center justify-center text-lg" aria-hidden="true">BB</div>
+                }
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="truncate font-semibold text-charcoal-900">{product.name}</h3>
+                    <p className="text-xs text-charcoal-500">{product.category}</p>
+                  </div>
+                  <p className="shrink-0 text-sm font-semibold tabular-nums text-charcoal-900">
+                    {formatCurrency(product.price)}
+                  </p>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {stockBadge(product.stock_count)}
+                  <Badge
+                    label={product.is_available ? 'Listed' : 'Hidden'}
+                    variant={product.is_available ? 'instock' : 'default'}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {confirmId === product.id ? (
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => handleDelete(product.id)}
+                  disabled={deletingId === product.id}
+                  className="btn-danger px-3 py-2 text-xs"
+                >
+                  {deletingId === product.id ? <Spinner size="sm" /> : 'Yes, delete'}
+                </button>
+                <button
+                  onClick={() => setConfirmId(null)}
+                  className="btn-secondary px-3 py-2 text-xs"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => onEdit(product)}
+                  className="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:border-bloom-300 hover:text-bloom-600"
+                  aria-label={`Edit ${product.name}`}
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => setConfirmId(product.id)}
+                  className="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-red-500 transition-colors hover:border-red-300 hover:bg-red-50"
+                  aria-label={`Delete ${product.name}`}
+                >
+                  Delete
+                </button>
+              </div>
+            )}
+          </article>
+        ))}
+      </div>
+
+      <div className="card hidden overflow-x-auto md:block">
       <table className="min-w-full divide-y divide-gold-100 text-sm" aria-label="Product inventory">
         <thead className="bg-petal-50/80 text-xs font-semibold uppercase tracking-wider text-charcoal-500">
           <tr>
@@ -79,7 +152,7 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
                   <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-petal-100">
                     {product.image_url
                       ? <img src={product.image_url} alt="" className="h-full w-full object-cover" aria-hidden="true" />
-                      : <div className="flex h-full w-full items-center justify-center text-lg" aria-hidden="true">🌸</div>
+                      : <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-bloom-700" aria-hidden="true">BB</div>
                     }
                   </div>
                   <div className="min-w-0">
@@ -155,5 +228,6 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
         </tbody>
       </table>
     </div>
+    </>
   )
 }

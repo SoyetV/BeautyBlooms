@@ -13,7 +13,7 @@ export default function HomePage() {
     <div className="page-enter">
       {/* Hero */}
       <section
-        className="relative flex items-center justify-center min-h-[90vh] overflow-hidden"
+        className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center overflow-hidden sm:min-h-[90vh]"
         style={{ background: 'linear-gradient(135deg, #500724 0%, #831843 40%, #2d1b2e 100%)' }}
         aria-label="Welcome to Beauty Blooms"
       >
@@ -30,15 +30,15 @@ export default function HomePage() {
         {/* Ambient orbs */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <div
-            className="absolute -top-32 -left-32 w-[600px] h-[600px] rounded-full opacity-20"
+            className="absolute -left-48 -top-48 h-[360px] w-[360px] rounded-full opacity-20 sm:-left-32 sm:-top-32 sm:h-[600px] sm:w-[600px]"
             style={{ background: 'radial-gradient(circle, #ec4899 0%, transparent 70%)', filter: 'blur(60px)' }}
           />
           <div
-            className="absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full opacity-15"
+            className="absolute -bottom-44 -right-44 h-[320px] w-[320px] rounded-full opacity-15 sm:-bottom-32 sm:-right-32 sm:h-[500px] sm:w-[500px]"
             style={{ background: 'radial-gradient(circle, #c08d4b 0%, transparent 70%)', filter: 'blur(80px)' }}
           />
           <div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-10"
+            className="absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-10 sm:h-[800px] sm:w-[800px]"
             style={{ background: 'radial-gradient(circle, #f9a8d4 0%, transparent 60%)', filter: 'blur(100px)' }}
           />
         </div>
@@ -46,10 +46,10 @@ export default function HomePage() {
         {/* Dark gradient bottom fade */}
         <div className="absolute inset-0 z-1" style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(45,27,46,0.6) 100%)' }} />
 
-        <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 py-24 text-center flex flex-col items-center">
+        <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center px-4 py-16 text-center sm:px-6 sm:py-24">
           {/* Eyebrow — glass pill */}
           <div
-            className="mb-8 inline-flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold uppercase tracking-[0.25em] text-gold-200"
+            className="mb-6 inline-flex items-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-200 sm:mb-8 sm:px-5 sm:text-xs sm:tracking-[0.25em]"
             style={{
               background: 'rgba(255,255,255,0.08)',
               backdropFilter: 'blur(16px)',
@@ -62,7 +62,7 @@ export default function HomePage() {
           </div>
 
           <h1
-            className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight"
+            className="font-display text-4xl font-bold leading-tight sm:text-6xl lg:text-7xl"
             style={{ color: '#fdf2f8', textShadow: '0 2px 20px rgba(0,0,0,0.4)' }}
           >
             Elegance in{' '}
@@ -80,17 +80,17 @@ export default function HomePage() {
           </h1>
 
           <p
-            className="mt-8 max-w-xl mx-auto text-lg font-light leading-relaxed"
+            className="mx-auto mt-6 max-w-xl text-base font-light leading-relaxed sm:mt-8 sm:text-lg"
             style={{ color: 'rgba(253,242,248,0.8)', textShadow: '0 1px 8px rgba(0,0,0,0.3)' }}
           >
             Hand-arranged, premium bouquets crafted with the most luxurious seasonal blooms.
             Elevate your moments with Beauty Blooms.
           </p>
 
-          <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">
+          <div className="mt-9 flex w-full flex-col justify-center gap-3 sm:mt-12 sm:w-auto sm:flex-row sm:gap-4">
             <Link
               to="/catalog"
-              className="inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-sm font-semibold uppercase tracking-wider transition-all duration-300"
+              className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-xs font-semibold uppercase tracking-wider transition-all duration-300 sm:px-8 sm:py-4 sm:text-sm"
               style={{
                 background: 'rgba(255,255,255,0.1)',
                 backdropFilter: 'blur(16px)',
@@ -104,7 +104,7 @@ export default function HomePage() {
             </Link>
             <a
               href="#featured"
-              className="inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-sm font-semibold uppercase tracking-wider transition-all duration-300"
+              className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-xs font-semibold uppercase tracking-wider transition-all duration-300 sm:px-8 sm:py-4 sm:text-sm"
               style={{
                 background: 'rgba(255,255,255,0.1)',
                 backdropFilter: 'blur(16px)',
@@ -119,7 +119,7 @@ export default function HomePage() {
           </div>
 
           {/* Scroll indicator */}
-          <div className="mt-20 flex flex-col items-center gap-2 opacity-50">
+          <div className="mt-12 hidden flex-col items-center gap-2 opacity-50 sm:flex lg:mt-20">
             <span className="text-xs uppercase tracking-[0.2em] text-petal-200">Scroll</span>
             <div
               className="w-px h-10 rounded-full"
@@ -138,7 +138,7 @@ export default function HomePage() {
         style={{ borderColor: 'rgba(249,168,212,0.2)' }}
         aria-label="Why choose Bloom"
       >
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12 grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 px-4 py-8 sm:grid-cols-3 sm:gap-6 sm:px-6 sm:py-12">
           {[
             { icon: '🌿', heading: 'Always fresh', body: 'Sourced daily from local farms and markets.' },
             { icon: '🚚', heading: 'Same-day delivery', body: 'Order by noon, delivered to your door by 6 PM.' },
@@ -146,7 +146,7 @@ export default function HomePage() {
           ].map(item => (
             <div
               key={item.heading}
-              className="flex flex-col items-center gap-3 text-center rounded-2xl p-6 transition-all duration-300"
+              className="flex flex-col items-center gap-3 rounded-2xl p-5 text-center transition-all duration-300 sm:p-6"
               style={{
                 background: 'rgba(255,255,255,0.5)',
                 backdropFilter: 'blur(16px)',
@@ -154,7 +154,7 @@ export default function HomePage() {
               }}
             >
               <span
-                className="flex h-12 w-12 items-center justify-center rounded-2xl text-2xl"
+                className="flex h-10 w-10 items-center justify-center rounded-2xl text-xl sm:h-12 sm:w-12 sm:text-2xl"
                 style={{
                   background: 'linear-gradient(135deg, rgba(236,72,153,0.1), rgba(192,141,75,0.1))',
                   border: '1px solid rgba(236,72,153,0.15)',
@@ -171,11 +171,11 @@ export default function HomePage() {
       </section>
 
       {/* Featured products */}
-      <section id="featured" className="mx-auto max-w-6xl px-4 sm:px-6 py-16">
-        <div className="flex items-end justify-between mb-10">
+      <section id="featured" className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-16">
+        <div className="mb-8 flex items-end justify-between gap-4 sm:mb-10">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-bloom-500 mb-2">Handpicked for you</p>
-            <h2 className="font-display text-3xl font-bold text-charcoal-900">Fresh picks</h2>
+            <h2 className="font-display text-2xl font-bold text-charcoal-900 sm:text-3xl">Fresh picks</h2>
           </div>
           <Link
             to="/catalog"

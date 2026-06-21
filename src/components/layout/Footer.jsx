@@ -88,7 +88,7 @@ export function Footer() {
                 >
                   📍
                 </span>
-                Cebu City, Philippines
+                Bato, Leyte, Philippines
               </li>
               <li className="flex items-center gap-3">
                 <span

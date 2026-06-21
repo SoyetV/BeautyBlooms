@@ -24,7 +24,7 @@ export function Navbar({ onCartOpen }) {
   }
 
   const navLink = ({ isActive }) =>
-    `text-xs font-semibold uppercase tracking-[0.15em] transition-all duration-200 ${
+    `text-xs font-semibold uppercase tracking-[0.14em] transition-all duration-200 ${
       isActive
         ? 'text-bloom-500'
         : 'text-charcoal-600 hover:text-bloom-500'
@@ -46,24 +46,28 @@ export function Navbar({ onCartOpen }) {
         borderBottom: '1px solid rgba(249, 168, 212, 0.2)',
       }}
     >
-      <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:h-20 sm:px-6">
 
         {/* Logo */}
         <Link
           to="/"
-          className="flex items-center gap-2.5 font-display text-2xl font-bold text-charcoal-900 tracking-tight group"
+          className="group flex min-w-0 items-center gap-2 font-display text-xl font-bold tracking-tight text-charcoal-900 sm:gap-2.5 sm:text-2xl"
+          onClick={() => setMenuOpen(false)}
         >
           <span
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-lg transition-transform duration-300 group-hover:scale-110"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-base transition-transform duration-300 group-hover:scale-105 sm:h-9 sm:w-9 sm:text-lg"
             style={{
               background: 'linear-gradient(135deg, rgba(236,72,153,0.15) 0%, rgba(192,141,75,0.15) 100%)',
               border: '1px solid rgba(236,72,153,0.2)',
             }}
             aria-hidden="true"
           >
-            🌸
+            <svg className="h-[18px] w-[18px] sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 21c-2.6-3.2-6.8-4.8-6.8-8.5A3.8 3.8 0 0 1 12 10a3.8 3.8 0 0 1 6.8 2.5C18.8 16.2 14.6 17.8 12 21Z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 10c-1.8-1.2-3-2.7-3-4.2A3 3 0 0 1 12 3a3 3 0 0 1 3 2.8c0 1.5-1.2 3-3 4.2Z" />
+            </svg>
           </span>
-          <span className="bg-clip-text" style={{
+          <span className="truncate bg-clip-text" style={{
             backgroundImage: 'linear-gradient(135deg, #2d1b2e 0%, #831843 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
@@ -73,7 +77,7 @@ export function Navbar({ onCartOpen }) {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden sm:flex items-center gap-8" aria-label="Main navigation">
+        <nav className="hidden items-center gap-8 md:flex" aria-label="Main navigation">
           <NavLink to="/catalog" className={navLink}>Shop</NavLink>
           {isAdmin && (
             <NavLink
@@ -117,7 +121,7 @@ export function Navbar({ onCartOpen }) {
           </button>
 
           {/* Auth button (desktop) */}
-          <div className="hidden sm:block">
+          <div className="hidden md:block">
             {user ? (
               <button onClick={handleSignOut} className="btn-secondary py-2 text-xs px-5">
                 Sign out
@@ -131,7 +135,7 @@ export function Navbar({ onCartOpen }) {
 
           {/* Mobile menu toggle */}
           <button
-            className="sm:hidden rounded-xl p-2.5 text-charcoal-600 transition-all"
+            className="rounded-xl p-2.5 text-charcoal-600 transition-all hover:text-bloom-600 md:hidden"
             style={{
               background: 'rgba(255,255,255,0.6)',
               backdropFilter: 'blur(12px)',
@@ -153,7 +157,7 @@ export function Navbar({ onCartOpen }) {
       {/* Mobile dropdown */}
       {menuOpen && (
         <nav
-          className="sm:hidden px-4 py-4 flex flex-col gap-4"
+          className="flex flex-col gap-2 px-4 pb-4 pt-2 md:hidden"
           style={{
             background: 'rgba(253, 242, 248, 0.9)',
             backdropFilter: 'blur(20px)',
@@ -161,11 +165,11 @@ export function Navbar({ onCartOpen }) {
           }}
           aria-label="Mobile navigation"
         >
-          <NavLink to="/catalog" className={navLink} onClick={() => setMenuOpen(false)}>Shop</NavLink>
-          {isAdmin && <NavLink to="/admin" className={navLink} onClick={() => setMenuOpen(false)}>Admin</NavLink>}
+          <NavLink to="/catalog" className={({ isActive }) => `${navLink({ isActive })} rounded-2xl px-4 py-3 hover:bg-white/60`} onClick={() => setMenuOpen(false)}>Shop</NavLink>
+          {isAdmin && <NavLink to="/admin" className={({ isActive }) => `${navLink({ isActive })} rounded-2xl px-4 py-3 hover:bg-white/60`} onClick={() => setMenuOpen(false)}>Admin</NavLink>}
           {user
-            ? <button onClick={handleSignOut} className="text-left text-xs font-semibold uppercase tracking-widest text-charcoal-500">Sign out</button>
-            : <Link to="/admin/login" className="text-xs font-semibold uppercase tracking-widest text-bloom-600" onClick={() => setMenuOpen(false)}>Sign in</Link>
+            ? <button onClick={handleSignOut} className="rounded-2xl px-4 py-3 text-left text-xs font-semibold uppercase tracking-widest text-charcoal-500 hover:bg-white/60">Sign out</button>
+            : <Link to="/admin/login" className="rounded-2xl px-4 py-3 text-xs font-semibold uppercase tracking-widest text-bloom-600 hover:bg-white/60" onClick={() => setMenuOpen(false)}>Sign in</Link>
           }
         </nav>
       )}

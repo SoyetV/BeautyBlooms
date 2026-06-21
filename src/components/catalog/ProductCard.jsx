@@ -32,7 +32,7 @@ export function ProductCard({ product }) {
 
   return (
     <article
-      className="group flex flex-col overflow-hidden rounded-3xl transition-all duration-500"
+      className="group flex flex-col overflow-hidden rounded-2xl transition-all duration-500 sm:rounded-3xl"
       style={{
         background: 'rgba(255,255,255,0.6)',
         backdropFilter: 'blur(20px) saturate(180%)',
@@ -89,13 +89,13 @@ export function ProductCard({ product }) {
       </div>
 
       {/* Card body */}
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="font-display text-lg font-bold text-charcoal-900 leading-tight line-clamp-2">
+      <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
+        <div className="flex items-start justify-between gap-2 sm:gap-3">
+          <h3 className="font-display text-base font-bold leading-tight text-charcoal-900 line-clamp-2 sm:text-lg">
             {product.name}
           </h3>
           <span
-            className="shrink-0 text-sm font-bold rounded-full px-3 py-1"
+            className="shrink-0 rounded-full px-2.5 py-1 text-xs font-bold sm:px-3 sm:text-sm"
             style={{
               background: 'linear-gradient(135deg, rgba(236,72,153,0.1), rgba(192,141,75,0.1))',
               border: '1px solid rgba(236,72,153,0.2)',
