@@ -1,5 +1,4 @@
 // src/components/ui/Modal.jsx
-// Accessible modal dialog built on a native <dialog>-inspired pattern.
 
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
@@ -7,7 +6,6 @@ import { createPortal } from 'react-dom'
 export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
   const overlayRef = useRef(null)
 
-  // Close on Escape
   useEffect(() => {
     if (!isOpen) return
     const handle = (e) => { if (e.key === 'Escape') onClose() }
@@ -15,7 +13,6 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
     return () => document.removeEventListener('keydown', handle)
   }, [isOpen, onClose])
 
-  // Lock body scroll while open
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
@@ -33,23 +30,41 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
       aria-modal="true"
       aria-labelledby="modal-title"
       onClick={(e) => { if (e.target === overlayRef.current) onClose() }}
+      style={{ background: 'rgba(45,27,46,0.5)', backdropFilter: 'blur(8px)' }}
     >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40" aria-hidden="true" />
-
       {/* Panel */}
-      <div className={`relative z-10 w-full ${maxW[size]} max-h-[calc(100vh-4rem)] overflow-hidden rounded-2xl bg-white shadow-xl`}>
+      <div
+        className={`relative z-10 w-full ${maxW[size]} max-h-[calc(100vh-4rem)] overflow-hidden rounded-3xl animate-fade-in-up`}
+        style={{
+          background: 'rgba(253,242,248,0.88)',
+          backdropFilter: 'blur(32px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(32px) saturate(200%)',
+          border: '1px solid rgba(249,168,212,0.35)',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.2), 0 8px 24px rgba(236,72,153,0.1), inset 0 1px 0 rgba(255,255,255,0.8)',
+        }}
+      >
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-6 py-4">
-          <h2 id="modal-title" className="text-lg font-display font-semibold text-gray-900">
+        <div
+          className="sticky top-0 z-10 flex items-center justify-between px-6 py-4"
+          style={{
+            background: 'rgba(255,255,255,0.5)',
+            backdropFilter: 'blur(12px)',
+            borderBottom: '1px solid rgba(249,168,212,0.2)',
+          }}
+        >
+          <h2 id="modal-title" className="font-display text-xl font-bold text-charcoal-900">
             {title}
           </h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-xl p-1.5 text-charcoal-400 transition-all hover:text-charcoal-700"
+            style={{
+              background: 'rgba(255,255,255,0.6)',
+              border: '1px solid rgba(249,168,212,0.25)',
+            }}
             aria-label="Close modal"
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>

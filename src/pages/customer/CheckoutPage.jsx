@@ -1,5 +1,4 @@
 // src/pages/customer/CheckoutPage.jsx
-// Collects delivery details and submits the order via useOrders.placeOrder.
 
 import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
@@ -10,11 +9,11 @@ import { formatCurrency } from '@/utils/formatCurrency'
 import { Spinner } from '@/components/ui/Spinner'
 
 const EMPTY_FORM = {
-  customer_name:      '',
-  customer_email:     '',
-  customer_phone:     '',
-  delivery_address:   '',
-  notes:              '',
+  customer_name:    '',
+  customer_email:   '',
+  customer_phone:   '',
+  delivery_address: '',
+  notes:            '',
 }
 
 export default function CheckoutPage() {
@@ -28,7 +27,6 @@ export default function CheckoutPage() {
   const [error,    setError]    = useState(null)
   const [fieldErr, setFieldErr] = useState({})
 
-  // Nothing in cart → redirect to catalog
   if (items.length === 0) return <Navigate to="/catalog" replace />
 
   function handleChange(e) {
@@ -53,8 +51,8 @@ export default function CheckoutPage() {
     setLoading(true)
     setError(null)
 
-      try {
-        const orderPayload = {
+    try {
+      const orderPayload = {
         customer_name:    form.customer_name.trim(),
         customer_email:   form.customer_email.trim(),
         customer_phone:   form.customer_phone.trim() || null,
@@ -63,23 +61,15 @@ export default function CheckoutPage() {
         total_amount:     totalPrice,
         status:           'Pending',
       }
-
-      if (user?.id) {
-        orderPayload.customer_id = user.id
-      }
+      if (user?.id) orderPayload.customer_id = user.id
 
       const order = await placeOrder(orderPayload, items)
       clearCart()
       try {
-        // Persist last order id and token so guests can revisit the tracking page.
         localStorage.setItem('lastOrderId', order.id)
-        if (order.tracking_token) {
-          localStorage.setItem('lastOrderToken', order.tracking_token)
-        }
+        if (order.tracking_token) localStorage.setItem('lastOrderToken', order.tracking_token)
         window.dispatchEvent(new Event('lastOrderIdChanged'))
-      } catch (e) {
-        // ignore storage failures
-      }
+      } catch {}
       navigate(`/orders/${order.id}?token=${order.tracking_token}`, { replace: true, state: { order } })
     } catch (err) {
       setError(err.message)
@@ -90,118 +80,151 @@ export default function CheckoutPage() {
 
   const DELIVERY_FEE = 80
 
+  const glassCard = {
+    background: 'rgba(255,255,255,0.65)',
+    backdropFilter: 'blur(20px) saturate(180%)',
+    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+    border: '1px solid rgba(255,255,255,0.5)',
+    boxShadow: '0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)',
+  }
+
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 py-16 page-enter">
-      <Link to="/catalog" className="inline-flex items-center gap-1 text-sm tracking-wider uppercase font-semibold text-charcoal-500 hover:text-bloom-600 mb-8 transition-colors">
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-        </svg>
+      <Link
+        to="/catalog"
+        className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-charcoal-500 hover:text-bloom-600 mb-10 transition-colors group"
+      >
+        <span className="flex h-7 w-7 items-center justify-center rounded-full transition-all group-hover:-translate-x-1" style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(249,168,212,0.3)' }}>
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </span>
         Back to Collection
       </Link>
 
-      <h1 className="font-display text-4xl font-bold text-charcoal-900 mb-10 tracking-tight">Secure Checkout</h1>
+      <div className="mb-10">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-bloom-500 mb-2">Almost there</p>
+        <h1 className="font-display text-4xl font-bold text-charcoal-900">Secure Checkout</h1>
+      </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
         {/* Delivery form */}
         <form onSubmit={handleSubmit} noValidate className="lg:col-span-3 space-y-5">
-          <div className="card px-5 py-5">
-            <h2 className="font-semibold text-gray-900 mb-4">Delivery details</h2>
+          <div className="rounded-3xl px-6 py-6" style={glassCard}>
+            <h2 className="font-semibold text-charcoal-900 mb-5 flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #ec4899, #be185d)' }}>1</span>
+              Delivery details
+            </h2>
 
             {error && (
-              <div role="alert" className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div role="alert" className="mb-5 rounded-2xl px-4 py-3 text-sm text-red-700" style={{ background: 'rgba(254,226,226,0.8)', border: '1px solid rgba(252,165,165,0.4)' }}>
                 {error}
               </div>
             )}
 
-            {[
-              { id: 'customer_name',    label: 'Full name',        type: 'text',  required: true,  placeholder: 'Maria Santos' },
-              { id: 'customer_email',   label: 'Messenger name',   type: 'text',  required: true,  placeholder: 'maria.santos' },
-              { id: 'customer_phone',   label: 'Phone (optional)',  type: 'tel',   required: false, placeholder: '+63 9XX XXX XXXX' },
-            ].map(field => (
-              <div key={field.id} className="mb-4">
-                <label htmlFor={`co-${field.id}`} className="label">
-                  {field.label}
-                  {field.required && <span aria-hidden="true" className="text-red-500 ml-0.5">*</span>}
+            <div className="space-y-4">
+              {[
+                { id: 'customer_name',  label: 'Full name',       type: 'text', required: true,  placeholder: 'Maria Santos' },
+                { id: 'customer_email', label: 'Messenger name',  type: 'text', required: true,  placeholder: 'maria.santos' },
+                { id: 'customer_phone', label: 'Phone (optional)', type: 'tel',  required: false, placeholder: '+63 9XX XXX XXXX' },
+              ].map(field => (
+                <div key={field.id}>
+                  <label htmlFor={`co-${field.id}`} className="label">
+                    {field.label}
+                    {field.required && <span aria-hidden="true" className="text-bloom-500 ml-0.5">*</span>}
+                  </label>
+                  <input
+                    id={`co-${field.id}`}
+                    name={field.id}
+                    type={field.type}
+                    value={form[field.id]}
+                    onChange={handleChange}
+                    placeholder={field.placeholder}
+                    required={field.required}
+                    className={`input-field ${fieldErr[field.id] ? 'border-red-300 ring-red-100' : ''}`}
+                  />
+                  {fieldErr[field.id] && (
+                    <p role="alert" className="mt-1 text-xs text-red-500">{fieldErr[field.id]}</p>
+                  )}
+                </div>
+              ))}
+
+              <div>
+                <label htmlFor="co-address" className="label">
+                  Delivery address <span aria-hidden="true" className="text-bloom-500">*</span>
                 </label>
-                <input
-                  id={`co-${field.id}`}
-                  name={field.id}
-                  type={field.type}
-                  value={form[field.id]}
-                  onChange={handleChange}
-                  placeholder={field.placeholder}
-                  required={field.required}
-                  className={`input-field ${fieldErr[field.id] ? 'border-red-400' : ''}`}
-                  aria-describedby={fieldErr[field.id] ? `co-${field.id}-err` : undefined}
+                <textarea
+                  id="co-address" name="delivery_address" rows={3}
+                  value={form.delivery_address} onChange={handleChange}
+                  placeholder="House/unit no., street, barangay, city"
+                  className={`input-field resize-none ${fieldErr.delivery_address ? 'border-red-300' : ''}`}
                 />
-                {fieldErr[field.id] && (
-                  <p id={`co-${field.id}-err`} role="alert" className="mt-1 text-xs text-red-600">
-                    {fieldErr[field.id]}
-                  </p>
+                {fieldErr.delivery_address && (
+                  <p role="alert" className="mt-1 text-xs text-red-500">{fieldErr.delivery_address}</p>
                 )}
               </div>
-            ))}
 
-            <div className="mb-4">
-              <label htmlFor="co-address" className="label">
-                Delivery address <span aria-hidden="true" className="text-red-500">*</span>
-              </label>
-              <textarea
-                id="co-address" name="delivery_address" rows={3}
-                value={form.delivery_address} onChange={handleChange}
-                placeholder="House/unit no., street, barangay, city"
-                className={`input-field resize-none ${fieldErr.delivery_address ? 'border-red-400' : ''}`}
-                aria-describedby={fieldErr.delivery_address ? 'co-address-err' : undefined}
-              />
-              {fieldErr.delivery_address && (
-                <p id="co-address-err" role="alert" className="mt-1 text-xs text-red-600">
-                  {fieldErr.delivery_address}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="co-notes" className="label">Order notes (optional)</label>
-              <textarea
-                id="co-notes" name="notes" rows={2}
-                value={form.notes} onChange={handleChange}
-                placeholder="Any special instructions, e.g. ribbon color preference, card message…"
-                className="input-field resize-none"
-              />
+              <div>
+                <label htmlFor="co-notes" className="label">Order notes (optional)</label>
+                <textarea
+                  id="co-notes" name="notes" rows={2}
+                  value={form.notes} onChange={handleChange}
+                  placeholder="Any special instructions, e.g. ribbon color preference, card message…"
+                  className="input-field resize-none"
+                />
+              </div>
             </div>
           </div>
 
-          <button type="submit" className="btn-primary w-full justify-center py-3 text-base" disabled={loading}>
-            {loading ? <><Spinner size="sm" /> Placing order…</> : `Place order · ${formatCurrency(totalPrice + DELIVERY_FEE)}`}
+          <button
+            type="submit"
+            className="btn-primary w-full justify-center py-4 text-sm"
+            disabled={loading}
+            style={{ boxShadow: '0 8px 30px rgba(236,72,153,0.35)' }}
+          >
+            {loading
+              ? <><Spinner size="sm" /> Placing order…</>
+              : `Place order · ${formatCurrency(totalPrice + DELIVERY_FEE)}`
+            }
           </button>
         </form>
 
         {/* Order summary */}
         <aside className="lg:col-span-2" aria-label="Order summary">
-          <div className="card px-5 py-5 sticky top-20">
-            <h2 className="font-semibold text-gray-900 mb-4">Order summary</h2>
-            <ul className="divide-y divide-gray-100 space-y-0 mb-4">
+          <div className="rounded-3xl px-6 py-6 sticky top-24" style={glassCard}>
+            <h2 className="font-semibold text-charcoal-900 mb-5 flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #ec4899, #be185d)' }}>2</span>
+              Order summary
+            </h2>
+            <ul className="space-y-0 mb-4" style={{ borderTop: '1px solid rgba(249,168,212,0.15)' }}>
               {items.map(item => (
-                <li key={item.id} className="flex justify-between py-2.5 text-sm">
-                  <span className="text-gray-700">
-                    <span className="font-medium">{item.quantity}×</span> {item.name}
+                <li
+                  key={item.id}
+                  className="flex justify-between py-3 text-sm"
+                  style={{ borderBottom: '1px solid rgba(249,168,212,0.1)' }}
+                >
+                  <span className="text-charcoal-700">
+                    <span className="font-semibold text-charcoal-900">{item.quantity}×</span> {item.name}
                   </span>
-                  <span className="text-gray-900 tabular-nums">{formatCurrency(item.price * item.quantity)}</span>
+                  <span className="text-charcoal-800 font-medium tabular-nums">{formatCurrency(item.price * item.quantity)}</span>
                 </li>
               ))}
             </ul>
-            <div className="border-t border-gray-100 pt-3 space-y-2 text-sm">
-              <div className="flex justify-between text-gray-500">
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between text-charcoal-500">
                 <span>Subtotal</span>
                 <span>{formatCurrency(totalPrice)}</span>
               </div>
-              <div className="flex justify-between text-gray-500">
+              <div className="flex justify-between text-charcoal-500">
                 <span>Delivery</span>
                 <span>{formatCurrency(DELIVERY_FEE)}</span>
               </div>
-              <div className="flex justify-between font-semibold text-gray-900 text-base pt-1 border-t border-gray-100">
+              <div
+                className="flex justify-between font-bold text-charcoal-900 text-base pt-3 mt-2"
+                style={{ borderTop: '1px solid rgba(249,168,212,0.2)' }}
+              >
                 <span>Total</span>
-                <span>{formatCurrency(totalPrice + DELIVERY_FEE)}</span>
+                <span className="text-bloom-600">{formatCurrency(totalPrice + DELIVERY_FEE)}</span>
               </div>
             </div>
           </div>

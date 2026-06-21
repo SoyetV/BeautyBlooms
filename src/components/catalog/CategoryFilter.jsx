@@ -1,5 +1,4 @@
 // src/components/catalog/CategoryFilter.jsx
-// Horizontal scrollable pill-filter for product categories.
 
 export function CategoryFilter({ categories, active, onChange }) {
   const all = ['All', ...categories]
@@ -10,20 +9,49 @@ export function CategoryFilter({ categories, active, onChange }) {
       role="group"
       aria-label="Filter by category"
     >
-      {all.map(cat => (
-        <button
-          key={cat}
-          onClick={() => onChange(cat)}
-          aria-pressed={active === cat}
-          className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-all
-            ${active === cat
-              ? 'bg-bloom-500 text-white shadow-sm'
-              : 'bg-gray-100 text-gray-600 hover:bg-bloom-50 hover:text-bloom-600'
-            }`}
-        >
-          {cat}
-        </button>
-      ))}
+      {all.map(cat => {
+        const isActive = active === cat
+        return (
+          <button
+            key={cat}
+            onClick={() => onChange(cat)}
+            aria-pressed={isActive}
+            className="shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all duration-200"
+            style={
+              isActive ? {
+                background: 'linear-gradient(135deg, #ec4899, #be185d)',
+                color: 'white',
+                border: '1px solid transparent',
+                boxShadow: '0 4px 12px rgba(236,72,153,0.35)',
+                transform: 'translateY(-1px)',
+              } : {
+                background: 'rgba(255,255,255,0.65)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid rgba(249,168,212,0.25)',
+                color: '#6b616e',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+              }
+            }
+            onMouseEnter={e => {
+              if (!isActive) {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.85)'
+                e.currentTarget.style.borderColor = 'rgba(236,72,153,0.3)'
+                e.currentTarget.style.color = '#be185d'
+              }
+            }}
+            onMouseLeave={e => {
+              if (!isActive) {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.65)'
+                e.currentTarget.style.borderColor = 'rgba(249,168,212,0.25)'
+                e.currentTarget.style.color = '#6b616e'
+              }
+            }}
+          >
+            {cat}
+          </button>
+        )
+      })}
     </div>
   )
 }

@@ -10,29 +10,12 @@ export function Navbar({ onCartOpen }) {
   const { totalItems } = useCart()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
-  const [lastOrderId, setLastOrderId] = useState(null)
-  const [lastOrderToken, setLastOrderToken] = useState(null)
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    function syncOrderLink() {
-      try {
-        setLastOrderId(localStorage.getItem('lastOrderId'))
-        setLastOrderToken(localStorage.getItem('lastOrderToken'))
-      } catch (e) {
-        setLastOrderId(null)
-        setLastOrderToken(null)
-      }
-    }
-
-    syncOrderLink()
-
-    window.addEventListener('storage', syncOrderLink)
-    window.addEventListener('lastOrderIdChanged', syncOrderLink)
-
-    return () => {
-      window.removeEventListener('storage', syncOrderLink)
-      window.removeEventListener('lastOrderIdChanged', syncOrderLink)
-    }
+    const onScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   async function handleSignOut() {
@@ -41,23 +24,62 @@ export function Navbar({ onCartOpen }) {
   }
 
   const navLink = ({ isActive }) =>
-    `text-sm font-medium uppercase tracking-widest transition-colors ${isActive ? 'text-bloom-600' : 'text-charcoal-600 hover:text-bloom-600'}`
+    `text-xs font-semibold uppercase tracking-[0.15em] transition-all duration-200 ${
+      isActive
+        ? 'text-bloom-500'
+        : 'text-charcoal-600 hover:text-bloom-500'
+    }`
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gold-200/40 bg-petal-50/80 backdrop-blur-xl">
+    <header
+      className={`sticky top-0 z-40 transition-all duration-500 ${
+        scrolled
+          ? 'shadow-lg shadow-bloom-900/5'
+          : ''
+      }`}
+      style={{
+        background: scrolled
+          ? 'rgba(253, 242, 248, 0.85)'
+          : 'rgba(253, 242, 248, 0.65)',
+        backdropFilter: 'blur(24px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+        borderBottom: '1px solid rgba(249, 168, 212, 0.2)',
+      }}
+    >
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
 
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 font-display text-2xl font-bold text-charcoal-900 tracking-tight">
-          <span className="text-2xl" aria-hidden="true">🌸</span>
-          Beauty Blooms
+        <Link
+          to="/"
+          className="flex items-center gap-2.5 font-display text-2xl font-bold text-charcoal-900 tracking-tight group"
+        >
+          <span
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-lg transition-transform duration-300 group-hover:scale-110"
+            style={{
+              background: 'linear-gradient(135deg, rgba(236,72,153,0.15) 0%, rgba(192,141,75,0.15) 100%)',
+              border: '1px solid rgba(236,72,153,0.2)',
+            }}
+            aria-hidden="true"
+          >
+            🌸
+          </span>
+          <span className="bg-clip-text" style={{
+            backgroundImage: 'linear-gradient(135deg, #2d1b2e 0%, #831843 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}>
+            Beauty Blooms
+          </span>
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden sm:flex items-center gap-6" aria-label="Main navigation">
+        <nav className="hidden sm:flex items-center gap-8" aria-label="Main navigation">
           <NavLink to="/catalog" className={navLink}>Shop</NavLink>
           {isAdmin && (
-            <NavLink to="/admin" className={navLink + ' !text-bloom-600 font-semibold'}>
+            <NavLink
+              to="/admin"
+              className={() => 'text-xs font-semibold uppercase tracking-[0.15em] text-bloom-600 hover:text-bloom-700 transition-colors'}
+            >
               Admin
             </NavLink>
           )}
@@ -68,15 +90,27 @@ export function Navbar({ onCartOpen }) {
           {/* Cart button */}
           <button
             onClick={onCartOpen}
-            className="relative rounded-full p-2 text-charcoal-600 transition-colors hover:bg-gold-100/50 hover:text-bloom-600"
+            className="relative rounded-xl p-2.5 transition-all duration-200 hover:scale-105"
+            style={{
+              background: 'rgba(255,255,255,0.6)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(249,168,212,0.25)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+            }}
             aria-label={`Open cart, ${totalItems} items`}
           >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <svg className="h-5 w-5 text-charcoal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
               <path strokeLinecap="round" strokeLinejoin="round"
                 d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
             </svg>
             {totalItems > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-pink-500 text-[10px] font-bold text-white">
+              <span
+                className="absolute -right-1 -top-1 flex h-4.5 w-4.5 min-w-[1.1rem] items-center justify-center rounded-full text-[10px] font-bold text-white px-1"
+                style={{
+                  background: 'linear-gradient(135deg, #ec4899, #be185d)',
+                  boxShadow: '0 2px 8px rgba(236,72,153,0.4)',
+                }}
+              >
                 {totalItems > 9 ? '9+' : totalItems}
               </span>
             )}
@@ -85,11 +119,11 @@ export function Navbar({ onCartOpen }) {
           {/* Auth button (desktop) */}
           <div className="hidden sm:block">
             {user ? (
-              <button onClick={handleSignOut} className="btn-secondary py-2 text-xs uppercase tracking-wider px-5 rounded-full border-gold-200 hover:bg-gold-50 transition-colors">
+              <button onClick={handleSignOut} className="btn-secondary py-2 text-xs px-5">
                 Sign out
               </button>
             ) : (
-              <Link to="/admin/login" className="btn-primary py-2 text-xs uppercase tracking-wider px-5 rounded-full shadow-md shadow-bloom-500/20">
+              <Link to="/admin/login" className="btn-primary py-2 text-xs px-5">
                 Sign in
               </Link>
             )}
@@ -97,7 +131,12 @@ export function Navbar({ onCartOpen }) {
 
           {/* Mobile menu toggle */}
           <button
-            className="sm:hidden rounded-lg p-2 text-gray-600 hover:bg-gray-100"
+            className="sm:hidden rounded-xl p-2.5 text-charcoal-600 transition-all"
+            style={{
+              background: 'rgba(255,255,255,0.6)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(249,168,212,0.25)',
+            }}
             onClick={() => setMenuOpen(v => !v)}
             aria-label="Toggle navigation menu"
             aria-expanded={menuOpen}
@@ -114,14 +153,19 @@ export function Navbar({ onCartOpen }) {
       {/* Mobile dropdown */}
       {menuOpen && (
         <nav
-          className="sm:hidden border-t border-gray-100 bg-white px-4 py-3 flex flex-col gap-3"
+          className="sm:hidden px-4 py-4 flex flex-col gap-4"
+          style={{
+            background: 'rgba(253, 242, 248, 0.9)',
+            backdropFilter: 'blur(20px)',
+            borderTop: '1px solid rgba(249,168,212,0.2)',
+          }}
           aria-label="Mobile navigation"
         >
           <NavLink to="/catalog" className={navLink} onClick={() => setMenuOpen(false)}>Shop</NavLink>
           {isAdmin && <NavLink to="/admin" className={navLink} onClick={() => setMenuOpen(false)}>Admin</NavLink>}
           {user
-            ? <button onClick={handleSignOut} className="text-left text-sm text-gray-600">Sign out</button>
-            : <Link to="/admin/login" className="text-sm font-medium text-bloom-600" onClick={() => setMenuOpen(false)}>Sign in</Link>
+            ? <button onClick={handleSignOut} className="text-left text-xs font-semibold uppercase tracking-widest text-charcoal-500">Sign out</button>
+            : <Link to="/admin/login" className="text-xs font-semibold uppercase tracking-widest text-bloom-600" onClick={() => setMenuOpen(false)}>Sign in</Link>
           }
         </nav>
       )}
