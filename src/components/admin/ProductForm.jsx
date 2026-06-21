@@ -7,6 +7,7 @@ import { Modal } from '@/components/ui/Modal'
 import { Spinner } from '@/components/ui/Spinner'
 
 const CATEGORIES = ['Roses', 'Sunflowers', 'Lilies', 'Orchids', 'Tulips', 'Mixed', 'Dried Flowers', 'Uncategorized']
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
 const EMPTY_FORM = {
   name:         '',
@@ -57,8 +58,8 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
   function handleImageChange(e) {
     const file = e.target.files[0]
     if (!file) return
-    if (!file.type.startsWith('image/')) {
-      setErrors(prev => ({ ...prev, image: 'Please select a valid image file.' }))
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setErrors(prev => ({ ...prev, image: 'Please select a JPG, PNG, or WebP image.' }))
       return
     }
     if (file.size > 5 * 1024 * 1024) {
@@ -138,10 +139,10 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                     d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M13.5 3.75h6.75M16.875 3.75v6.75M6 20.25a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                 </svg>
-                <p className="text-center text-sm text-gray-400">Click to upload a photo <span className="text-gray-300">(PNG, JPG - max 5 MB)</span></p>
+                <p className="text-center text-sm text-gray-400">Click to upload a photo <span className="text-gray-300">(JPG, PNG, WebP - max 5 MB)</span></p>
               </>
             )}
-            <input ref={fileRef} type="file" accept="image/*" className="sr-only" onChange={handleImageChange} tabIndex={-1} />
+            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={handleImageChange} tabIndex={-1} />
           </div>
           {preview && (
             <button type="button" onClick={() => { setPreview(null); setImageFile(null) }}

@@ -88,6 +88,20 @@ create table if not exists public.orders (
   updated_at        timestamptz not null default now()
 );
 
+alter table public.orders
+  drop constraint if exists orders_customer_name_length,
+  drop constraint if exists orders_customer_email_length,
+  drop constraint if exists orders_customer_phone_length,
+  drop constraint if exists orders_delivery_address_length,
+  drop constraint if exists orders_notes_length;
+
+alter table public.orders
+  add constraint orders_customer_name_length check (char_length(customer_name) between 1 and 200),
+  add constraint orders_customer_email_length check (char_length(customer_email) between 1 and 200),
+  add constraint orders_customer_phone_length check (customer_phone is null or char_length(customer_phone) <= 40),
+  add constraint orders_delivery_address_length check (char_length(delivery_address) between 1 and 500),
+  add constraint orders_notes_length check (notes is null or char_length(notes) <= 1000);
+
 drop trigger if exists orders_updated_at on public.orders;
 create trigger orders_updated_at
   before update on public.orders
@@ -109,6 +123,16 @@ create table if not exists public.order_items (
   quantity      integer not null check (quantity > 0),
   subtotal      numeric(10, 2) generated always as (unit_price * quantity) stored
 );
+
+alter table public.order_items
+  drop constraint if exists order_items_unit_price_positive,
+  drop constraint if exists order_items_product_name_length,
+  drop constraint if exists order_items_quantity_limit;
+
+alter table public.order_items
+  add constraint order_items_unit_price_positive check (unit_price > 0),
+  add constraint order_items_product_name_length check (char_length(product_name) between 1 and 200),
+  add constraint order_items_quantity_limit check (quantity between 1 and 99);
 
 -- ── 5. INDEXES ────────────────────────────────────────────
 create index if not exists idx_products_category   on public.products(category);
@@ -185,6 +209,7 @@ alter table public.orders enable row level security;
 
 drop policy if exists "Customers can read own orders" on public.orders;
 drop policy if exists "Anyone can place an order" on public.orders;
+drop policy if exists "No direct public order inserts" on public.orders;
 drop policy if exists "Admins can read all orders" on public.orders;
 drop policy if exists "Admins can update order status" on public.orders;
 
@@ -192,11 +217,6 @@ drop policy if exists "Admins can update order status" on public.orders;
 create policy "Customers can read own orders"
   on public.orders for select
   using (auth.uid() = customer_id);
-
--- Anyone (incl. guests) can INSERT an order
-create policy "Anyone can place an order"
-  on public.orders for insert
-  with check (true);
 
 -- Admins see and update all orders
 create policy "Admins can read all orders"
@@ -206,6 +226,137 @@ create policy "Admins can read all orders"
 create policy "Admins can update order status"
   on public.orders for update
   using (public.is_admin());
+
+create or replace function public.place_order(
+  order_data jsonb,
+  items jsonb
+)
+returns table (
+  id uuid,
+  tracking_token uuid,
+  total_amount numeric(10, 2)
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_order_id uuid := uuid_generate_v4();
+  v_tracking_token uuid := uuid_generate_v4();
+  v_customer_id uuid := auth.uid();
+  v_customer_name text := btrim(coalesce(order_data->>'customer_name', ''));
+  v_customer_email text := btrim(coalesce(order_data->>'customer_email', ''));
+  v_customer_phone text := nullif(btrim(coalesce(order_data->>'customer_phone', '')), '');
+  v_delivery_address text := btrim(coalesce(order_data->>'delivery_address', ''));
+  v_notes text := nullif(btrim(coalesce(order_data->>'notes', '')), '');
+  v_total numeric(10, 2) := 0;
+  v_item jsonb;
+  v_product record;
+  v_product_id uuid;
+  v_quantity integer;
+begin
+  if jsonb_typeof(items) <> 'array' or jsonb_array_length(items) = 0 then
+    raise exception 'Cart is empty.';
+  end if;
+
+  if char_length(v_customer_name) = 0 or char_length(v_customer_name) > 200 then
+    raise exception 'Customer name is required and must be 200 characters or fewer.';
+  end if;
+  if char_length(v_customer_email) = 0 or char_length(v_customer_email) > 200 then
+    raise exception 'Messenger name is required and must be 200 characters or fewer.';
+  end if;
+  if v_customer_phone is not null and char_length(v_customer_phone) > 40 then
+    raise exception 'Phone number must be 40 characters or fewer.';
+  end if;
+  if char_length(v_delivery_address) = 0 or char_length(v_delivery_address) > 500 then
+    raise exception 'Delivery address is required and must be 500 characters or fewer.';
+  end if;
+  if v_notes is not null and char_length(v_notes) > 1000 then
+    raise exception 'Order notes must be 1000 characters or fewer.';
+  end if;
+
+  insert into public.orders (
+    id,
+    customer_id,
+    tracking_token,
+    customer_name,
+    customer_email,
+    customer_phone,
+    delivery_address,
+    status,
+    total_amount,
+    notes
+  )
+  values (
+    v_order_id,
+    v_customer_id,
+    v_tracking_token,
+    v_customer_name,
+    v_customer_email,
+    v_customer_phone,
+    v_delivery_address,
+    'Pending',
+    0,
+    v_notes
+  );
+
+  for v_item in select * from jsonb_array_elements(items) loop
+    v_product_id := (v_item->>'product_id')::uuid;
+    v_quantity := (v_item->>'quantity')::integer;
+
+    if v_quantity is null or v_quantity < 1 or v_quantity > 99 then
+      raise exception 'Invalid quantity.';
+    end if;
+
+    select p.id, p.name, p.price, p.stock_count, p.is_available
+      into v_product
+      from public.products p
+      where p.id = v_product_id
+      for update;
+
+    if not found or not v_product.is_available then
+      raise exception 'One or more products are unavailable.';
+    end if;
+
+    if v_product.price <= 0 then
+      raise exception 'One or more products have invalid pricing.';
+    end if;
+
+    if v_product.stock_count < v_quantity then
+      raise exception 'Insufficient stock for %.', v_product.name;
+    end if;
+
+    insert into public.order_items (
+      order_id,
+      product_id,
+      product_name,
+      unit_price,
+      quantity
+    )
+    values (
+      v_order_id,
+      v_product.id,
+      v_product.name,
+      v_product.price,
+      v_quantity
+    );
+
+    update public.products
+      set stock_count = stock_count - v_quantity
+      where id = v_product.id;
+
+    v_total := v_total + (v_product.price * v_quantity);
+  end loop;
+
+  update public.orders
+    set total_amount = v_total
+    where public.orders.id = v_order_id;
+
+  return query select v_order_id, v_tracking_token, v_total;
+end;
+$$;
+
+grant execute on function public.place_order(jsonb, jsonb) to anon, authenticated;
 
 create or replace function public.get_order_status(
   p_order_id uuid,
@@ -260,6 +411,7 @@ alter table public.order_items enable row level security;
 
 drop policy if exists "Customers can read own order items" on public.order_items;
 drop policy if exists "Anyone can insert order items" on public.order_items;
+drop policy if exists "No direct public order item inserts" on public.order_items;
 drop policy if exists "Admins can read all order items" on public.order_items;
 
 -- Customers can view items belonging to their orders
@@ -271,10 +423,6 @@ create policy "Customers can read own order items"
       where o.id = order_id and o.customer_id = auth.uid()
     )
   );
-
-create policy "Anyone can insert order items"
-  on public.order_items for insert
-  with check (true);
 
 create policy "Admins can read all order items"
   on public.order_items for select

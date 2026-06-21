@@ -16,6 +16,14 @@ const EMPTY_FORM = {
   notes:            '',
 }
 
+const FIELD_LIMITS = {
+  customer_name: 200,
+  customer_email: 200,
+  customer_phone: 40,
+  delivery_address: 500,
+  notes: 1000,
+}
+
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart()
   const { user } = useAuth()
@@ -31,15 +39,31 @@ export default function CheckoutPage() {
 
   function handleChange(e) {
     const { name, value } = e.target
-    setForm(prev => ({ ...prev, [name]: value }))
+    const limit = FIELD_LIMITS[name]
+    setForm(prev => ({ ...prev, [name]: limit ? value.slice(0, limit) : value }))
     if (fieldErr[name]) setFieldErr(prev => ({ ...prev, [name]: null }))
   }
 
   function validate() {
     const errs = {}
-    if (!form.customer_name.trim())    errs.customer_name    = 'Name is required.'
-    if (!form.customer_email.trim())   errs.customer_email   = 'Messenger name is required.'
-    if (!form.delivery_address.trim()) errs.delivery_address = 'Delivery address is required.'
+    const cleaned = {
+      customer_name: form.customer_name.trim(),
+      customer_email: form.customer_email.trim(),
+      customer_phone: form.customer_phone.trim(),
+      delivery_address: form.delivery_address.trim(),
+      notes: form.notes.trim(),
+    }
+
+    if (!cleaned.customer_name) errs.customer_name = 'Name is required.'
+    if (!cleaned.customer_email) errs.customer_email = 'Messenger name is required.'
+    if (!cleaned.delivery_address) errs.delivery_address = 'Delivery address is required.'
+
+    Object.entries(FIELD_LIMITS).forEach(([field, limit]) => {
+      if (cleaned[field] && cleaned[field].length > limit) {
+        errs[field] = `Must be ${limit} characters or fewer.`
+      }
+    })
+
     return errs
   }
 
@@ -58,8 +82,6 @@ export default function CheckoutPage() {
         customer_phone:   form.customer_phone.trim() || null,
         delivery_address: form.delivery_address.trim(),
         notes:            form.notes.trim() || null,
-        total_amount:     totalPrice,
-        status:           'Pending',
       }
       if (user?.id) orderPayload.customer_id = user.id
 
@@ -69,7 +91,9 @@ export default function CheckoutPage() {
         localStorage.setItem('lastOrderId', order.id)
         if (order.tracking_token) localStorage.setItem('lastOrderToken', order.tracking_token)
         window.dispatchEvent(new Event('lastOrderIdChanged'))
-      } catch {}
+      } catch {
+        // Local storage is best-effort only; checkout has already succeeded.
+      }
       navigate(`/orders/${order.id}?token=${order.tracking_token}`, { replace: true, state: { order } })
     } catch (err) {
       setError(err.message)
@@ -140,6 +164,7 @@ export default function CheckoutPage() {
                     value={form[field.id]}
                     onChange={handleChange}
                     placeholder={field.placeholder}
+                    maxLength={FIELD_LIMITS[field.id]}
                     required={field.required}
                     className={`input-field ${fieldErr[field.id] ? 'border-red-300 ring-red-100' : ''}`}
                   />
@@ -157,6 +182,7 @@ export default function CheckoutPage() {
                   id="co-address" name="delivery_address" rows={3}
                   value={form.delivery_address} onChange={handleChange}
                   placeholder="House/unit no., street, barangay, city"
+                  maxLength={FIELD_LIMITS.delivery_address}
                   className={`input-field resize-none ${fieldErr.delivery_address ? 'border-red-300' : ''}`}
                 />
                 {fieldErr.delivery_address && (
@@ -170,6 +196,7 @@ export default function CheckoutPage() {
                   id="co-notes" name="notes" rows={2}
                   value={form.notes} onChange={handleChange}
                   placeholder="Any special instructions, e.g. ribbon color preference, card message…"
+                  maxLength={FIELD_LIMITS.notes}
                   className="input-field resize-none"
                 />
               </div>

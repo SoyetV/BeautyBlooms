@@ -5,6 +5,28 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 
+const PRODUCT_COLUMNS = 'id,name,description,price,stock_count,category,image_url,is_available,created_at,updated_at'
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024
+const ALLOWED_IMAGE_TYPES = new Map([
+  ['image/jpeg', 'jpg'],
+  ['image/png', 'png'],
+  ['image/webp', 'webp'],
+])
+
+function assertValidImageFile(imageFile) {
+  if (!imageFile) return null
+
+  if (!ALLOWED_IMAGE_TYPES.has(imageFile.type)) {
+    throw new Error('Product images must be JPG, PNG, or WebP files.')
+  }
+
+  if (imageFile.size > MAX_IMAGE_BYTES) {
+    throw new Error('Product images must be smaller than 5 MB.')
+  }
+
+  return ALLOWED_IMAGE_TYPES.get(imageFile.type)
+}
+
 export function useProducts({ adminMode = false } = {}) {
   const [products, setProducts] = useState([])
   const [loading,  setLoading]  = useState(true)
@@ -18,7 +40,7 @@ export function useProducts({ adminMode = false } = {}) {
     try {
       let query = supabase
         .from('products')
-        .select('*')
+        .select(PRODUCT_COLUMNS)
         .order('created_at', { ascending: false })
 
       // Public catalog shows only available products unless admin
@@ -72,11 +94,15 @@ export function useProducts({ adminMode = false } = {}) {
     let image_url = null
 
     if (imageFile) {
-      const ext      = imageFile.name.split('.').pop()
+      const ext      = assertValidImageFile(imageFile)
       const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
       const { error: uploadErr } = await supabase.storage
         .from('product-images')
-        .upload(filePath, imageFile, { upsert: false })
+        .upload(filePath, imageFile, {
+          upsert: false,
+          contentType: imageFile.type,
+          cacheControl: '31536000',
+        })
       if (uploadErr) throw uploadErr
 
       const { data: urlData } = supabase.storage
@@ -101,11 +127,15 @@ export function useProducts({ adminMode = false } = {}) {
     let image_url = fields.image_url ?? null
 
     if (imageFile) {
-      const ext      = imageFile.name.split('.').pop()
+      const ext      = assertValidImageFile(imageFile)
       const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
       const { error: uploadErr } = await supabase.storage
         .from('product-images')
-        .upload(filePath, imageFile, { upsert: false })
+        .upload(filePath, imageFile, {
+          upsert: false,
+          contentType: imageFile.type,
+          cacheControl: '31536000',
+        })
       if (uploadErr) throw uploadErr
 
       const { data: urlData } = supabase.storage

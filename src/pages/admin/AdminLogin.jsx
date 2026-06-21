@@ -6,12 +6,21 @@ import { useAuth } from '@/context/AuthContext'
 import { Spinner } from '@/components/ui/Spinner'
 
 export default function AdminLogin() {
-  const { signIn, isAdmin, session } = useAuth()
+  const { signIn, isAdmin, session, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [loading,  setLoading]  = useState(false)
   const [error,    setError]    = useState(null)
+  const [failedAttempts, setFailedAttempts] = useState(0)
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-bloom-950">
+        <Spinner size="lg" />
+      </div>
+    )
+  }
 
   if (session && isAdmin) return <Navigate to="/admin" replace />
 
@@ -21,8 +30,10 @@ export default function AdminLogin() {
     setError(null)
     try {
       await signIn(email.trim(), password)
+      setFailedAttempts(0)
       navigate('/admin', { replace: true })
-    } catch (err) {
+    } catch {
+      setFailedAttempts(prev => prev + 1)
       setError('Invalid email or password. Please try again.')
     } finally {
       setLoading(false)
@@ -144,12 +155,17 @@ export default function AdminLogin() {
                 background: 'linear-gradient(135deg, #ec4899, #be185d)',
                 boxShadow: '0 4px 20px rgba(236,72,153,0.4)',
               }}
-              disabled={loading}
+              disabled={loading || failedAttempts >= 5}
               onMouseEnter={e => { if (!loading) e.currentTarget.style.boxShadow = '0 8px 30px rgba(236,72,153,0.5)' }}
               onMouseLeave={e => e.currentTarget.style.boxShadow = '0 4px 20px rgba(236,72,153,0.4)'}
             >
-              {loading ? <><Spinner size="sm" /> Signing in…</> : 'Sign in'}
+              {loading ? <><Spinner size="sm" /> Signing in…</> : failedAttempts >= 5 ? 'Refresh to retry' : 'Sign in'}
             </button>
+            {failedAttempts >= 5 && (
+              <p className="text-center text-xs text-petal-100/70">
+                Too many failed attempts in this session.
+              </p>
+            )}
           </form>
         </div>
       </div>

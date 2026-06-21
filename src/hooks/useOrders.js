@@ -20,7 +20,18 @@ export function useOrders() {
       let query = supabase
         .from('orders')
         .select(`
-          *,
+          id,
+          customer_id,
+          tracking_token,
+          customer_name,
+          customer_email,
+          customer_phone,
+          delivery_address,
+          status,
+          total_amount,
+          notes,
+          created_at,
+          updated_at,
           order_items (
             id,
             product_name,
@@ -54,51 +65,38 @@ export function useOrders() {
 
   // ── CREATE (place order + items in one transaction) ──
   async function placeOrder(orderDetails, cartItems) {
-    // Generate the order id client-side so we can skip Supabase row-returning.
-    const orderId = orderDetails.id ?? crypto.randomUUID()
-    const trackingToken = crypto.randomUUID()
-    const orderPayload = { id: orderId, tracking_token: trackingToken, ...orderDetails }
-
-    const { error: orderErr } = await supabase
-      .from('orders')
-      .insert([orderPayload], { returning: 'minimal' })
-    if (orderErr) throw orderErr
-
-    const order = {
-      id: orderId,
-      tracking_token: trackingToken,
-      ...orderDetails,
-      order_items: cartItems.map(item => ({
-        order_id:     orderId,
-        product_id:   item.id,
-        product_name: item.name,
-        unit_price:   item.price,
-        quantity:     item.quantity,
-        subtotal:     item.price * item.quantity,
-      })),
+    const safeOrder = {
+      customer_name:     orderDetails.customer_name,
+      customer_email:    orderDetails.customer_email,
+      customer_phone:    orderDetails.customer_phone,
+      delivery_address:  orderDetails.delivery_address,
+      notes:             orderDetails.notes,
     }
 
-    // 2. Bulk-insert order_items
-    const lineItems = order.order_items.map(({ order_id, product_id, product_name, unit_price, quantity }) => ({
-      order_id,
-      product_id,
-      product_name,
-      unit_price,
-      quantity,
+    const safeItems = cartItems.map(item => ({
+      product_id: item.id,
+      quantity:   item.quantity,
     }))
 
-    const { error: itemsErr } = await supabase.from('order_items').insert(lineItems)
-    if (itemsErr) throw itemsErr
-
-    // 3. Decrement stock_count for each product
-    for (const item of cartItems) {
-      await supabase.rpc('decrement_stock', {
-        p_product_id: item.id,
-        p_qty:        item.quantity,
+    const { data, error } = await supabase
+      .rpc('place_order', {
+        order_data: safeOrder,
+        items: safeItems,
       })
+      .single()
+
+    if (error) {
+      if (error.message?.includes('Could not find the function')) {
+        throw new Error('Secure checkout is not installed yet. Run supabase/schema.sql in Supabase SQL Editor, then try again.')
+      }
+      throw error
     }
 
-    return order
+    return {
+      ...data,
+      ...safeOrder,
+      order_items: safeItems,
+    }
   }
 
   // ── UPDATE (admin changes status) ─────────────────────

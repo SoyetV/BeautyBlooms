@@ -17,11 +17,12 @@ const ImageIcon = ({ size = 24, className = '' }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
 )
 
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024
+
 export default function ProductMarquee({ isAdmin = false }) {
   const {
     products = [],
-    loading,
-    error,
     createProduct,
     updateProduct,
     deleteProduct,
@@ -40,9 +41,21 @@ export default function ProductMarquee({ isAdmin = false }) {
     const file = e.target.files?.[0]
     if (!file) return
 
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      callback(null, '', 'Please select a JPG, PNG, or WebP image.')
+      e.target.value = ''
+      return
+    }
+
+    if (file.size > MAX_IMAGE_BYTES) {
+      callback(null, '', 'Image must be smaller than 5 MB.')
+      e.target.value = ''
+      return
+    }
+
     const reader = new FileReader()
     reader.onloadend = () => {
-      callback(file, reader.result)
+      callback(file, reader.result, null)
     }
     reader.readAsDataURL(file)
   }
@@ -222,10 +235,18 @@ export default function ProductMarquee({ isAdmin = false }) {
                     <label className="label">Upload Image</label>
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/webp"
                       className="input-field py-1.5 text-sm"
-                      onChange={(e) => handleImageUpload(e, (file, url) => setNewProduct({ ...newProduct, image_url: url, imageFile: file }))}
+                      onChange={(e) => handleImageUpload(e, (file, url, error) => {
+                        if (error) {
+                          setNewProductErrors({ ...newProductErrors, image: error })
+                          return
+                        }
+                        setNewProductErrors({ ...newProductErrors, image: null })
+                        setNewProduct({ ...newProduct, image_url: url, imageFile: file })
+                      })}
                     />
+                    {newProductErrors.image && <p className="mt-1 text-xs text-red-600">{newProductErrors.image}</p>}
                   </div>
                 </div>
                 {newProductErrors.submit && (
@@ -270,10 +291,18 @@ export default function ProductMarquee({ isAdmin = false }) {
                       {editErrors.price && <p className="mt-1 text-xs text-red-600">{editErrors.price}</p>}
                       <input
                         type="file"
-                        accept="image/*"
+                        accept="image/jpeg,image/png,image/webp"
                         className="input-field py-1.5 text-sm"
-                        onChange={(e) => handleImageUpload(e, (file, url) => setEditForm({ ...editForm, image_url: url, imageFile: file }))}
+                        onChange={(e) => handleImageUpload(e, (file, url, error) => {
+                          if (error) {
+                            setEditErrors({ ...editErrors, image: error })
+                            return
+                          }
+                          setEditErrors({ ...editErrors, image: null })
+                          setEditForm({ ...editForm, image_url: url, imageFile: file })
+                        })}
                       />
+                      {editErrors.image && <p className="mt-1 text-xs text-red-600">{editErrors.image}</p>}
                       {editErrors.submit && (
                         <p className="text-sm text-red-600">{editErrors.submit}</p>
                       )}
