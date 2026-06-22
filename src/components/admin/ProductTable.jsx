@@ -63,11 +63,11 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
         {products.map((product, idx) => (
           <article
             key={product.id}
-            className="card p-4 opacity-0 animate-fade-in-up"
+            className="bg-surface-container border border-outline/20 shadow-sm rounded-3xl p-4 opacity-0 animate-fade-in-up"
             style={{ animationDelay: `${idx * 50}ms` }}
           >
             <div className="flex gap-3">
-              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-petal-100">
+              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-surface-variant/50">
                 {product.image_url
                   ? <img src={product.image_url} alt="" className="h-full w-full object-cover" aria-hidden="true" />
                   : <div className="flex h-full w-full items-center justify-center text-lg" aria-hidden="true">BB</div>
@@ -76,10 +76,10 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h3 className="truncate font-semibold text-charcoal-900">{product.name}</h3>
-                    <p className="text-xs text-charcoal-500">{product.category}</p>
+                    <h3 className="truncate font-semibold text-on-surface">{product.name}</h3>
+                    <p className="font-body-sm text-body-sm text-on-surface-variant">{product.category}</p>
                   </div>
-                  <p className="shrink-0 text-sm font-semibold tabular-nums text-charcoal-900">
+                  <p className="shrink-0 font-label-md text-label-md tabular-nums text-on-surface">
                     {formatCurrency(product.price)}
                   </p>
                 </div>
@@ -113,14 +113,14 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <button
                   onClick={() => onEdit(product)}
-                  className="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:border-bloom-300 hover:text-bloom-600"
+                  className="rounded-full border border-outline/30 bg-surface px-3 py-2 font-label-sm text-label-sm text-on-surface transition-colors hover:border-primary/50 hover:text-primary"
                   aria-label={`Edit ${product.name}`}
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => setConfirmId(product.id)}
-                  className="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-red-500 transition-colors hover:border-red-300 hover:bg-red-50"
+                  className="rounded-full border border-outline/30 bg-surface px-3 py-2 font-label-sm text-label-sm text-error transition-colors hover:border-error/50 hover:bg-error/10"
                   aria-label={`Delete ${product.name}`}
                 >
                   Delete
@@ -131,9 +131,9 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
         ))}
       </div>
 
-      <div className="card hidden overflow-x-auto md:block">
-      <table className="min-w-full divide-y divide-gold-100 text-sm" aria-label="Product inventory">
-        <thead className="bg-petal-50/80 text-xs font-semibold uppercase tracking-wider text-charcoal-500">
+      <div className="bg-surface-container border border-outline/20 shadow-sm rounded-3xl hidden overflow-x-auto md:block">
+      <table className="min-w-full divide-y divide-outline/20 font-body-sm text-body-sm" aria-label="Product inventory">
+        <thead className="bg-surface/50 font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">
           <tr>
             <th scope="col" className="px-5 py-4 text-left">Product</th>
             <th scope="col" className="px-5 py-4 text-left hidden sm:table-cell">Category</th>
@@ -143,31 +143,31 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
             <th scope="col" className="px-5 py-4 text-right">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gold-50 bg-white">
+        <tbody className="divide-y divide-outline/10 bg-surface">
           {products.map((product, idx) => (
-            <tr key={product.id} className="group hover:bg-petal-50 transition-colors duration-500 opacity-0 animate-fade-in-up" style={{ animationDelay: `${idx * 50}ms` }}>
+            <tr key={product.id} className="group hover:bg-surface-variant/30 transition-colors duration-500 opacity-0 animate-fade-in-up" style={{ animationDelay: `${idx * 50}ms` }}>
               {/* Product name + image */}
               <td className="px-5 py-4">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-petal-100">
+                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-surface-variant/50">
                     {product.image_url
                       ? <img src={product.image_url} alt="" className="h-full w-full object-cover" aria-hidden="true" />
                       : <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-bloom-700" aria-hidden="true">BB</div>
                     }
                   </div>
                   <div className="min-w-0">
-                    <p className="font-medium text-gray-900 truncate max-w-[160px]">{product.name}</p>
+                    <p className="font-label-md text-label-md text-on-surface truncate max-w-[160px]">{product.name}</p>
                     {/* Show category inline on mobile */}
-                    <p className="text-xs text-gray-400 sm:hidden">{product.category}</p>
+                    <p className="font-body-sm text-body-sm text-on-surface-variant sm:hidden">{product.category}</p>
                   </div>
                 </div>
               </td>
 
               {/* Category (hidden on mobile — shown inline above) */}
-              <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{product.category}</td>
+              <td className="px-4 py-3 text-on-surface-variant hidden sm:table-cell">{product.category}</td>
 
               {/* Price */}
-              <td className="px-4 py-3 text-right font-medium text-gray-900 tabular-nums">
+              <td className="px-4 py-3 text-right font-label-md text-label-md text-on-surface tabular-nums">
                 {formatCurrency(product.price)}
               </td>
 
@@ -189,7 +189,7 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
                 {confirmId === product.id ? (
                   // Inline delete confirmation
                   <div className="flex items-center justify-end gap-2">
-                    <span className="text-xs text-gray-500 hidden sm:inline">Delete?</span>
+                    <span className="font-label-sm text-label-sm text-on-surface-variant hidden sm:inline">Delete?</span>
                     <button
                       onClick={() => handleDelete(product.id)}
                       disabled={deletingId === product.id}
@@ -208,14 +208,14 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
                   <div className="flex items-center justify-end gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => onEdit(product)}
-                      className="rounded-lg border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 hover:border-bloom-300 hover:text-bloom-600 transition-colors"
+                      className="rounded-lg border border-outline/30 bg-surface px-3 py-1 font-label-sm text-label-sm text-on-surface hover:border-primary/50 hover:text-primary transition-colors"
                       aria-label={`Edit ${product.name}`}
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => setConfirmId(product.id)}
-                      className="rounded-lg border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-red-500 hover:border-red-300 hover:bg-red-50 transition-colors"
+                      className="rounded-lg border border-outline/30 bg-surface px-3 py-1 font-label-sm text-label-sm text-error hover:border-error/50 hover:bg-error/10 transition-colors"
                       aria-label={`Delete ${product.name}`}
                     >
                       Delete

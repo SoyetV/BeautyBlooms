@@ -104,39 +104,31 @@ export default function CheckoutPage() {
 
   const DELIVERY_FEE = 80
 
-  const glassCard = {
-    background: 'rgba(255,255,255,0.65)',
-    backdropFilter: 'blur(20px) saturate(180%)',
-    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-    border: '1px solid rgba(255,255,255,0.5)',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)',
-  }
+  const glassCard = "bg-surface-container backdrop-blur-lg border border-outline/30 shadow-sm"
 
   return (
-    <div className="page-enter mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-16">
+    <div className="page-enter mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop py-8 sm:py-16">
       <Link
         to="/catalog"
-        className="group mb-7 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-charcoal-500 transition-colors hover:text-bloom-600 sm:mb-10"
+        className="group mb-7 inline-flex items-center gap-2 font-label-md text-label-md uppercase tracking-widest text-on-surface-variant transition-colors hover:text-primary sm:mb-10"
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full transition-all group-hover:-translate-x-1" style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(249,168,212,0.3)' }}>
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-          </svg>
+        <span className="flex h-7 w-7 items-center justify-center rounded-full transition-all group-hover:-translate-x-1 border border-outline/30 bg-surface/80">
+          <span className="material-symbols-outlined text-sm">arrow_back</span>
         </span>
         Back to Collection
       </Link>
 
       <div className="mb-7 sm:mb-10">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-bloom-500 mb-2">Almost there</p>
-        <h1 className="font-display text-3xl font-bold text-charcoal-900 sm:text-4xl">Secure Checkout</h1>
+        <p className="font-label-md text-label-md uppercase tracking-[0.2em] text-primary mb-2">Almost there</p>
+        <h1 className="font-display-md text-display-md text-on-surface">Secure Checkout</h1>
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
         {/* Delivery form */}
         <form onSubmit={handleSubmit} noValidate className="lg:col-span-3 space-y-5">
-          <div className="rounded-2xl px-4 py-5 sm:rounded-3xl sm:px-6 sm:py-6" style={glassCard}>
-            <h2 className="font-semibold text-charcoal-900 mb-5 flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #ec4899, #be185d)' }}>1</span>
+          <div className={`rounded-2xl px-4 py-5 sm:rounded-3xl sm:px-6 sm:py-6 ${glassCard}`}>
+            <h2 className="font-title-lg text-title-lg text-on-surface mb-5 flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full font-label-md text-label-md text-on-primary bg-primary">1</span>
               Delivery details
             </h2>
 
@@ -153,9 +145,9 @@ export default function CheckoutPage() {
                 { id: 'customer_phone', label: 'Phone (optional)', type: 'tel',  required: false, placeholder: '+63 9XX XXX XXXX' },
               ].map(field => (
                 <div key={field.id}>
-                  <label htmlFor={`co-${field.id}`} className="label">
+                  <label htmlFor={`co-${field.id}`} className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mb-1 block">
                     {field.label}
-                    {field.required && <span aria-hidden="true" className="text-bloom-500 ml-0.5">*</span>}
+                    {field.required && <span aria-hidden="true" className="text-error ml-0.5">*</span>}
                   </label>
                   <input
                     id={`co-${field.id}`}
@@ -175,8 +167,8 @@ export default function CheckoutPage() {
               ))}
 
               <div>
-                <label htmlFor="co-address" className="label">
-                  Delivery address <span aria-hidden="true" className="text-bloom-500">*</span>
+                <label htmlFor="co-address" className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mb-1 block">
+                  Delivery address <span aria-hidden="true" className="text-error">*</span>
                 </label>
                 <textarea
                   id="co-address" name="delivery_address" rows={3}
@@ -191,7 +183,7 @@ export default function CheckoutPage() {
               </div>
 
               <div>
-                <label htmlFor="co-notes" className="label">Order notes (optional)</label>
+                <label htmlFor="co-notes" className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mb-1 block">Order notes (optional)</label>
                 <textarea
                   id="co-notes" name="notes" rows={2}
                   value={form.notes} onChange={handleChange}
@@ -205,9 +197,8 @@ export default function CheckoutPage() {
 
           <button
             type="submit"
-            className="btn-primary w-full justify-center py-4 text-sm"
+            className="w-full justify-center py-4 bg-primary text-on-primary rounded-full font-label-lg text-label-lg uppercase tracking-wider shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-300"
             disabled={loading}
-            style={{ boxShadow: '0 8px 30px rgba(236,72,153,0.35)' }}
           >
             {loading
               ? <><Spinner size="sm" /> Placing order…</>
@@ -218,40 +209,38 @@ export default function CheckoutPage() {
 
         {/* Order summary */}
         <aside className="lg:col-span-2" aria-label="Order summary">
-          <div className="rounded-2xl px-4 py-5 sm:rounded-3xl sm:px-6 sm:py-6 lg:sticky lg:top-24" style={glassCard}>
-            <h2 className="font-semibold text-charcoal-900 mb-5 flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #ec4899, #be185d)' }}>2</span>
+          <div className={`rounded-2xl px-4 py-5 sm:rounded-3xl sm:px-6 sm:py-6 lg:sticky lg:top-24 ${glassCard}`}>
+            <h2 className="font-title-lg text-title-lg text-on-surface mb-5 flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full font-label-md text-label-md text-on-primary bg-primary">2</span>
               Order summary
             </h2>
-            <ul className="space-y-0 mb-4" style={{ borderTop: '1px solid rgba(249,168,212,0.15)' }}>
+            <ul className="space-y-0 mb-4 border-t border-outline/20">
               {items.map(item => (
                 <li
                   key={item.id}
-                  className="flex gap-3 py-3 text-sm"
-                  style={{ borderBottom: '1px solid rgba(249,168,212,0.1)' }}
+                  className="flex gap-3 py-3 font-body-sm text-body-sm border-b border-outline/10"
                 >
-                  <span className="min-w-0 flex-1 text-charcoal-700">
-                    <span className="font-semibold text-charcoal-900">{item.quantity}×</span> {item.name}
+                  <span className="min-w-0 flex-1 text-on-surface-variant">
+                    <span className="font-semibold text-on-surface">{item.quantity}×</span> {item.name}
                   </span>
-                  <span className="text-charcoal-800 font-medium tabular-nums">{formatCurrency(item.price * item.quantity)}</span>
+                  <span className="text-on-surface font-medium tabular-nums">{formatCurrency(item.price * item.quantity)}</span>
                 </li>
               ))}
             </ul>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between text-charcoal-500">
+            <div className="space-y-2 font-body-sm text-body-sm">
+              <div className="flex justify-between text-on-surface-variant">
                 <span>Subtotal</span>
                 <span>{formatCurrency(totalPrice)}</span>
               </div>
-              <div className="flex justify-between text-charcoal-500">
+              <div className="flex justify-between text-on-surface-variant">
                 <span>Delivery</span>
                 <span>{formatCurrency(DELIVERY_FEE)}</span>
               </div>
               <div
-                className="flex justify-between font-bold text-charcoal-900 text-base pt-3 mt-2"
-                style={{ borderTop: '1px solid rgba(249,168,212,0.2)' }}
+                className="flex justify-between font-title-lg text-title-lg text-on-surface pt-3 mt-2 border-t border-outline/20"
               >
                 <span>Total</span>
-                <span className="text-bloom-600">{formatCurrency(totalPrice + DELIVERY_FEE)}</span>
+                <span className="text-primary">{formatCurrency(totalPrice + DELIVERY_FEE)}</span>
               </div>
             </div>
           </div>

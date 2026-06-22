@@ -115,7 +115,7 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
 
         {/* Submit-level error */}
         {errors.submit && (
-          <div role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div role="alert" className="rounded-lg bg-error/10 px-4 py-3 font-body-sm text-body-sm text-error">
             {errors.submit}
           </div>
         )}
@@ -124,7 +124,7 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
         <div>
           <label className="label">Product photo</label>
           <div
-            className="mt-1 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-4 transition-colors hover:border-bloom-300 sm:p-5"
+            className="mt-1 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-outline/20 bg-surface/50 p-4 transition-colors hover:border-primary/50 hover:bg-surface-variant/30 sm:p-5"
             onClick={() => fileRef.current?.click()}
             onKeyDown={e => e.key === 'Enter' && fileRef.current?.click()}
             tabIndex={0}
@@ -135,36 +135,36 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
               <img src={preview} alt="Product preview" className="h-36 w-full object-cover rounded-lg" />
             ) : (
               <>
-                <svg className="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-8 w-8 text-on-surface-variant/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                     d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M13.5 3.75h6.75M16.875 3.75v6.75M6 20.25a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                 </svg>
-                <p className="text-center text-sm text-gray-400">Click to upload a photo <span className="text-gray-300">(JPG, PNG, WebP - max 5 MB)</span></p>
+                <p className="text-center font-body-sm text-body-sm text-on-surface-variant">Click to upload a photo <span className="text-on-surface-variant/70">(JPG, PNG, WebP - max 5 MB)</span></p>
               </>
             )}
             <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={handleImageChange} tabIndex={-1} />
           </div>
           {preview && (
             <button type="button" onClick={() => { setPreview(null); setImageFile(null) }}
-              className="mt-1 text-xs text-gray-400 hover:text-red-500 transition-colors">
+              className="mt-1 font-label-sm text-label-sm text-on-surface-variant hover:text-error transition-colors">
               Remove image
             </button>
           )}
-          {errors.image && <p role="alert" className="mt-1 text-xs text-red-600">{errors.image}</p>}
+          {errors.image && <p role="alert" className="mt-1 font-body-sm text-body-sm text-error">{errors.image}</p>}
         </div>
 
         {/* Name */}
         <div>
-          <label htmlFor="pf-name" className="label">Product name <span aria-hidden="true" className="text-red-500">*</span></label>
+          <label htmlFor="pf-name" className="label">Product name <span aria-hidden="true" className="text-error">*</span></label>
           <input
             id="pf-name" name="name" type="text"
             value={form.name} onChange={handleChange}
             placeholder="e.g. Red Velvet Roses"
-            className={`input-field ${errors.name ? 'border-red-400 focus:ring-red-200' : ''}`}
+            className={`input-field bg-surface text-on-surface border-outline/30 ${errors.name ? 'border-error/50 focus:ring-error/20' : ''}`}
             aria-required="true"
             aria-describedby={errors.name ? 'pf-name-error' : undefined}
           />
-          {errors.name && <p id="pf-name-error" role="alert" className="mt-1 text-xs text-red-600">{errors.name}</p>}
+          {errors.name && <p id="pf-name-error" role="alert" className="mt-1 font-body-sm text-body-sm text-error">{errors.name}</p>}
         </div>
 
         {/* Description */}
@@ -181,35 +181,35 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
         {/* Price + Stock row */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="pf-price" className="label">Price (₱) <span aria-hidden="true" className="text-red-500">*</span></label>
+            <label htmlFor="pf-price" className="label">Price (₱) <span aria-hidden="true" className="text-error">*</span></label>
             <input
               id="pf-price" name="price" type="number" min="0" step="0.01"
               value={form.price} onChange={handleChange}
               placeholder="850.00"
-              className={`input-field ${errors.price ? 'border-red-400 focus:ring-red-200' : ''}`}
+              className={`input-field bg-surface text-on-surface border-outline/30 ${errors.price ? 'border-error/50 focus:ring-error/20' : ''}`}
               aria-required="true"
               aria-describedby={errors.price ? 'pf-price-error' : undefined}
             />
-            {errors.price && <p id="pf-price-error" role="alert" className="mt-1 text-xs text-red-600">{errors.price}</p>}
+            {errors.price && <p id="pf-price-error" role="alert" className="mt-1 font-body-sm text-body-sm text-error">{errors.price}</p>}
           </div>
           <div>
-            <label htmlFor="pf-stock" className="label">Stock count <span aria-hidden="true" className="text-red-500">*</span></label>
+            <label htmlFor="pf-stock" className="label">Stock count <span aria-hidden="true" className="text-error">*</span></label>
             <input
               id="pf-stock" name="stock_count" type="number" min="0" step="1"
               value={form.stock_count} onChange={handleChange}
               placeholder="20"
-              className={`input-field ${errors.stock_count ? 'border-red-400 focus:ring-red-200' : ''}`}
+              className={`input-field bg-surface text-on-surface border-outline/30 ${errors.stock_count ? 'border-error/50 focus:ring-error/20' : ''}`}
               aria-required="true"
               aria-describedby={errors.stock_count ? 'pf-stock-error' : undefined}
             />
-            {errors.stock_count && <p id="pf-stock-error" role="alert" className="mt-1 text-xs text-red-600">{errors.stock_count}</p>}
+            {errors.stock_count && <p id="pf-stock-error" role="alert" className="mt-1 font-body-sm text-body-sm text-error">{errors.stock_count}</p>}
           </div>
         </div>
 
         {/* Category */}
         <div>
           <label htmlFor="pf-category" className="label">Category</label>
-          <select id="pf-category" name="category" value={form.category} onChange={handleChange} className="input-field">
+          <select id="pf-category" name="category" value={form.category} onChange={handleChange} className="input-field bg-surface text-on-surface border-outline/30">
             {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
@@ -222,20 +222,20 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
             aria-checked={form.is_available}
             onClick={() => setForm(prev => ({ ...prev, is_available: !prev.is_available }))}
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200
-              ${form.is_available ? 'bg-bloom-500' : 'bg-gray-200'}`}
+              ${form.is_available ? 'bg-primary' : 'bg-surface-variant/50'}`}
           >
             <span
               className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200
                 ${form.is_available ? 'translate-x-5' : 'translate-x-0'}`}
             />
           </button>
-          <span className="text-sm text-gray-700">
+          <span className="font-body-sm text-body-sm text-on-surface">
             {form.is_available ? 'Listed in catalog' : 'Hidden from catalog'}
           </span>
         </div>
 
         {/* Actions */}
-        <div className="grid grid-cols-2 gap-2 border-t border-gray-100 pt-2 sm:flex sm:justify-end sm:gap-3">
+        <div className="grid grid-cols-2 gap-2 border-t border-outline/20 pt-2 sm:flex sm:justify-end sm:gap-3">
           <button type="button" onClick={onClose} className="btn-secondary" disabled={saving}>
             Cancel
           </button>

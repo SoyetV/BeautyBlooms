@@ -149,10 +149,10 @@ export default function ProductMarquee({ isAdmin = false }) {
   }
 
   return (
-    <div className="w-full flex flex-col items-center py-12 bg-petal-50 overflow-hidden">
-      <div className="w-full relative py-8 overflow-hidden bg-white/50 border-y border-gold-200/50 shadow-sm backdrop-blur-sm">
-        <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-petal-50 to-transparent z-10 pointer-events-none"></div>
-        <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-petal-50 to-transparent z-10 pointer-events-none"></div>
+    <div className="w-full flex flex-col items-center py-12 bg-background overflow-hidden">
+      <div className="w-full relative py-8 overflow-hidden bg-surface-container-low border-y border-outline/20 shadow-sm backdrop-blur-sm">
+        <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none"></div>
+        <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
 
         <div className="flex w-max animate-marquee hover-pause group gap-6 px-6">
           {marqueeItems.map((product, idx) => (
@@ -160,7 +160,7 @@ export default function ProductMarquee({ isAdmin = false }) {
               key={`${product.id}-${idx}`}
               className="card flex-shrink-0 w-72 md:w-80 overflow-hidden cursor-pointer group-hover:[animation-play-state:paused]"
             >
-              <div className="relative h-80 overflow-hidden bg-gray-100">
+              <div className="relative h-80 overflow-hidden bg-surface-container">
                 {product.image_url || product.image ? (
                   <img
                     src={product.image_url || product.image}
@@ -168,18 +168,18 @@ export default function ProductMarquee({ isAdmin = false }) {
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
                     <ImageIcon size={48} />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
 
-              <div className="p-5 bg-white flex flex-col justify-between h-32">
-                <h3 className="font-display text-xl text-charcoal-900 font-semibold truncate">{product.name || product.title}</h3>
+              <div className="p-5 bg-surface flex flex-col justify-between h-32">
+                <h3 className="font-title-lg text-title-lg text-on-surface truncate">{product.name || product.title}</h3>
                 <div className="flex items-center justify-between mt-auto">
-                  <span className="text-lg font-medium text-bloom-600">${product.price.toFixed(2)}</span>
-                  <button className="btn-secondary text-xs px-3 py-1.5 rounded-full">View Details</button>
+                  <span className="font-label-lg text-label-lg text-primary">${product.price.toFixed(2)}</span>
+                  <button className="px-4 py-2 border ring-1 ring-outline text-on-surface rounded-full font-label-sm text-label-sm uppercase tracking-wider hover:bg-surface-variant transition-all duration-300">View Details</button>
                 </div>
               </div>
             </div>
