@@ -1,5 +1,3 @@
-// src/components/layout/Navbar.jsx
-
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
@@ -24,153 +22,101 @@ export function Navbar({ onCartOpen }) {
   }
 
   const navLink = ({ isActive }) =>
-    `text-xs font-semibold uppercase tracking-[0.14em] transition-all duration-200 ${
+    `text-[11px] font-semibold uppercase tracking-[0.2em] transition-all duration-300 ${
       isActive
-        ? 'text-bloom-500'
-        : 'text-charcoal-600 hover:text-bloom-500'
+        ? 'text-brand-primary'
+        : 'text-brand-on-surface/70 hover:text-brand-primary'
     }`
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-all duration-500 ${
-        scrolled
-          ? 'shadow-lg shadow-bloom-900/5'
-          : ''
-      }`}
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b border-brand-secondary/10"
       style={{
-        background: scrolled
-          ? 'rgba(253, 242, 248, 0.85)'
-          : 'rgba(253, 242, 248, 0.65)',
-        backdropFilter: 'blur(24px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-        borderBottom: '1px solid rgba(249, 168, 212, 0.2)',
+        background: scrolled ? 'rgba(255, 247, 250, 0.8)' : 'rgba(255, 247, 250, 0.4)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
       }}
     >
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:h-20 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 sm:h-20">
 
-        {/* Logo */}
-        <Link
-          to="/"
-          className="group flex min-w-0 items-center gap-2 font-display text-xl font-bold tracking-tight text-charcoal-900 sm:gap-2.5 sm:text-2xl"
-          onClick={() => setMenuOpen(false)}
+        {/* Mobile menu toggle */}
+        <button
+          className="md:hidden p-2 text-brand-on-surface"
+          onClick={() => setMenuOpen(v => !v)}
+          aria-label="Toggle menu"
         >
-          <span
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-base transition-transform duration-300 group-hover:scale-105 sm:h-9 sm:w-9 sm:text-lg"
-            style={{
-              background: 'linear-gradient(135deg, rgba(236,72,153,0.15) 0%, rgba(192,141,75,0.15) 100%)',
-              border: '1px solid rgba(236,72,153,0.2)',
-            }}
-            aria-hidden="true"
-          >
-            <svg className="h-[18px] w-[18px] sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 21c-2.6-3.2-6.8-4.8-6.8-8.5A3.8 3.8 0 0 1 12 10a3.8 3.8 0 0 1 6.8 2.5C18.8 16.2 14.6 17.8 12 21Z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 10c-1.8-1.2-3-2.7-3-4.2A3 3 0 0 1 12 3a3 3 0 0 1 3 2.8c0 1.5-1.2 3-3 4.2Z" />
-            </svg>
-          </span>
-          <span className="truncate bg-clip-text" style={{
-            backgroundImage: 'linear-gradient(135deg, #2d1b2e 0%, #831843 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}>
-            Beauty Blooms
-          </span>
-        </Link>
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            {menuOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            )}
+          </svg>
+        </button>
 
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-8 md:flex" aria-label="Main navigation">
-          <NavLink to="/catalog" className={navLink}>Shop</NavLink>
-          {isAdmin && (
-            <NavLink
-              to="/admin"
-              className={() => 'text-xs font-semibold uppercase tracking-[0.15em] text-bloom-600 hover:text-bloom-700 transition-colors'}
-            >
-              Admin
-            </NavLink>
-          )}
+        {/* Desktop Nav - Left */}
+        <nav className="hidden items-center gap-8 md:flex">
+          <NavLink to="/catalog" className={navLink}>The Collection</NavLink>
+          <NavLink to="/catalog?category=Seasonal" className={navLink}>Seasonal</NavLink>
         </nav>
 
-        {/* Right actions */}
-        <div className="flex items-center gap-2">
-          {/* Cart button */}
+        {/* Logo - Center */}
+        <Link
+          to="/"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-display text-2xl font-bold tracking-tight text-brand-on-surface"
+          onClick={() => setMenuOpen(false)}
+        >
+          Beauty Blooms
+        </Link>
+
+        {/* Right Actions */}
+        <div className="flex items-center gap-4">
           <button
             onClick={onCartOpen}
-            className="relative rounded-xl p-2.5 transition-all duration-200 hover:scale-105"
-            style={{
-              background: 'rgba(255,255,255,0.6)',
-              backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(249,168,212,0.25)',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-            }}
-            aria-label={`Open cart, ${totalItems} items`}
+            className="group relative p-2"
+            aria-label="Cart"
           >
-            <svg className="h-5 w-5 text-charcoal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-              <path strokeLinecap="round" strokeLinejoin="round"
-                d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+            <svg className="h-6 w-6 text-brand-on-surface transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
             </svg>
             {totalItems > 0 && (
-              <span
-                className="absolute -right-1 -top-1 flex h-4.5 w-4.5 min-w-[1.1rem] items-center justify-center rounded-full text-[10px] font-bold text-white px-1"
-                style={{
-                  background: 'linear-gradient(135deg, #ec4899, #be185d)',
-                  boxShadow: '0 2px 8px rgba(236,72,153,0.4)',
-                }}
-              >
-                {totalItems > 9 ? '9+' : totalItems}
+              <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-brand-primary text-[10px] font-bold text-white">
+                {totalItems}
               </span>
             )}
           </button>
 
-          {/* Auth button (desktop) */}
-          <div className="hidden md:block">
+          {/* Admin/Auth */}
+          <div className="hidden items-center gap-4 md:flex">
+             {isAdmin && (
+              <NavLink to="/admin" className={navLink}>Admin</NavLink>
+            )}
             {user ? (
-              <button onClick={handleSignOut} className="btn-secondary py-2 text-xs px-5">
-                Sign out
+              <button onClick={handleSignOut} className="text-[11px] font-semibold uppercase tracking-widest text-brand-on-surface/70 hover:text-brand-primary transition-colors">
+                Sign Out
               </button>
             ) : (
-              <Link to="/admin/login" className="btn-primary py-2 text-xs px-5">
-                Sign in
+              <Link to="/admin/login" className="text-[11px] font-semibold uppercase tracking-widest text-brand-on-surface/70 hover:text-brand-primary transition-colors">
+                Sign In
               </Link>
             )}
           </div>
-
-          {/* Mobile menu toggle */}
-          <button
-            className="rounded-xl p-2.5 text-charcoal-600 transition-all hover:text-bloom-600 md:hidden"
-            style={{
-              background: 'rgba(255,255,255,0.6)',
-              backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(249,168,212,0.25)',
-            }}
-            onClick={() => setMenuOpen(v => !v)}
-            aria-label="Toggle navigation menu"
-            aria-expanded={menuOpen}
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              {menuOpen
-                ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                : <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 7.5h16.5M3.75 12h16.5M3.75 16.5h16.5" />}
-            </svg>
-          </button>
         </div>
       </div>
 
-      {/* Mobile dropdown */}
+      {/* Mobile menu */}
       {menuOpen && (
-        <nav
-          className="flex flex-col gap-2 px-4 pb-4 pt-2 md:hidden"
-          style={{
-            background: 'rgba(253, 242, 248, 0.9)',
-            backdropFilter: 'blur(20px)',
-            borderTop: '1px solid rgba(249,168,212,0.2)',
-          }}
-          aria-label="Mobile navigation"
-        >
-          <NavLink to="/catalog" className={({ isActive }) => `${navLink({ isActive })} rounded-2xl px-4 py-3 hover:bg-white/60`} onClick={() => setMenuOpen(false)}>Shop</NavLink>
-          {isAdmin && <NavLink to="/admin" className={({ isActive }) => `${navLink({ isActive })} rounded-2xl px-4 py-3 hover:bg-white/60`} onClick={() => setMenuOpen(false)}>Admin</NavLink>}
-          {user
-            ? <button onClick={handleSignOut} className="rounded-2xl px-4 py-3 text-left text-xs font-semibold uppercase tracking-widest text-charcoal-500 hover:bg-white/60">Sign out</button>
-            : <Link to="/admin/login" className="rounded-2xl px-4 py-3 text-xs font-semibold uppercase tracking-widest text-bloom-600 hover:bg-white/60" onClick={() => setMenuOpen(false)}>Sign in</Link>
-          }
+        <nav className="md:hidden border-t border-brand-secondary/10 bg-brand-background/95 backdrop-blur-xl px-6 py-8 flex flex-col gap-6 animate-fade-in-down">
+          <NavLink to="/catalog" className={navLink} onClick={() => setMenuOpen(false)}>The Collection</NavLink>
+          <NavLink to="/catalog?category=Seasonal" className={navLink} onClick={() => setMenuOpen(false)}>Seasonal</NavLink>
+          {isAdmin && (
+            <NavLink to="/admin" className={navLink} onClick={() => setMenuOpen(false)}>Admin</NavLink>
+          )}
+          {user ? (
+            <button onClick={() => { handleSignOut(); setMenuOpen(false); }} className={navLink + ' text-left'}>Sign Out</button>
+          ) : (
+            <Link to="/admin/login" className={navLink} onClick={() => setMenuOpen(false)}>Sign In</Link>
+          )}
         </nav>
       )}
     </header>

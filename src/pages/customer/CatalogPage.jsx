@@ -1,5 +1,3 @@
-// src/pages/customer/CatalogPage.jsx
-
 import { useProducts } from '@/hooks/useProducts'
 import { ProductGrid } from '@/components/catalog/ProductGrid'
 import ProductMarquee from '@/components/ui/ProductMarquee'
@@ -8,34 +6,37 @@ export default function CatalogPage() {
   const { products, loading, error, fetchProducts } = useProducts()
 
   return (
-    <div className="page-enter">
-      {/* Shop Banner */}
-      <section className="relative mb-8 flex h-[34vh] min-h-[240px] items-center justify-center overflow-hidden bg-bloom-950 sm:mb-12 sm:h-[40vh] sm:min-h-[300px]">
+    <div className="page-enter pt-16 sm:pt-20 min-h-screen">
+      {/* Banner */}
+      <section className="relative h-[40vh] min-h-[300px] flex items-center justify-center overflow-hidden bg-brand-surface-container-highest">
         <div className="absolute inset-0 z-0">
           <img 
             src="https://images.pexels.com/photos/10772718/pexels-photo-10772718.jpeg" 
             alt="Beautiful pink flowers" 
-            className="w-full h-full object-cover object-center opacity-70 mix-blend-overlay"
+            className="w-full h-full object-cover opacity-50 mix-blend-overlay"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-bloom-900/80 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-brand-primary/5 to-brand-background" />
         </div>
-        <div className="relative z-10 text-center px-4">
-          <h1 className="font-display text-3xl font-bold tracking-tight text-petal-50 drop-shadow-md sm:text-5xl lg:text-6xl">
-            The Collection
+        <div className="relative z-10 text-center px-6 animate-fade-in-up">
+          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-primary mb-4 block">The Collection</span>
+          <h1 className="font-display text-4xl md:text-6xl font-bold text-brand-on-surface tracking-tight">
+            Curated <span className="italic font-light">Elegance</span>
           </h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm font-light text-petal-100 opacity-90 sm:mt-4 sm:text-lg">
-            {!loading && !error 
-              ? `Explore our curated selection of ${products.length} luxurious floral arrangements, designed to captivate.`
-              : 'Explore our curated selection of luxurious floral arrangements, designed to captivate.'}
-          </p>
         </div>
       </section>
 
-      {/* Infinite Product Marquee */}
-      <ProductMarquee />
+      {/* Marquee Accent */}
+      <div className="border-y border-brand-secondary/5 bg-white/20 py-8">
+        <ProductMarquee />
+      </div>
 
-      {/* Grid Container */}
-      <div className="mx-auto max-w-6xl px-4 pb-10 pt-6 sm:px-6 sm:pb-16 sm:pt-8">
+      {/* Catalog Grid */}
+      <div className="max-w-6xl mx-auto px-6 py-20 sm:py-24">
+        <div className="mb-12">
+          <p className="text-xs font-medium text-brand-on-surface-variant">
+            Showing all {products.length} exclusive arrangements
+          </p>
+        </div>
         <ProductGrid
           products={products}
           loading={loading}

@@ -1,166 +1,179 @@
-import React, { useMemo, useState } from 'react'
-import { useProducts } from '@/hooks/useProducts'
+import { useEffect, useState } from 'react'
+import { Plus, X, Edit2, Check, Image as ImageIcon } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
+import { supabase } from '@/lib/supabaseClient'
+import { formatCurrency } from '@/utils/formatCurrency'
 
-const Plus = ({ size = 24, className = '' }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-)
-const Edit2 = ({ size = 24, className = '' }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-)
-const Check = ({ size = 24, className = '' }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20 6 9 17 4 12"></polyline></svg>
-)
-const X = ({ size = 24, className = '' }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-)
-const ImageIcon = ({ size = 24, className = '' }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-)
-
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024
-
-export default function ProductMarquee({ isAdmin = false }) {
-  const {
-    products = [],
-    createProduct,
-    updateProduct,
-    deleteProduct,
-  } = useProducts({ adminMode: isAdmin })
-  const [editingId, setEditingId] = useState(null)
-  const [editForm, setEditForm] = useState({})
-  const [editErrors, setEditErrors] = useState({})
+export default function ProductMarquee() {
+  const { isAdmin } = useAuth()
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
   const [isAdding, setIsAdding] = useState(false)
-  const [newProduct, setNewProduct] = useState({ name: '', price: '', image_url: '', imageFile: null })
-  const [newProductErrors, setNewProductErrors] = useState({})
   const [actionLoading, setActionLoading] = useState(false)
+  const [editingId, setEditingId] = useState(null)
 
-  const marqueeItems = useMemo(() => [...products, ...products], [products])
+  const [newProduct, setNewProduct] = useState({ name: '', price: '', image_url: '', imageFile: null })
+  const [editForm, setEditForm] = useState({ name: '', price: '', image_url: '', imageFile: null })
 
-  const handleImageUpload = (e, callback) => {
-    const file = e.target.files?.[0]
+  const [newProductErrors, setNewProductErrors] = useState({})
+  const [editErrors, setEditErrors] = useState({})
+
+  useEffect(() => {
+    fetchMarqueeProducts()
+  }, [])
+
+  async function fetchMarqueeProducts() {
+    try {
+      const { data, error } = await supabase
+        .from('marquee_products')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      setProducts(data || [])
+    } catch (err) {
+      console.error('Error fetching marquee products:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleImageUpload(e, callback) {
+    const file = e.target.files[0]
     if (!file) return
 
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      callback(null, '', 'Please select a JPG, PNG, or WebP image.')
-      e.target.value = ''
+    if (file.size > 2 * 1024 * 1024) {
+      callback(null, null, 'Image size should be less than 2MB')
       return
     }
 
-    if (file.size > MAX_IMAGE_BYTES) {
-      callback(null, '', 'Image must be smaller than 5 MB.')
-      e.target.value = ''
-      return
-    }
-
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      callback(file, reader.result, null)
-    }
-    reader.readAsDataURL(file)
+    const previewUrl = URL.createObjectURL(file)
+    callback(file, previewUrl, null)
   }
 
-  const validateProduct = ({ name, price }) => {
+  async function uploadToSupabase(file) {
+    const fileExt = file.name.split('.').pop()
+    const fileName = `marquee-${Math.random()}.${fileExt}`
+    const { data, error } = await supabase.storage
+      .from('product-images')
+      .upload(fileName, file)
+
+    if (error) throw error
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(data.path)
+
+    return publicUrl
+  }
+
+  async function handleAddProduct() {
     const errors = {}
-    if (!name?.trim()) errors.name = 'Product name is required.'
-    if (!price || isNaN(Number(price)) || Number(price) <= 0) errors.price = 'Enter a valid price greater than 0.'
-    return errors
-  }
+    if (!newProduct.name) errors.name = 'Name is required'
+    if (!newProduct.price || isNaN(newProduct.price)) errors.price = 'Valid price is required'
+    if (!newProduct.imageFile) errors.image = 'Image is required'
 
-  const handleEditClick = (product) => {
-    setEditingId(product.id)
-    setEditErrors({})
-    setEditForm({
-      name: product.name ?? product.title ?? '',
-      price: String(product.price ?? ''),
-      image_url: product.image_url ?? product.image ?? '',
-      imageFile: null,
-    })
-  }
-
-  const handleSaveEdit = async () => {
-    if (!editingId) return
-    const errors = validateProduct(editForm)
-    if (Object.keys(errors).length) {
-      setEditErrors(errors)
-      return
-    }
-
-    setActionLoading(true)
-    try {
-      const fields = {
-        name: editForm.name,
-        price: Number(editForm.price),
-        image_url: editForm.image_url || null,
-      }
-      await updateProduct(editingId, fields, editForm.imageFile)
-      setEditingId(null)
-    } catch (err) {
-      console.error('[ProductMarquee] updateProduct failed:', err.message || err)
-      setEditErrors({ submit: err.message || 'Unable to save product.' })
-    } finally {
-      setActionLoading(false)
-    }
-  }
-
-  const handleDeleteProduct = async (id) => {
-    if (!window.confirm('Delete this product from the marquee?')) return
-    try {
-      await deleteProduct(id)
-    } catch (err) {
-      console.error('[ProductMarquee] deleteProduct failed:', err.message || err)
-    }
-  }
-
-  const handleCancelEdit = () => {
-    setEditingId(null)
-  }
-
-  const handleAddProduct = async () => {
-    const errors = validateProduct(newProduct)
-    if (Object.keys(errors).length) {
+    if (Object.keys(errors).length > 0) {
       setNewProductErrors(errors)
       return
     }
 
     setActionLoading(true)
     try {
-      await createProduct(
-        {
-          name: newProduct.name.trim(),
-          price: Number(newProduct.price),
-          image_url: newProduct.image_url || null,
-          category: 'Uncategorized',
-          stock_count: 0,
-          is_available: true,
-          description: null,
-        },
-        newProduct.imageFile,
-      )
-      setNewProduct({ name: '', price: '', image_url: '', imageFile: null })
-      setNewProductErrors({})
+      const publicUrl = await uploadToSupabase(newProduct.imageFile)
+      const { error } = await supabase
+        .from('marquee_products')
+        .insert([{
+          name: newProduct.name,
+          price: parseFloat(newProduct.price),
+          image_url: publicUrl
+        }])
+
+      if (error) throw error
+
       setIsAdding(false)
+      setNewProduct({ name: '', price: '', image_url: '', imageFile: null })
+      fetchMarqueeProducts()
     } catch (err) {
-      console.error('[ProductMarquee] createProduct failed:', err.message || err)
-      setNewProductErrors({ submit: err.message || 'Unable to add new product.' })
+      setNewProductErrors({ submit: err.message })
     } finally {
       setActionLoading(false)
     }
   }
 
-  return (
-    <div className="w-full flex flex-col items-center py-12 bg-petal-50 overflow-hidden">
-      <div className="w-full relative py-8 overflow-hidden bg-white/50 border-y border-gold-200/50 shadow-sm backdrop-blur-sm">
-        <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-petal-50 to-transparent z-10 pointer-events-none"></div>
-        <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-petal-50 to-transparent z-10 pointer-events-none"></div>
+  async function handleDeleteProduct(id) {
+    if (!confirm('Are you sure you want to remove this product from the marquee?')) return
+    try {
+      const { error } = await supabase.from('marquee_products').delete().eq('id', id)
+      if (error) throw error
+      fetchMarqueeProducts()
+    } catch (err) {
+      console.error('Error deleting product:', err)
+    }
+  }
 
-        <div className="flex w-max animate-marquee hover-pause group gap-6 px-6">
-          {marqueeItems.map((product, idx) => (
+  function handleEditClick(product) {
+    setEditingId(product.id)
+    setEditForm({
+      name: product.name || product.title,
+      price: product.price.toString(),
+      image_url: product.image_url || product.image,
+      imageFile: null
+    })
+  }
+
+  function handleCancelEdit() {
+    setEditingId(null)
+    setEditErrors({})
+  }
+
+  async function handleSaveEdit() {
+    if (!editForm.price || isNaN(editForm.price)) {
+      setEditErrors({ price: 'Valid price is required' })
+      return
+    }
+
+    setActionLoading(true)
+    try {
+      let finalImageUrl = editForm.image_url
+      if (editForm.imageFile) {
+        finalImageUrl = await uploadToSupabase(editForm.imageFile)
+      }
+
+      const { error } = await supabase
+        .from('marquee_products')
+        .update({
+          name: editForm.name,
+          price: parseFloat(editForm.price),
+          image_url: finalImageUrl
+        })
+        .eq('id', editingId)
+
+      if (error) throw error
+
+      setEditingId(null)
+      fetchMarqueeProducts()
+    } catch (err) {
+      setEditErrors({ submit: err.message })
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  if (loading) return null
+
+  // Double the products for infinite effect
+  const displayProducts = [...products, ...products]
+
+  return (
+    <div className="w-full flex flex-col items-center">
+      <div className="w-full overflow-hidden relative">
+        <div className="flex animate-marquee hover-pause py-4">
+          {displayProducts.map((product, idx) => (
             <div
               key={`${product.id}-${idx}`}
-              className="card flex-shrink-0 w-72 md:w-80 overflow-hidden cursor-pointer group-hover:[animation-play-state:paused]"
+              className="flex-shrink-0 w-64 mx-4 card-glass overflow-hidden group"
             >
-              <div className="relative h-80 overflow-hidden bg-gray-100">
+              <div className="h-48 overflow-hidden relative">
                 {product.image_url || product.image ? (
                   <img
                     src={product.image_url || product.image}
@@ -168,18 +181,18 @@ export default function ProductMarquee({ isAdmin = false }) {
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  <div className="w-full h-full flex items-center justify-center text-brand-on-surface-variant/40">
                     <ImageIcon size={48} />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute inset-0 bg-brand-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
 
-              <div className="p-5 bg-white flex flex-col justify-between h-32">
-                <h3 className="font-display text-xl text-charcoal-900 font-semibold truncate">{product.name || product.title}</h3>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="text-lg font-medium text-bloom-600">${product.price.toFixed(2)}</span>
-                  <button className="btn-secondary text-xs px-3 py-1.5 rounded-full">View Details</button>
+              <div className="p-5 bg-white/40 flex flex-col justify-between">
+                <h3 className="font-display text-lg text-brand-on-surface font-bold truncate">{product.name || product.title}</h3>
+                <div className="flex items-center justify-between mt-4">
+                  <span className="text-sm font-bold text-brand-primary">{formatCurrency(product.price)}</span>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-brand-on-surface-variant/60">Seasonal</div>
                 </div>
               </div>
             </div>
@@ -189,80 +202,63 @@ export default function ProductMarquee({ isAdmin = false }) {
 
       {isAdmin && (
         <div className="w-full max-w-4xl mt-16 px-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-gold-200 p-8">
+          <div className="card-glass p-8">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-display text-charcoal-900">Admin: Manage Marquee</h2>
+              <h2 className="text-2xl font-display font-bold text-brand-on-surface">Manage Marquee</h2>
               {!isAdding && (
-                <button onClick={() => setIsAdding(true)} className="btn-primary">
-                  <Plus size={18} /> Add New Product
+                <button onClick={() => setIsAdding(true)} className="btn-primary py-2.5 px-6 text-xs">
+                  <Plus size={16} /> Add Bloom
                 </button>
               )}
             </div>
 
             {isAdding && (
-              <div className="mb-8 p-6 bg-petal-50/50 rounded-xl border border-petal-100 animate-fade-in-up">
-                <h3 className="font-medium text-charcoal-800 mb-4 text-lg">Add New Marquee Item</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div>
-                    <label className="label">Product name</label>
+              <div className="mb-8 p-6 bg-white/20 rounded-2xl border border-brand-secondary/5 animate-fade-in-up">
+                <h3 className="font-bold text-brand-on-surface mb-6 text-sm uppercase tracking-widest">New Marquee Item</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-brand-on-surface-variant ml-1">Name</label>
                     <input
                       type="text"
-                      className={`input-field ${newProductErrors.name ? 'border-red-400 focus:ring-red-200' : ''}`}
+                      className="input-field"
                       value={newProduct.name}
-                      onChange={(e) => {
-                        setNewProduct({ ...newProduct, name: e.target.value })
-                        if (newProductErrors.name) setNewProductErrors({ ...newProductErrors, name: null })
-                      }}
-                      placeholder="E.g., Radiant Sunflowers"
+                      onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                      placeholder="Radiant Sunflowers"
                     />
-                    {newProductErrors.name && <p className="mt-1 text-xs text-red-600">{newProductErrors.name}</p>}
                   </div>
-                  <div>
-                    <label className="label">Price ($)</label>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-brand-on-surface-variant ml-1">Price (₱)</label>
                     <input
                       type="number"
-                      className={`input-field ${newProductErrors.price ? 'border-red-400 focus:ring-red-200' : ''}`}
+                      className="input-field"
                       value={newProduct.price}
-                      onChange={(e) => {
-                        setNewProduct({ ...newProduct, price: e.target.value })
-                        if (newProductErrors.price) setNewProductErrors({ ...newProductErrors, price: null })
-                      }}
-                      placeholder="0.00"
+                      onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                      placeholder="0"
                     />
-                    {newProductErrors.price && <p className="mt-1 text-xs text-red-600">{newProductErrors.price}</p>}
                   </div>
-                  <div>
-                    <label className="label">Upload Image</label>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-brand-on-surface-variant ml-1">Image</label>
                     <input
                       type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      className="input-field py-1.5 text-sm"
+                      className="input-field py-2 text-xs"
                       onChange={(e) => handleImageUpload(e, (file, url, error) => {
                         if (error) {
                           setNewProductErrors({ ...newProductErrors, image: error })
                           return
                         }
-                        setNewProductErrors({ ...newProductErrors, image: null })
                         setNewProduct({ ...newProduct, image_url: url, imageFile: file })
                       })}
                     />
-                    {newProductErrors.image && <p className="mt-1 text-xs text-red-600">{newProductErrors.image}</p>}
                   </div>
                 </div>
-                {newProductErrors.submit && (
-                  <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 mb-4">
-                    {newProductErrors.submit}
-                  </div>
-                )}
-                <div className="flex justify-end gap-3">
-                  <button onClick={() => { setIsAdding(false); setNewProductErrors({}) }} className="btn-secondary">Cancel</button>
+                <div className="flex justify-end gap-4">
+                  <button onClick={() => setIsAdding(false)} className="btn-secondary py-2.5 px-6 text-xs">Cancel</button>
                   <button
                     onClick={handleAddProduct}
-                    className="btn-primary"
+                    className="btn-primary py-2.5 px-6 text-xs"
                     disabled={actionLoading}
-                    type="button"
                   >
-                    {actionLoading ? 'Saving…' : 'Save Product'}
+                    {actionLoading ? 'Saving...' : 'Add to Marquee'}
                   </button>
                 </div>
               </div>
@@ -270,72 +266,49 @@ export default function ProductMarquee({ isAdmin = false }) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {products.map((product) => (
-                <div key={product.id} className="relative p-4 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 transition-colors group">
+                <div key={product.id} className="relative p-4 rounded-2xl border border-brand-secondary/5 bg-white/10 hover:bg-white/30 transition-colors group">
                   {editingId === product.id ? (
-                    <div className="space-y-3 animate-fade-in-up">
+                    <div className="space-y-3">
                       <input
                         type="text"
-                        className="input-field py-1.5 text-sm"
+                        className="input-field py-2 text-xs"
                         value={editForm.name}
                         onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                       />
                       <input
                         type="number"
-                        className={`input-field py-1.5 text-sm ${editErrors.price ? 'border-red-400 focus:ring-red-200' : ''}`}
+                        className="input-field py-2 text-xs"
                         value={editForm.price}
-                        onChange={(e) => {
-                          setEditForm({ ...editForm, price: e.target.value })
-                          if (editErrors.price) setEditErrors({ ...editErrors, price: null })
-                        }}
+                        onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
                       />
-                      {editErrors.price && <p className="mt-1 text-xs text-red-600">{editErrors.price}</p>}
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        className="input-field py-1.5 text-sm"
-                        onChange={(e) => handleImageUpload(e, (file, url, error) => {
-                          if (error) {
-                            setEditErrors({ ...editErrors, image: error })
-                            return
-                          }
-                          setEditErrors({ ...editErrors, image: null })
-                          setEditForm({ ...editForm, image_url: url, imageFile: file })
-                        })}
-                      />
-                      {editErrors.image && <p className="mt-1 text-xs text-red-600">{editErrors.image}</p>}
-                      {editErrors.submit && (
-                        <p className="text-sm text-red-600">{editErrors.submit}</p>
-                      )}
                       <div className="flex gap-2 justify-end pt-2">
-                        <button onClick={handleCancelEdit} className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-md transition-colors"><X size={16} /></button>
-                        <button onClick={handleSaveEdit} className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-100 rounded-md transition-colors"><Check size={16} /></button>
+                        <button onClick={handleCancelEdit} className="p-1.5 text-brand-on-surface-variant hover:text-brand-on-surface"><X size={16} /></button>
+                        <button onClick={handleSaveEdit} className="p-1.5 text-brand-primary hover:scale-110"><Check size={16} /></button>
                       </div>
                     </div>
                   ) : (
                     <>
                       <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0">
-                          <img src={product.image_url || product.image} alt={product.name || product.title} className="w-full h-full object-cover" />
+                        <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-brand-secondary/5">
+                          <img src={product.image_url || product.image} alt="" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium text-gray-900 truncate">{product.name || product.title}</h4>
-                          <p className="text-sm text-bloom-600">${product.price.toFixed(2)}</p>
+                          <h4 className="text-xs font-bold text-brand-on-surface truncate">{product.name || product.title}</h4>
+                          <p className="text-[10px] font-bold text-brand-primary uppercase mt-1">{formatCurrency(product.price)}</p>
                         </div>
                       </div>
-                      <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                        <button
-                          onClick={() => handleDeleteProduct(product.id)}
-                          className="p-2 bg-white rounded-full shadow-sm text-red-500 hover:text-red-700"
-                          type="button"
-                        >
-                          <X size={14} />
-                        </button>
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
                         <button
                           onClick={() => handleEditClick(product)}
-                          className="p-2 bg-white rounded-full shadow-sm text-gray-400 hover:text-bloom-500"
-                          type="button"
+                          className="p-1.5 bg-white/80 rounded-full text-brand-on-surface-variant hover:text-brand-primary shadow-sm"
                         >
-                          <Edit2 size={14} />
+                          <Edit2 size={12} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(product.id)}
+                          className="p-1.5 bg-white/80 rounded-full text-brand-on-surface-variant hover:text-brand-error shadow-sm"
+                        >
+                          <X size={12} />
                         </button>
                       </div>
                     </>

@@ -1,259 +1,246 @@
-// src/pages/customer/CheckoutPage.jsx
-
 import { useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '@/context/CartContext'
-import { useAuth } from '@/context/AuthContext'
 import { useOrders } from '@/hooks/useOrders'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { Spinner } from '@/components/ui/Spinner'
 
-const EMPTY_FORM = {
-  customer_name:    '',
-  customer_email:   '',
-  customer_phone:   '',
-  delivery_address: '',
-  notes:            '',
+const FIELD_LIMITS = {
+  customer_name: 100,
+  customer_email: 100,
+  customer_phone: 20,
+  delivery_address: 300,
+  notes: 500,
 }
 
-const FIELD_LIMITS = {
-  customer_name: 200,
-  customer_email: 200,
-  customer_phone: 40,
-  delivery_address: 500,
-  notes: 1000,
-}
+const DELIVERY_FEE = 80
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart()
-  const { user } = useAuth()
-  const { placeOrder } = useOrders()
+  const { createOrder } = useOrders()
   const navigate = useNavigate()
 
-  const [form,     setForm]     = useState(EMPTY_FORM)
-  const [loading,  setLoading]  = useState(false)
-  const [error,    setError]    = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
   const [fieldErr, setFieldErr] = useState({})
+  const [form, setForm] = useState({
+    customer_name: '',
+    customer_email: '',
+    customer_phone: '',
+    delivery_address: '',
+    notes: '',
+  })
 
-  if (items.length === 0) return <Navigate to="/catalog" replace />
+  if (items.length === 0) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 pt-24 text-center">
+        <h2 className="font-display text-3xl font-bold text-brand-on-surface mb-4">Your collection is empty</h2>
+        <p className="text-brand-on-surface-variant font-light mb-8 max-w-sm">Please select a bouquet from our collection before proceeding to checkout.</p>
+        <Link to="/catalog" className="btn-primary">
+          Explore Collection
+        </Link>
+      </div>
+    )
+  }
 
-  function handleChange(e) {
+  const handleChange = (e) => {
     const { name, value } = e.target
-    const limit = FIELD_LIMITS[name]
-    setForm(prev => ({ ...prev, [name]: limit ? value.slice(0, limit) : value }))
+    setForm(prev => ({ ...prev, [name]: value }))
     if (fieldErr[name]) setFieldErr(prev => ({ ...prev, [name]: null }))
   }
 
-  function validate() {
+  const validate = () => {
     const errs = {}
-    const cleaned = {
-      customer_name: form.customer_name.trim(),
-      customer_email: form.customer_email.trim(),
-      customer_phone: form.customer_phone.trim(),
-      delivery_address: form.delivery_address.trim(),
-      notes: form.notes.trim(),
-    }
-
-    if (!cleaned.customer_name) errs.customer_name = 'Name is required.'
-    if (!cleaned.customer_email) errs.customer_email = 'Messenger name is required.'
-    if (!cleaned.delivery_address) errs.delivery_address = 'Delivery address is required.'
-
-    Object.entries(FIELD_LIMITS).forEach(([field, limit]) => {
-      if (cleaned[field] && cleaned[field].length > limit) {
-        errs[field] = `Must be ${limit} characters or fewer.`
-      }
-    })
-
-    return errs
+    if (!form.customer_name.trim()) errs.customer_name = 'Name is required'
+    if (!form.customer_email.trim()) errs.customer_email = 'Contact info is required'
+    if (!form.delivery_address.trim()) errs.delivery_address = 'Address is required'
+    setFieldErr(errs)
+    return Object.keys(errs).length === 0
   }
 
-  async function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    const errs = validate()
-    if (Object.keys(errs).length) { setFieldErr(errs); return }
+    if (!validate()) return
 
     setLoading(true)
     setError(null)
 
     try {
-      const orderPayload = {
-        customer_name:    form.customer_name.trim(),
-        customer_email:   form.customer_email.trim(),
-        customer_phone:   form.customer_phone.trim() || null,
-        delivery_address: form.delivery_address.trim(),
-        notes:            form.notes.trim() || null,
+      const orderData = {
+        ...form,
+        total_amount: totalPrice + DELIVERY_FEE,
+        items: items.map(item => ({
+          product_id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image_url: item.image_url,
+        })),
       }
-      if (user?.id) orderPayload.customer_id = user.id
 
-      const order = await placeOrder(orderPayload, items)
+      const order = await createOrder(orderData)
       clearCart()
-      try {
-        localStorage.setItem('lastOrderId', order.id)
-        if (order.tracking_token) localStorage.setItem('lastOrderToken', order.tracking_token)
-        window.dispatchEvent(new Event('lastOrderIdChanged'))
-      } catch {
-        // Local storage is best-effort only; checkout has already succeeded.
-      }
-      navigate(`/orders/${order.id}?token=${order.tracking_token}`, { replace: true, state: { order } })
+      localStorage.setItem('lastOrderId', order.id)
+      localStorage.setItem('lastOrderToken', order.tracking_token)
+      navigate(`/orders/${order.id}?token=${order.tracking_token}`)
     } catch (err) {
       setError(err.message)
-    } finally {
       setLoading(false)
     }
   }
 
-  const DELIVERY_FEE = 80
-
-  const glassCard = {
-    background: 'rgba(255,255,255,0.65)',
-    backdropFilter: 'blur(20px) saturate(180%)',
-    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-    border: '1px solid rgba(255,255,255,0.5)',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)',
-  }
-
   return (
-    <div className="page-enter mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-16">
-      <Link
-        to="/catalog"
-        className="group mb-7 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-charcoal-500 transition-colors hover:text-bloom-600 sm:mb-10"
-      >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full transition-all group-hover:-translate-x-1" style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(249,168,212,0.3)' }}>
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+    <div className="page-enter pt-24 pb-20 mx-auto max-w-6xl px-6">
+      <div className="mb-16">
+        <Link to="/catalog" className="group inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-brand-on-surface-variant hover:text-brand-primary transition-colors">
+          <svg className="h-4 w-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
           </svg>
-        </span>
-        Back to Collection
-      </Link>
-
-      <div className="mb-7 sm:mb-10">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-bloom-500 mb-2">Almost there</p>
-        <h1 className="font-display text-3xl font-bold text-charcoal-900 sm:text-4xl">Secure Checkout</h1>
+          Back to Collection
+        </Link>
+        <h1 className="mt-8 font-display text-4xl md:text-5xl font-bold text-brand-on-surface leading-tight">
+          Secure <span className="italic font-light">Checkout</span>
+        </h1>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
-        {/* Delivery form */}
-        <form onSubmit={handleSubmit} noValidate className="lg:col-span-3 space-y-5">
-          <div className="rounded-2xl px-4 py-5 sm:rounded-3xl sm:px-6 sm:py-6" style={glassCard}>
-            <h2 className="font-semibold text-charcoal-900 mb-5 flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #ec4899, #be185d)' }}>1</span>
-              Delivery details
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-10">
+          <section className="card-glass p-8 space-y-8">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.3em] text-brand-primary flex items-center gap-4">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-primary text-white text-[10px]">1</span>
+              Delivery Information
             </h2>
 
             {error && (
-              <div role="alert" className="mb-5 rounded-2xl px-4 py-3 text-sm text-red-700" style={{ background: 'rgba(254,226,226,0.8)', border: '1px solid rgba(252,165,165,0.4)' }}>
+              <div className="p-4 rounded-xl bg-brand-error/10 text-brand-error text-xs font-medium">
                 {error}
               </div>
             )}
 
-            <div className="space-y-4">
-              {[
-                { id: 'customer_name',  label: 'Full name',       type: 'text', required: true,  placeholder: 'Maria Santos' },
-                { id: 'customer_email', label: 'Messenger name',  type: 'text', required: true,  placeholder: 'maria.santos' },
-                { id: 'customer_phone', label: 'Phone (optional)', type: 'tel',  required: false, placeholder: '+63 9XX XXX XXXX' },
-              ].map(field => (
-                <div key={field.id}>
-                  <label htmlFor={`co-${field.id}`} className="label">
-                    {field.label}
-                    {field.required && <span aria-hidden="true" className="text-bloom-500 ml-0.5">*</span>}
-                  </label>
-                  <input
-                    id={`co-${field.id}`}
-                    name={field.id}
-                    type={field.type}
-                    value={form[field.id]}
-                    onChange={handleChange}
-                    placeholder={field.placeholder}
-                    maxLength={FIELD_LIMITS[field.id]}
-                    required={field.required}
-                    className={`input-field ${fieldErr[field.id] ? 'border-red-300 ring-red-100' : ''}`}
-                  />
-                  {fieldErr[field.id] && (
-                    <p role="alert" className="mt-1 text-xs text-red-500">{fieldErr[field.id]}</p>
-                  )}
-                </div>
-              ))}
-
-              <div>
-                <label htmlFor="co-address" className="label">
-                  Delivery address <span aria-hidden="true" className="text-bloom-500">*</span>
-                </label>
-                <textarea
-                  id="co-address" name="delivery_address" rows={3}
-                  value={form.delivery_address} onChange={handleChange}
-                  placeholder="House/unit no., street, barangay, city"
-                  maxLength={FIELD_LIMITS.delivery_address}
-                  className={`input-field resize-none ${fieldErr.delivery_address ? 'border-red-300' : ''}`}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-brand-on-surface-variant ml-1">Full Name</label>
+                <input
+                  name="customer_name"
+                  type="text"
+                  required
+                  value={form.customer_name}
+                  onChange={handleChange}
+                  placeholder="Maria Clara"
+                  className={`input-field ${fieldErr.customer_name ? 'border-brand-error' : ''}`}
                 />
-                {fieldErr.delivery_address && (
-                  <p role="alert" className="mt-1 text-xs text-red-500">{fieldErr.delivery_address}</p>
-                )}
               </div>
-
-              <div>
-                <label htmlFor="co-notes" className="label">Order notes (optional)</label>
-                <textarea
-                  id="co-notes" name="notes" rows={2}
-                  value={form.notes} onChange={handleChange}
-                  placeholder="Any special instructions, e.g. ribbon color preference, card message…"
-                  maxLength={FIELD_LIMITS.notes}
-                  className="input-field resize-none"
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-brand-on-surface-variant ml-1">Messenger / Email</label>
+                <input
+                  name="customer_email"
+                  type="text"
+                  required
+                  value={form.customer_email}
+                  onChange={handleChange}
+                  placeholder="mclara.24"
+                  className={`input-field ${fieldErr.customer_email ? 'border-brand-error' : ''}`}
                 />
               </div>
             </div>
-          </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-brand-on-surface-variant ml-1">Phone Number</label>
+              <input
+                name="customer_phone"
+                type="tel"
+                value={form.customer_phone}
+                onChange={handleChange}
+                placeholder="+63 900 000 0000"
+                className="input-field"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-brand-on-surface-variant ml-1">Delivery Address</label>
+              <textarea
+                name="delivery_address"
+                rows={3}
+                required
+                value={form.delivery_address}
+                onChange={handleChange}
+                placeholder="Complete address in Cebu..."
+                className={`input-field resize-none ${fieldErr.delivery_address ? 'border-brand-error' : ''}`}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-brand-on-surface-variant ml-1">Gift Note (Optional)</label>
+              <textarea
+                name="notes"
+                rows={2}
+                value={form.notes}
+                onChange={handleChange}
+                placeholder="Include a message with your bouquet..."
+                className="input-field resize-none"
+              />
+            </div>
+          </section>
 
           <button
             type="submit"
-            className="btn-primary w-full justify-center py-4 text-sm"
             disabled={loading}
-            style={{ boxShadow: '0 8px 30px rgba(236,72,153,0.35)' }}
+            className="btn-primary w-full py-5 text-base"
           >
-            {loading
-              ? <><Spinner size="sm" /> Placing order…</>
-              : `Place order · ${formatCurrency(totalPrice + DELIVERY_FEE)}`
-            }
+            {loading ? (
+              <span className="flex items-center gap-3"><Spinner size="sm" /> Processing Order...</span>
+            ) : (
+              `Complete Collection · ${formatCurrency(totalPrice + DELIVERY_FEE)}`
+            )}
           </button>
         </form>
 
-        {/* Order summary */}
-        <aside className="lg:col-span-2" aria-label="Order summary">
-          <div className="rounded-2xl px-4 py-5 sm:rounded-3xl sm:px-6 sm:py-6 lg:sticky lg:top-24" style={glassCard}>
-            <h2 className="font-semibold text-charcoal-900 mb-5 flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #ec4899, #be185d)' }}>2</span>
-              Order summary
+        {/* Order Summary */}
+        <aside className="lg:col-span-5 lg:sticky lg:top-32 space-y-8">
+           <section className="card-glass p-8">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.3em] text-brand-primary flex items-center gap-4 mb-8">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-primary text-white text-[10px]">2</span>
+              Your Selection
             </h2>
-            <ul className="space-y-0 mb-4" style={{ borderTop: '1px solid rgba(249,168,212,0.15)' }}>
+
+            <ul className="space-y-6 mb-8">
               {items.map(item => (
-                <li
-                  key={item.id}
-                  className="flex gap-3 py-3 text-sm"
-                  style={{ borderBottom: '1px solid rgba(249,168,212,0.1)' }}
-                >
-                  <span className="min-w-0 flex-1 text-charcoal-700">
-                    <span className="font-semibold text-charcoal-900">{item.quantity}×</span> {item.name}
-                  </span>
-                  <span className="text-charcoal-800 font-medium tabular-nums">{formatCurrency(item.price * item.quantity)}</span>
+                <li key={item.id} className="flex justify-between items-center gap-4">
+                  <div className="flex items-center gap-4 min-w-0">
+                     <div className="h-12 w-12 rounded-xl overflow-hidden shrink-0 border border-brand-secondary/5">
+                        <img src={item.image_url} alt={item.name} className="h-full w-full object-cover" />
+                     </div>
+                     <div className="min-w-0">
+                        <p className="text-xs font-bold text-brand-on-surface truncate">{item.name}</p>
+                        <p className="text-[10px] font-medium text-brand-on-surface-variant">{item.quantity} × {formatCurrency(item.price)}</p>
+                     </div>
+                  </div>
+                  <span className="text-xs font-bold text-brand-on-surface tabular-nums">{formatCurrency(item.price * item.quantity)}</span>
                 </li>
               ))}
             </ul>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between text-charcoal-500">
+
+            <div className="space-y-3 pt-6 border-t border-brand-secondary/5">
+              <div className="flex justify-between text-xs font-medium text-brand-on-surface-variant uppercase tracking-widest">
                 <span>Subtotal</span>
                 <span>{formatCurrency(totalPrice)}</span>
               </div>
-              <div className="flex justify-between text-charcoal-500">
-                <span>Delivery</span>
+              <div className="flex justify-between text-xs font-medium text-brand-on-surface-variant uppercase tracking-widest">
+                <span>Cebu Delivery</span>
                 <span>{formatCurrency(DELIVERY_FEE)}</span>
               </div>
-              <div
-                className="flex justify-between font-bold text-charcoal-900 text-base pt-3 mt-2"
-                style={{ borderTop: '1px solid rgba(249,168,212,0.2)' }}
-              >
-                <span>Total</span>
-                <span className="text-bloom-600">{formatCurrency(totalPrice + DELIVERY_FEE)}</span>
+              <div className="flex justify-between items-baseline pt-6 mt-2 border-t border-brand-secondary/5">
+                <span className="font-display text-xl font-bold text-brand-on-surface">Total</span>
+                <span className="font-display text-3xl font-bold text-brand-primary">{formatCurrency(totalPrice + DELIVERY_FEE)}</span>
               </div>
             </div>
+          </section>
+
+          <div className="px-4 text-center">
+             <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-brand-on-surface-variant/60">
+                Secure SSL Encrypted Payment & Delivery
+             </p>
           </div>
         </aside>
       </div>

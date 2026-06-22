@@ -1,18 +1,13 @@
-// src/components/admin/OrdersTable.jsx
-// Incoming orders dashboard with inline status update dropdown.
-
 import { useState } from 'react'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/ui/Spinner'
-import { EmptyState } from '@/components/ui/EmptyState'
 import { formatCurrency } from '@/utils/formatCurrency'
 
 const ORDER_STATUSES = ['Pending', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled']
 
 function formatDate(iso) {
   return new Intl.DateTimeFormat('en-PH', {
-    month: 'short', day: 'numeric', year: 'numeric',
-    hour: 'numeric', minute: '2-digit',
+    month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
   }).format(new Date(iso))
 }
 
@@ -29,34 +24,12 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-16" aria-live="polite" aria-busy="true">
-        <Spinner size="lg" />
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div role="alert" className="rounded-xl bg-red-50 px-5 py-4 text-sm text-red-700">
-        Failed to load orders: {error}
-      </div>
-    )
-  }
-
-  if (orders.length === 0) {
-    return (
-      <EmptyState
-        icon="📋"
-        title="No orders yet"
-        message="Orders placed by customers will appear here."
-      />
-    )
-  }
+  if (loading) return <div className="py-20 flex justify-center"><Spinner size="lg" /></div>
+  if (error) return <div className="p-8 text-center text-brand-error font-medium">{error}</div>
+  if (orders.length === 0) return <div className="py-20 text-center text-brand-on-surface-variant font-light">Awaiting your first request.</div>
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {orders.map((order, idx) => {
         const isExpanded = expandedId === order.id
         const isUpdating = updatingId === order.id
@@ -64,113 +37,65 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
         return (
           <article
             key={order.id}
-            className="card overflow-hidden opacity-0 animate-fade-in-up"
-            style={{ animationDelay: `${idx * 75}ms` }}
-            aria-label={`Order from ${order.customer_name}`}
+            className="group card-glass overflow-hidden opacity-0 animate-fade-in-up"
+            style={{ animationDelay: `${idx * 50}ms` }}
           >
-            {/* Order header row */}
             <div
-              className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-2 px-4 py-4 transition-colors duration-500 hover:bg-petal-100 sm:gap-x-4 sm:px-5"
+              className="flex items-center gap-6 px-6 py-5 cursor-pointer hover:bg-white/40 transition-colors"
               onClick={() => setExpandedId(isExpanded ? null : order.id)}
-              role="button"
-              aria-expanded={isExpanded}
-              tabIndex={0}
-              onKeyDown={e => e.key === 'Enter' && setExpandedId(isExpanded ? null : order.id)}
             >
-              {/* Customer name + ID */}
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-gray-900 truncate">{order.customer_name}</p>
-                <p className="text-xs text-gray-400 font-mono">{order.id.slice(0, 8)}…</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-brand-on-surface truncate">{order.customer_name}</p>
+                <p className="text-[10px] font-bold text-brand-on-surface-variant/50 uppercase tracking-widest">{formatDate(order.created_at)}</p>
               </div>
 
-              {/* Total */}
-              <span className="text-sm font-semibold tabular-nums text-gray-900">
-                {formatCurrency(order.total_amount)}
-              </span>
+              <div className="text-right shrink-0">
+                <p className="text-sm font-bold text-brand-on-surface tabular-nums">{formatCurrency(order.total_amount)}</p>
+                <Badge label={order.status} />
+              </div>
 
-              {/* Status badge */}
-              <Badge label={order.status} />
-
-              {/* Date */}
-              <span className="text-xs text-gray-400 hidden sm:inline">{formatDate(order.created_at)}</span>
-
-              {/* Chevron */}
-              <svg
-                className={`h-4 w-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-                aria-hidden="true"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              <svg className={`h-5 w-5 text-brand-on-surface-variant/30 transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="m19.5 8.25-7.5 7.5-7.5-7.5" />
               </svg>
             </div>
 
-            {/* Expanded detail panel */}
             {isExpanded && (
-              <div className="animate-fade-in space-y-5 border-t border-gold-100 bg-petal-50/50 px-4 py-5 sm:space-y-6 sm:px-5 sm:py-6">
-                {/* Customer details */}
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
+              <div className="px-6 pb-8 pt-2 grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-brand-secondary/5 animate-fade-in">
+                <div className="space-y-4">
                   <div>
-                    <p className="text-xs font-semibold uppercase text-gray-400 mb-1">Customer</p>
-                    <p className="text-gray-700">{order.customer_name}</p>
-                    <p className="text-gray-500">Messenger: {order.customer_email}</p>
-                    {order.customer_phone && <p className="text-gray-500">{order.customer_phone}</p>}
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-brand-primary mb-2">Delivery Details</h4>
+                    <p className="text-sm font-light text-brand-on-surface leading-relaxed">{order.delivery_address}</p>
+                    <p className="text-xs font-medium text-brand-on-surface-variant mt-2">{order.customer_email} · {order.customer_phone}</p>
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase text-gray-400 mb-1">Delivery address</p>
-                    <p className="text-gray-700">{order.delivery_address}</p>
-                    {order.notes && (
-                      <p className="mt-1 text-gray-400 italic text-xs">Note: {order.notes}</p>
-                    )}
-                  </div>
+                  {order.notes && (
+                    <div className="p-3 rounded-xl bg-brand-primary/5 italic text-xs text-brand-primary">
+                      "{order.notes}"
+                    </div>
+                  )}
                 </div>
 
-                {/* Order items */}
-                {order.order_items?.length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold uppercase text-gray-400 mb-2">Items</p>
-                    <ul className="divide-y divide-gray-100 rounded-lg bg-white ring-1 ring-gray-100">
-                      {order.order_items.map(item => (
-                        <li key={item.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
-                          <span className="min-w-0 text-gray-700">
-                            <span className="font-medium text-gray-900">{item.quantity}×</span> {item.product_name}
-                          </span>
-                          <span className="text-gray-500 tabular-nums">{formatCurrency(item.subtotal)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-brand-primary">Request Selection</h4>
+                  <ul className="space-y-2">
+                    {order.order_items?.map(item => (
+                      <li key={item.id} className="flex justify-between text-xs text-brand-on-surface">
+                        <span className="font-medium">{item.quantity}× {item.product_name}</span>
+                        <span className="font-bold tabular-nums">{formatCurrency(item.subtotal)}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-                {/* Status update */}
-                <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <label htmlFor={`status-${order.id}`} className="text-xs font-semibold uppercase text-gray-400">
-                      Update status
-                    </label>
-                    <div className="relative">
-                      <select
-                        id={`status-${order.id}`}
-                        value={order.status}
-                        onChange={e => handleStatusChange(order.id, e.target.value)}
-                        disabled={isUpdating}
-                        className="input-field py-2 pr-8 text-xs sm:py-1.5"
-                        aria-label={`Change order status for ${order.customer_name}`}
-                      >
-                        {ORDER_STATUSES.map(s => (
-                          <option key={s} value={s}>{s}</option>
-                        ))}
-                      </select>
-                      {isUpdating && (
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                          <Spinner size="sm" />
-                        </div>
-                      )}
-                    </div>
+                  <div className="pt-4 border-t border-brand-secondary/5">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-brand-on-surface-variant block mb-2">Update Status</label>
+                    <select
+                      value={order.status}
+                      onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                      disabled={isUpdating}
+                      className="input-field py-2 text-xs"
+                    >
+                      {ORDER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
                   </div>
-
-                  <p className="text-xs text-gray-400">
-                    Placed {formatDate(order.created_at)}
-                  </p>
                 </div>
               </div>
             )}
