@@ -16,7 +16,7 @@ export default function AdminLogin() {
 
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-bloom-950">
+      <div className="flex min-h-screen items-center justify-center bg-pattern">
         <Spinner size="lg" />
       </div>
     )
@@ -41,65 +41,88 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 page-enter bg-surface">
-      <div className="relative z-10 w-full max-w-sm">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl text-3xl mb-4 bg-primary/10 text-primary shadow-sm border border-primary/20 animate-scale-in">
-            🌸
-          </div>
-          <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">
-            Beauty Blooms
-          </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-            Admin dashboard access
-          </p>
+    <div className="flex min-h-screen items-center justify-center p-4 md:p-8 page-enter bg-pattern">
+      <main className="w-full max-w-md">
+        {/* Logo Header */}
+        <div className="text-center mb-8 animate-fade-in-up">
+          <span className="material-symbols-outlined text-primary text-5xl mb-4 icon-fill">
+            local_florist
+          </span>
+          <h1 className="font-headline-md text-headline-md text-primary tracking-tight">Beauty Blooms</h1>
+          <p className="font-body-md text-body-md text-on-surface-variant mt-2">Sign in to the Admin Dashboard</p>
         </div>
 
-        {/* Form card */}
-        <div className="rounded-3xl px-7 py-8 space-y-5 bg-surface-container shadow-md border border-outline/20">
-          <form onSubmit={handleSubmit} noValidate className="space-y-5">
+        {/* Login Card */}
+        <div className="glass-panel rounded-2xl p-8 shadow-petal transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:shadow-petal-hover hover:-translate-y-1">
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
             {error && (
-              <div role="alert" className="rounded-xl px-4 py-3 font-body-sm text-body-sm bg-error/10 text-error border border-error/20">
-                {error}
+              <div role="alert" className="p-4 rounded-lg bg-error-container/60 border border-error/20 flex items-start gap-3">
+                <span className="material-symbols-outlined text-error icon-fill">error</span>
+                <p className="font-body-md text-body-md text-on-error-container text-sm">
+                  {error}
+                </p>
               </div>
             )}
 
+            {/* Email Field */}
             <div>
-              <label htmlFor="login-email" className="label text-on-surface-variant">Email</label>
-              <input
-                id="login-email" type="email" autoComplete="email" required
-                value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="admin@bloom.ph"
-                className="input-field bg-surface text-on-surface border-outline/30 focus:border-primary focus:ring-1 focus:ring-primary"
-              />
+              <label className="block font-label-md text-label-md text-on-surface mb-2" htmlFor="login-email">Email Address</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline">mail</span>
+                <input
+                  id="login-email" type="email" autoComplete="email" required
+                  value={email} onChange={e => setEmail(e.target.value)}
+                  placeholder="admin@beautyblooms.com"
+                  className="input-field pl-10"
+                />
+              </div>
             </div>
 
+            {/* Password Field */}
             <div>
-              <label htmlFor="login-password" className="label text-on-surface-variant">Password</label>
-              <input
-                id="login-password" type="password" autoComplete="current-password" required
-                value={password} onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="input-field bg-surface text-on-surface border-outline/30 focus:border-primary focus:ring-1 focus:ring-primary"
-              />
+              <label className="block font-label-md text-label-md text-on-surface mb-2" htmlFor="login-password">Password</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline">lock</span>
+                <input
+                  id="login-password" type="password" autoComplete="current-password" required
+                  value={password} onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="input-field pl-10"
+                />
+              </div>
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
-              className="btn-primary w-full flex items-center justify-center gap-2 py-3 mt-2"
+              className="btn-primary w-full justify-center py-3 mt-2"
               disabled={loading || failedAttempts >= 5}
             >
-              {loading ? <><Spinner size="sm" /> Signing in…</> : failedAttempts >= 5 ? 'Refresh to retry' : 'Sign in'}
+              {loading
+                ? <><Spinner size="sm" /> Signing in…</>
+                : failedAttempts >= 5
+                  ? 'Refresh to retry'
+                  : 'Sign In'}
             </button>
             {failedAttempts >= 5 && (
-              <p className="text-center font-body-xs text-body-xs text-on-surface-variant">
+              <p className="text-center font-body-md text-body-md text-on-surface-variant text-sm">
                 Too many failed attempts in this session.
               </p>
             )}
           </form>
         </div>
-      </div>
+
+        {/* Footer Link */}
+        <div className="text-center mt-8">
+          <a
+            href="/"
+            className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center gap-2"
+          >
+            <span className="material-symbols-outlined text-sm">arrow_back</span>
+            Return to Shop
+          </a>
+        </div>
+      </main>
     </div>
   )
 }

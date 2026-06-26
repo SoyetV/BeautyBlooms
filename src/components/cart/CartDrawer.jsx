@@ -53,39 +53,37 @@ export function CartDrawer({ isOpen, onClose }) {
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{
-          background: 'rgba(253, 242, 248, 0.85)',
+          background: 'rgba(255, 247, 250, 0.92)',
           backdropFilter: 'blur(32px) saturate(180%)',
           WebkitBackdropFilter: 'blur(32px) saturate(180%)',
-          borderLeft: '1px solid rgba(249,168,212,0.3)',
+          borderLeft: '1px solid rgba(255, 255, 255, 0.6)',
           boxShadow: '-8px 0 40px rgba(0,0,0,0.15)',
         }}
       >
         {/* Header */}
         <div
           className="flex items-center justify-between px-4 py-4 sm:px-5"
-          style={{ borderBottom: '1px solid rgba(249,168,212,0.2)' }}
+          style={{ borderBottom: '1px solid rgba(222, 190, 200, 0.4)' }}
         >
           <div>
-            <h2 className="font-display text-xl font-bold text-charcoal-900">
+            <h2 className="font-headline-sm text-headline-sm text-on-surface">
               Your Cart
             </h2>
             {totalItems > 0 && (
-              <p className="text-xs text-charcoal-500 mt-0.5">{totalItems} item{totalItems !== 1 ? 's' : ''} selected</p>
+              <p className="text-xs text-on-surface-variant mt-0.5">{totalItems} item{totalItems !== 1 ? 's' : ''} selected</p>
             )}
           </div>
           <button
             ref={firstFocusRef}
             onClick={onClose}
-            className="rounded-xl p-2 text-charcoal-400 transition-all hover:text-charcoal-700"
+            className="rounded-xl p-2 text-on-surface-variant transition-all hover:text-primary"
             style={{
               background: 'rgba(255,255,255,0.6)',
-              border: '1px solid rgba(249,168,212,0.25)',
+              border: '1px solid rgba(222, 190, 200, 0.4)',
             }}
             aria-label="Close cart"
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <span className="material-symbols-outlined text-sm">close</span>
           </button>
         </div>
 
@@ -103,7 +101,7 @@ export function CartDrawer({ isOpen, onClose }) {
               }
             />
           ) : (
-            <ul className="divide-y" style={{ borderColor: 'rgba(249,168,212,0.15)' }} aria-label="Cart items">
+            <ul className="divide-y" style={{ borderColor: 'rgba(222, 190, 200, 0.25)' }} aria-label="Cart items">
               {items.map(item => <CartItem key={item.id} item={item} />)}
             </ul>
           )}
@@ -114,7 +112,7 @@ export function CartDrawer({ isOpen, onClose }) {
           <div
             className="space-y-3 px-4 py-4 sm:px-5 sm:py-5"
             style={{
-              borderTop: '1px solid rgba(249,168,212,0.2)',
+              borderTop: '1px solid rgba(222, 190, 200, 0.4)',
               background: 'rgba(255,255,255,0.5)',
               backdropFilter: 'blur(12px)',
             }}
@@ -124,23 +122,23 @@ export function CartDrawer({ isOpen, onClose }) {
               className="rounded-2xl p-4 space-y-2"
               style={{
                 background: 'rgba(255,255,255,0.6)',
-                border: '1px solid rgba(249,168,212,0.2)',
+                border: '1px solid rgba(222, 190, 200, 0.4)',
               }}
             >
               <div className="flex items-center justify-between text-sm">
-                <span className="text-charcoal-500">Subtotal</span>
-                <span className="font-medium text-charcoal-800">{formatCurrency(totalPrice)}</span>
+                <span className="text-on-surface-variant">Subtotal</span>
+                <span className="font-medium text-on-surface">{formatCurrency(totalPrice)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-charcoal-500">Delivery</span>
-                <span className="font-medium text-charcoal-800">{formatCurrency(DELIVERY_FEE)}</span>
+                <span className="text-on-surface-variant">Delivery</span>
+                <span className="font-medium text-on-surface">{formatCurrency(DELIVERY_FEE)}</span>
               </div>
               <div
                 className="flex items-center justify-between pt-2"
-                style={{ borderTop: '1px solid rgba(249,168,212,0.2)' }}
+                style={{ borderTop: '1px solid rgba(222, 190, 200, 0.4)' }}
               >
-                <span className="font-bold text-charcoal-900">Total</span>
-                <span className="font-bold text-bloom-600 text-lg">{formatCurrency(totalPrice + DELIVERY_FEE)}</span>
+                <span className="font-headline-sm text-headline-sm text-on-surface">Total</span>
+                <span className="font-headline-sm text-headline-sm text-primary text-lg">{formatCurrency(totalPrice + DELIVERY_FEE)}</span>
               </div>
             </div>
 
@@ -149,7 +147,7 @@ export function CartDrawer({ isOpen, onClose }) {
             </button>
             <button
               onClick={clearCart}
-              className="w-full text-center text-xs text-charcoal-400 hover:text-red-500 transition-colors py-1"
+              className="w-full text-center text-xs text-on-surface-variant hover:text-error transition-colors py-1"
             >
               Clear cart
             </button>

@@ -104,48 +104,44 @@ export default function CheckoutPage() {
 
   const DELIVERY_FEE = 80
 
-  const glassCard = "bg-surface-container backdrop-blur-lg border border-outline/30 shadow-sm"
+  const glassCard = "glass-panel rounded-2xl"
 
   return (
-    <div className="page-enter mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop py-8 sm:py-16">
+    <div className="page-enter mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop py-12 md:py-16">
       <Link
         to="/catalog"
         className="group mb-7 inline-flex items-center gap-2 font-label-md text-label-md uppercase tracking-widest text-on-surface-variant transition-colors hover:text-primary sm:mb-10"
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full transition-all group-hover:-translate-x-1 border border-outline/30 bg-surface/80">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full transition-all group-hover:-translate-x-1 border border-outline-variant bg-surface/80">
           <span className="material-symbols-outlined text-sm">arrow_back</span>
         </span>
         Back to Collection
       </Link>
 
       <div className="mb-7 sm:mb-10">
-        <p className="font-label-md text-label-md uppercase tracking-[0.2em] text-primary mb-2">Almost there</p>
-        <h1 className="font-display-md text-display-md text-on-surface">Secure Checkout</h1>
+        <p className="font-label-md text-label-md uppercase tracking-widest text-primary mb-2">Almost there</p>
+        <h1 className="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-primary">Secure Checkout</h1>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-gutter lg:grid-cols-5">
         {/* Delivery form */}
-        <form onSubmit={handleSubmit} noValidate className="lg:col-span-3 space-y-5">
-          <div className={`rounded-2xl px-4 py-5 sm:rounded-3xl sm:px-6 sm:py-6 ${glassCard}`}>
-            <h2 className="font-title-lg text-title-lg text-on-surface mb-5 flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full font-label-md text-label-md text-on-primary bg-primary">1</span>
-              Delivery details
-            </h2>
+        <form onSubmit={handleSubmit} noValidate className="w-full lg:col-span-3 space-y-8">
+          <div className={`p-6 md:p-8 space-y-6 ${glassCard}`}>
+            <h2 className="font-label-md text-label-md text-secondary uppercase tracking-widest">Recipient Information</h2>
 
             {error && (
-              <div role="alert" className="mb-5 rounded-2xl px-4 py-3 text-sm text-red-700" style={{ background: 'rgba(254,226,226,0.8)', border: '1px solid rgba(252,165,165,0.4)' }}>
+              <div role="alert" className="rounded-lg px-4 py-3 text-sm text-on-error-container bg-error-container/50 border border-error/20">
                 {error}
               </div>
             )}
 
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {[
                 { id: 'customer_name',  label: 'Full name',       type: 'text', required: true,  placeholder: 'Maria Santos' },
                 { id: 'customer_email', label: 'Messenger name',  type: 'text', required: true,  placeholder: 'maria.santos' },
-                { id: 'customer_phone', label: 'Phone (optional)', type: 'tel',  required: false, placeholder: '+63 9XX XXX XXXX' },
               ].map(field => (
-                <div key={field.id}>
-                  <label htmlFor={`co-${field.id}`} className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mb-1 block">
+                <div key={field.id} className="space-y-2">
+                  <label htmlFor={`co-${field.id}`} className="font-label-md text-label-md text-on-surface block">
                     {field.label}
                     {field.required && <span aria-hidden="true" className="text-error ml-0.5">*</span>}
                   </label>
@@ -158,46 +154,66 @@ export default function CheckoutPage() {
                     placeholder={field.placeholder}
                     maxLength={FIELD_LIMITS[field.id]}
                     required={field.required}
-                    className={`input-field ${fieldErr[field.id] ? 'border-red-300 ring-red-100' : ''}`}
+                    className={`input-field ${fieldErr[field.id] ? 'border-error/50' : ''}`}
                   />
                   {fieldErr[field.id] && (
-                    <p role="alert" className="mt-1 text-xs text-red-500">{fieldErr[field.id]}</p>
+                    <p role="alert" className="text-xs text-error">{fieldErr[field.id]}</p>
                   )}
                 </div>
               ))}
-
-              <div>
-                <label htmlFor="co-address" className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mb-1 block">
-                  Delivery address <span aria-hidden="true" className="text-error">*</span>
+              <div className="space-y-2 md:col-span-2">
+                <label htmlFor="co-customer_phone" className="font-label-md text-label-md text-on-surface block">
+                  Phone (optional)
                 </label>
-                <textarea
-                  id="co-address" name="delivery_address" rows={3}
-                  value={form.delivery_address} onChange={handleChange}
-                  placeholder="House/unit no., street, barangay, city"
-                  maxLength={FIELD_LIMITS.delivery_address}
-                  className={`input-field resize-none ${fieldErr.delivery_address ? 'border-red-300' : ''}`}
+                <input
+                  id="co-customer_phone"
+                  name="customer_phone"
+                  type="tel"
+                  value={form.customer_phone}
+                  onChange={handleChange}
+                  placeholder="+63 9XX XXX XXXX"
+                  maxLength={FIELD_LIMITS.customer_phone}
+                  className="input-field"
                 />
-                {fieldErr.delivery_address && (
-                  <p role="alert" className="mt-1 text-xs text-red-500">{fieldErr.delivery_address}</p>
-                )}
               </div>
+            </div>
 
-              <div>
-                <label htmlFor="co-notes" className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mb-1 block">Order notes (optional)</label>
-                <textarea
-                  id="co-notes" name="notes" rows={2}
-                  value={form.notes} onChange={handleChange}
-                  placeholder="Any special instructions, e.g. ribbon color preference, card message…"
-                  maxLength={FIELD_LIMITS.notes}
-                  className="input-field resize-none"
-                />
+            <div className="pt-6 border-t border-secondary/10 space-y-6">
+              <h3 className="font-label-md text-label-md text-secondary uppercase tracking-widest">Delivery Address</h3>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label htmlFor="co-address" className="font-label-md text-label-md text-on-surface block">
+                    Complete Address <span aria-hidden="true" className="text-error">*</span>
+                  </label>
+                  <textarea
+                    id="co-address" name="delivery_address" rows={3}
+                    value={form.delivery_address} onChange={handleChange}
+                    placeholder="House/unit no., street, barangay, city"
+                    maxLength={FIELD_LIMITS.delivery_address}
+                    className={`input-field resize-none ${fieldErr.delivery_address ? 'border-error/50' : ''}`}
+                  />
+                  {fieldErr.delivery_address && (
+                    <p role="alert" className="text-xs text-error">{fieldErr.delivery_address}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="co-notes" className="font-label-md text-label-md text-on-surface block">Delivery Notes (Optional)</label>
+                  <textarea
+                    id="co-notes" name="notes" rows={2}
+                    value={form.notes} onChange={handleChange}
+                    placeholder="Any special instructions, e.g. ribbon color preference, card message…"
+                    maxLength={FIELD_LIMITS.notes}
+                    className="input-field resize-none"
+                  />
+                </div>
               </div>
             </div>
           </div>
 
           <button
             type="submit"
-            className="w-full justify-center py-4 bg-primary text-on-primary rounded-full font-label-lg text-label-lg uppercase tracking-wider shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-300"
+            className="w-full justify-center py-4 bg-primary text-on-primary rounded-full font-label-md text-label-md uppercase tracking-wider shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-300"
             disabled={loading}
           >
             {loading
@@ -208,17 +224,14 @@ export default function CheckoutPage() {
         </form>
 
         {/* Order summary */}
-        <aside className="lg:col-span-2" aria-label="Order summary">
-          <div className={`rounded-2xl px-4 py-5 sm:rounded-3xl sm:px-6 sm:py-6 lg:sticky lg:top-24 ${glassCard}`}>
-            <h2 className="font-title-lg text-title-lg text-on-surface mb-5 flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full font-label-md text-label-md text-on-primary bg-primary">2</span>
-              Order summary
-            </h2>
-            <ul className="space-y-0 mb-4 border-t border-outline/20">
+        <aside className="w-full lg:col-span-2" aria-label="Order summary">
+          <div className={`p-6 md:p-8 lg:sticky lg:top-32 ${glassCard}`}>
+            <h2 className="font-label-md text-label-md text-secondary uppercase tracking-widest mb-6">Order Summary</h2>
+            <ul className="space-y-4 mb-8">
               {items.map(item => (
                 <li
                   key={item.id}
-                  className="flex gap-3 py-3 font-body-sm text-body-sm border-b border-outline/10"
+                  className="flex items-center gap-4 font-body-md text-body-md"
                 >
                   <span className="min-w-0 flex-1 text-on-surface-variant">
                     <span className="font-semibold text-on-surface">{item.quantity}×</span> {item.name}
@@ -227,22 +240,25 @@ export default function CheckoutPage() {
                 </li>
               ))}
             </ul>
-            <div className="space-y-2 font-body-sm text-body-sm">
-              <div className="flex justify-between text-on-surface-variant">
+            <div className="space-y-3 pt-6 border-t border-secondary/10 font-body-md text-body-md">
+              <div className="flex justify-between items-center text-on-surface-variant">
                 <span>Subtotal</span>
                 <span>{formatCurrency(totalPrice)}</span>
               </div>
-              <div className="flex justify-between text-on-surface-variant">
-                <span>Delivery</span>
+              <div className="flex justify-between items-center text-on-surface-variant">
+                <span>Delivery Fee</span>
                 <span>{formatCurrency(DELIVERY_FEE)}</span>
               </div>
               <div
-                className="flex justify-between font-title-lg text-title-lg text-on-surface pt-3 mt-2 border-t border-outline/20"
+                className="flex justify-between items-center pt-4 font-headline-sm text-headline-sm text-primary border-t border-secondary/10"
               >
                 <span>Total</span>
-                <span className="text-primary">{formatCurrency(totalPrice + DELIVERY_FEE)}</span>
+                <span>{formatCurrency(totalPrice + DELIVERY_FEE)}</span>
               </div>
             </div>
+            <p className="text-center font-body-md text-body-md text-on-surface-variant text-sm mt-6">
+              Payment collected upon delivery.
+            </p>
           </div>
         </aside>
       </div>

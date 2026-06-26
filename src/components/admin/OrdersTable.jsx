@@ -39,7 +39,7 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
 
   if (error) {
     return (
-      <div role="alert" className="rounded-xl bg-red-50 px-5 py-4 text-sm text-red-700">
+      <div role="alert" className="rounded-xl bg-error-container/50 px-5 py-4 text-sm text-on-error-container border border-error/20">
         Failed to load orders: {error}
       </div>
     )
@@ -64,13 +64,13 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
         return (
           <article
             key={order.id}
-            className="rounded-3xl bg-surface-container border border-outline/20 shadow-sm overflow-hidden opacity-0 animate-fade-in-up"
+            className="glass-panel rounded-2xl overflow-hidden opacity-0 animate-fade-in-up"
             style={{ animationDelay: `${idx * 75}ms` }}
             aria-label={`Order from ${order.customer_name}`}
           >
             {/* Order header row */}
             <div
-              className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-2 px-4 py-4 transition-colors duration-500 hover:bg-surface-variant/30 sm:gap-x-4 sm:px-5"
+              className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-2 px-4 py-4 transition-colors duration-500 hover:bg-surface-container-highest/30 sm:gap-x-4 sm:px-5"
               onClick={() => setExpandedId(isExpanded ? null : order.id)}
               role="button"
               aria-expanded={isExpanded}
@@ -79,12 +79,12 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
             >
               {/* Customer name + ID */}
               <div className="min-w-0 flex-1">
-                <p className="font-label-md text-label-md text-on-surface truncate">{order.customer_name}</p>
-                <p className="font-body-sm text-body-sm text-on-surface-variant font-mono">{order.id.slice(0, 8)}…</p>
+                <p className="font-headline-sm text-headline-sm text-on-surface truncate">{order.customer_name}</p>
+                <p className="font-body-md text-body-md text-on-surface-variant font-mono">{order.id.slice(0, 8)}…</p>
               </div>
 
               {/* Total */}
-              <span className="font-label-md text-label-md tabular-nums text-on-surface">
+              <span className="font-headline-sm text-headline-sm text-secondary tabular-nums">
                 {formatCurrency(order.total_amount)}
               </span>
 
@@ -92,34 +92,33 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
               <Badge label={order.status} />
 
               {/* Date */}
-              <span className="font-body-sm text-body-sm text-on-surface-variant hidden sm:inline">{formatDate(order.created_at)}</span>
+              <span className="font-body-md text-body-md text-on-surface-variant hidden sm:inline">{formatDate(order.created_at)}</span>
 
               {/* Chevron */}
-              <svg
-                className={`h-4 w-4 text-on-surface-variant transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+              <span
+                className={`material-symbols-outlined h-4 w-4 text-on-surface-variant transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                 aria-hidden="true"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-              </svg>
+                expand_more
+              </span>
             </div>
 
             {/* Expanded detail panel */}
             {isExpanded && (
-              <div className="animate-fade-in space-y-5 border-t border-outline/10 bg-surface/40 px-4 py-5 sm:space-y-6 sm:px-5 sm:py-6">
+              <div className="animate-fade-in space-y-5 border-t border-outline-variant/20 bg-surface/40 px-4 py-5 sm:space-y-6 sm:px-5 sm:py-6">
                 {/* Customer details */}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
                   <div>
-                    <p className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-1">Customer</p>
+                    <p className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mb-1">Customer</p>
                     <p className="font-body-md text-body-md text-on-surface">{order.customer_name}</p>
                     <p className="font-body-md text-body-md text-on-surface-variant">Messenger: {order.customer_email}</p>
                     {order.customer_phone && <p className="font-body-md text-body-md text-on-surface-variant">{order.customer_phone}</p>}
                   </div>
                   <div>
-                    <p className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-1">Delivery address</p>
+                    <p className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mb-1">Delivery address</p>
                     <p className="font-body-md text-body-md text-on-surface">{order.delivery_address}</p>
                     {order.notes && (
-                      <p className="mt-1 font-body-sm text-body-sm italic text-on-surface-variant">Note: {order.notes}</p>
+                      <p className="mt-1 font-body-md text-body-md italic text-on-surface-variant">Note: {order.notes}</p>
                     )}
                   </div>
                 </div>
@@ -127,10 +126,10 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
                 {/* Order items */}
                 {order.order_items?.length > 0 && (
                   <div>
-                    <p className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mb-2">Items</p>
-                    <ul className="divide-y divide-outline/10 rounded-lg bg-surface ring-1 ring-outline/20">
+                    <p className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mb-2">Items</p>
+                    <ul className="divide-y divide-outline-variant/20 rounded-lg bg-surface ring-1 ring-outline-variant/30">
                       {order.order_items.map(item => (
-                        <li key={item.id} className="flex items-center justify-between gap-3 px-3 py-2 font-body-sm text-body-sm">
+                        <li key={item.id} className="flex items-center justify-between gap-3 px-3 py-2 font-body-md text-body-md">
                           <span className="min-w-0 text-on-surface">
                             <span className="font-semibold text-on-surface">{item.quantity}×</span> {item.product_name}
                           </span>
@@ -144,7 +143,7 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
                 {/* Status update */}
                 <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <label htmlFor={`status-${order.id}`} className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">
+                    <label htmlFor={`status-${order.id}`} className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
                       Update status
                     </label>
                     <div className="relative">
@@ -153,7 +152,7 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
                         value={order.status}
                         onChange={e => handleStatusChange(order.id, e.target.value)}
                         disabled={isUpdating}
-                        className="input-field bg-surface border-outline/30 text-on-surface py-2 pr-8 font-body-sm text-body-sm sm:py-1.5"
+                        className="input-field py-2 pr-8 font-body-md text-body-md sm:py-1.5"
                         aria-label={`Change order status for ${order.customer_name}`}
                       >
                         {ORDER_STATUSES.map(s => (
@@ -168,7 +167,7 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
                     </div>
                   </div>
 
-                  <p className="font-body-sm text-body-sm text-on-surface-variant">
+                  <p className="font-body-md text-body-md text-on-surface-variant">
                     Placed {formatDate(order.created_at)}
                   </p>
                 </div>

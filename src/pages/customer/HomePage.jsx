@@ -29,10 +29,16 @@ export default function HomePage() {
             Curated botanical masterpieces for the refined aesthetic. Experience the luxury of nature's most delicate creations, hand-selected in Cebu.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link to="/catalog" className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-primary to-surface-tint text-on-primary rounded-full font-label-md text-label-md uppercase tracking-wider hover:shadow-lg hover:scale-[1.02] transition-all duration-300 shadow-primary/20">
+            <Link
+              to="/catalog"
+              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-primary to-surface-tint text-on-primary rounded-full font-label-md text-label-md uppercase tracking-wider hover:shadow-lg hover:scale-[1.02] transition-all duration-300 shadow-primary/20"
+            >
               Discover Collection
             </Link>
-            <a href="#featured" className="w-full sm:w-auto px-8 py-4 bg-transparent border ring-1 ring-secondary/50 text-secondary rounded-full font-label-md text-label-md uppercase tracking-wider hover:bg-secondary/5 transition-all duration-300 inline-block">
+            <a
+              href="#featured"
+              className="w-full sm:w-auto px-8 py-4 bg-transparent border ring-1 ring-secondary/50 text-secondary rounded-full font-label-md text-label-md uppercase tracking-wider hover:bg-secondary/5 transition-all duration-300 inline-block"
+            >
               View Featured
             </a>
           </div>
@@ -49,22 +55,22 @@ export default function HomePage() {
             <div className="w-16 h-16 rounded-full bg-surface-bright flex items-center justify-center text-primary mb-4 shadow-sm ring-1 ring-primary/10">
               <span className="material-symbols-outlined text-3xl icon-fill">local_florist</span>
             </div>
-            <h3 className="font-headline-sm text-lg text-on-surface mb-2">Always Fresh</h3>
-            <p className="font-body-md text-sm text-on-surface-variant max-w-xs mx-auto">Sourced daily from premium local and international growers to ensure longevity.</p>
+            <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">Always Fresh</h3>
+            <p className="font-body-md text-body-md text-on-surface-variant max-w-xs mx-auto">Sourced daily from premium local and international growers to ensure longevity.</p>
           </div>
           <div className="flex flex-col items-center pt-8 md:pt-0 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
             <div className="w-16 h-16 rounded-full bg-surface-bright flex items-center justify-center text-primary mb-4 shadow-sm ring-1 ring-primary/10">
               <span className="material-symbols-outlined text-3xl icon-fill">local_shipping</span>
             </div>
-            <h3 className="font-headline-sm text-lg text-on-surface mb-2">Same-Day Delivery</h3>
-            <p className="font-body-md text-sm text-on-surface-variant max-w-xs mx-auto">Available for Cebu City and surrounding metropolitan areas on orders placed before 2 PM.</p>
+            <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">Same-Day Delivery</h3>
+            <p className="font-body-md text-body-md text-on-surface-variant max-w-xs mx-auto">Available for Cebu City and surrounding metropolitan areas on orders placed before 2 PM.</p>
           </div>
           <div className="flex flex-col items-center pt-8 md:pt-0 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
             <div className="w-16 h-16 rounded-full bg-surface-bright flex items-center justify-center text-primary mb-4 shadow-sm ring-1 ring-primary/10">
               <span className="material-symbols-outlined text-3xl icon-fill">handshake</span>
             </div>
-            <h3 className="font-headline-sm text-lg text-on-surface mb-2">Hand-Arranged</h3>
-            <p className="font-body-md text-sm text-on-surface-variant max-w-xs mx-auto">Crafted with meticulous attention to detail by our master florists.</p>
+            <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">Hand-Arranged</h3>
+            <p className="font-body-md text-body-md text-on-surface-variant max-w-xs mx-auto">Crafted with meticulous attention to detail by our master florists.</p>
           </div>
         </div>
       </section>

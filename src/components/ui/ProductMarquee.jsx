@@ -150,7 +150,7 @@ export default function ProductMarquee({ isAdmin = false }) {
 
   return (
     <div className="w-full flex flex-col items-center py-12 bg-background overflow-hidden">
-      <div className="w-full relative py-8 overflow-hidden bg-surface-container-low border-y border-outline/20 shadow-sm backdrop-blur-sm">
+      <div className="w-full relative py-8 overflow-hidden bg-surface-container-low border-y border-secondary/10 shadow-sm backdrop-blur-sm">
         <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none"></div>
         <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
 
@@ -158,14 +158,14 @@ export default function ProductMarquee({ isAdmin = false }) {
           {marqueeItems.map((product, idx) => (
             <div
               key={`${product.id}-${idx}`}
-              className="card flex-shrink-0 w-72 md:w-80 overflow-hidden cursor-pointer group-hover:[animation-play-state:paused]"
+              className="glass-panel rounded-2xl flex-shrink-0 w-72 md:w-80 overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-petal-hover hover:scale-[1.02] group-hover:[animation-play-state:paused]"
             >
-              <div className="relative h-80 overflow-hidden bg-surface-container">
+              <div className="relative h-80 overflow-hidden bg-surface-container-highest">
                 {product.image_url || product.image ? (
                   <img
                     src={product.image_url || product.image}
                     alt={product.name || product.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
@@ -176,10 +176,10 @@ export default function ProductMarquee({ isAdmin = false }) {
               </div>
 
               <div className="p-5 bg-surface flex flex-col justify-between h-32">
-                <h3 className="font-title-lg text-title-lg text-on-surface truncate">{product.name || product.title}</h3>
+                <h3 className="font-headline-sm text-headline-sm text-primary truncate">{product.name || product.title}</h3>
                 <div className="flex items-center justify-between mt-auto">
-                  <span className="font-label-lg text-label-lg text-primary">${product.price.toFixed(2)}</span>
-                  <button className="px-4 py-2 border ring-1 ring-outline text-on-surface rounded-full font-label-sm text-label-sm uppercase tracking-wider hover:bg-surface-variant transition-all duration-300">View Details</button>
+                  <span className="font-headline-sm text-headline-sm text-secondary">${product.price.toFixed(2)}</span>
+                  <button className="px-4 py-2 border ring-1 ring-outline text-on-surface rounded-full font-label-md text-label-md uppercase tracking-wider hover:bg-surface-variant transition-all duration-300">View Details</button>
                 </div>
               </div>
             </div>
@@ -189,9 +189,9 @@ export default function ProductMarquee({ isAdmin = false }) {
 
       {isAdmin && (
         <div className="w-full max-w-4xl mt-16 px-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-gold-200 p-8">
+          <div className="glass-panel rounded-2xl shadow-petal p-8">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-display text-charcoal-900">Admin: Manage Marquee</h2>
+              <h2 className="font-headline-md text-headline-md text-on-surface">Admin: Manage Marquee</h2>
               {!isAdding && (
                 <button onClick={() => setIsAdding(true)} className="btn-primary">
                   <Plus size={18} /> Add New Product
@@ -200,14 +200,14 @@ export default function ProductMarquee({ isAdmin = false }) {
             </div>
 
             {isAdding && (
-              <div className="mb-8 p-6 bg-petal-50/50 rounded-xl border border-petal-100 animate-fade-in-up">
-                <h3 className="font-medium text-charcoal-800 mb-4 text-lg">Add New Marquee Item</h3>
+              <div className="mb-8 p-6 bg-surface-container-low/50 rounded-xl border border-secondary/15 animate-fade-in-up">
+                <h3 className="font-headline-sm text-headline-sm text-on-surface mb-4">Add New Marquee Item</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div>
                     <label className="label">Product name</label>
                     <input
                       type="text"
-                      className={`input-field ${newProductErrors.name ? 'border-red-400 focus:ring-red-200' : ''}`}
+                      className={`input-field ${newProductErrors.name ? 'border-error/50 focus:ring-error/20' : ''}`}
                       value={newProduct.name}
                       onChange={(e) => {
                         setNewProduct({ ...newProduct, name: e.target.value })
@@ -215,13 +215,13 @@ export default function ProductMarquee({ isAdmin = false }) {
                       }}
                       placeholder="E.g., Radiant Sunflowers"
                     />
-                    {newProductErrors.name && <p className="mt-1 text-xs text-red-600">{newProductErrors.name}</p>}
+                    {newProductErrors.name && <p className="mt-1 text-xs text-error">{newProductErrors.name}</p>}
                   </div>
                   <div>
                     <label className="label">Price ($)</label>
                     <input
                       type="number"
-                      className={`input-field ${newProductErrors.price ? 'border-red-400 focus:ring-red-200' : ''}`}
+                      className={`input-field ${newProductErrors.price ? 'border-error/50 focus:ring-error/20' : ''}`}
                       value={newProduct.price}
                       onChange={(e) => {
                         setNewProduct({ ...newProduct, price: e.target.value })
@@ -229,7 +229,7 @@ export default function ProductMarquee({ isAdmin = false }) {
                       }}
                       placeholder="0.00"
                     />
-                    {newProductErrors.price && <p className="mt-1 text-xs text-red-600">{newProductErrors.price}</p>}
+                    {newProductErrors.price && <p className="mt-1 text-xs text-error">{newProductErrors.price}</p>}
                   </div>
                   <div>
                     <label className="label">Upload Image</label>
@@ -246,11 +246,11 @@ export default function ProductMarquee({ isAdmin = false }) {
                         setNewProduct({ ...newProduct, image_url: url, imageFile: file })
                       })}
                     />
-                    {newProductErrors.image && <p className="mt-1 text-xs text-red-600">{newProductErrors.image}</p>}
+                    {newProductErrors.image && <p className="mt-1 text-xs text-error">{newProductErrors.image}</p>}
                   </div>
                 </div>
                 {newProductErrors.submit && (
-                  <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 mb-4">
+                  <div className="rounded-lg bg-error-container/40 px-4 py-3 text-sm text-on-error-container mb-4 border border-error/20">
                     {newProductErrors.submit}
                   </div>
                 )}
@@ -270,7 +270,7 @@ export default function ProductMarquee({ isAdmin = false }) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {products.map((product) => (
-                <div key={product.id} className="relative p-4 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 transition-colors group">
+                <div key={product.id} className="relative p-4 rounded-xl border border-outline/15 bg-surface-container-low/50 hover:bg-surface-container-low transition-colors group">
                   {editingId === product.id ? (
                     <div className="space-y-3 animate-fade-in-up">
                       <input
@@ -281,14 +281,14 @@ export default function ProductMarquee({ isAdmin = false }) {
                       />
                       <input
                         type="number"
-                        className={`input-field py-1.5 text-sm ${editErrors.price ? 'border-red-400 focus:ring-red-200' : ''}`}
+                        className={`input-field py-1.5 text-sm ${editErrors.price ? 'border-error/50 focus:ring-error/20' : ''}`}
                         value={editForm.price}
                         onChange={(e) => {
                           setEditForm({ ...editForm, price: e.target.value })
                           if (editErrors.price) setEditErrors({ ...editErrors, price: null })
                         }}
                       />
-                      {editErrors.price && <p className="mt-1 text-xs text-red-600">{editErrors.price}</p>}
+                      {editErrors.price && <p className="mt-1 text-xs text-error">{editErrors.price}</p>}
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
@@ -302,13 +302,13 @@ export default function ProductMarquee({ isAdmin = false }) {
                           setEditForm({ ...editForm, image_url: url, imageFile: file })
                         })}
                       />
-                      {editErrors.image && <p className="mt-1 text-xs text-red-600">{editErrors.image}</p>}
+                      {editErrors.image && <p className="mt-1 text-xs text-error">{editErrors.image}</p>}
                       {editErrors.submit && (
-                        <p className="text-sm text-red-600">{editErrors.submit}</p>
+                        <p className="text-sm text-error">{editErrors.submit}</p>
                       )}
                       <div className="flex gap-2 justify-end pt-2">
-                        <button onClick={handleCancelEdit} className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-md transition-colors"><X size={16} /></button>
-                        <button onClick={handleSaveEdit} className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-100 rounded-md transition-colors"><Check size={16} /></button>
+                        <button onClick={handleCancelEdit} className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant rounded-md transition-colors"><X size={16} /></button>
+                        <button onClick={handleSaveEdit} className="p-1.5 text-primary hover:text-primary-container hover:bg-primary/10 rounded-md transition-colors"><Check size={16} /></button>
                       </div>
                     </div>
                   ) : (
@@ -318,21 +318,21 @@ export default function ProductMarquee({ isAdmin = false }) {
                           <img src={product.image_url || product.image} alt={product.name || product.title} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium text-gray-900 truncate">{product.name || product.title}</h4>
-                          <p className="text-sm text-bloom-600">${product.price.toFixed(2)}</p>
+                          <h4 className="text-sm font-medium text-on-surface truncate">{product.name || product.title}</h4>
+                          <p className="text-sm text-primary">${product.price.toFixed(2)}</p>
                         </div>
                       </div>
                       <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
                         <button
                           onClick={() => handleDeleteProduct(product.id)}
-                          className="p-2 bg-white rounded-full shadow-sm text-red-500 hover:text-red-700"
+                          className="p-2 bg-surface rounded-full shadow-sm text-error hover:bg-error-container/50"
                           type="button"
                         >
                           <X size={14} />
                         </button>
                         <button
                           onClick={() => handleEditClick(product)}
-                          className="p-2 bg-white rounded-full shadow-sm text-gray-400 hover:text-bloom-500"
+                          className="p-2 bg-surface rounded-full shadow-sm text-on-surface-variant hover:text-primary"
                           type="button"
                         >
                           <Edit2 size={14} />

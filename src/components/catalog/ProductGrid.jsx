@@ -35,7 +35,7 @@ export function ProductGrid({ products, loading, error, onRetry }) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4" aria-live="polite" aria-busy="true">
         <Spinner size="lg" />
-        <p className="text-sm text-gray-500">Loading flowers…</p>
+        <p className="font-body-md text-body-md text-on-surface-variant">Loading flowers…</p>
       </div>
     )
   }
@@ -64,20 +64,15 @@ export function ProductGrid({ products, loading, error, onRetry }) {
       <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:gap-4">
         {/* Search input */}
         <div className="relative">
-          <svg
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
-            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-            aria-hidden="true"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round"
-              d="M21 21l-4.35-4.35M17 11A6 6 0 105 11a6 6 0 0012 0z" />
-          </svg>
+          <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
+            search
+          </span>
           <input
             type="search"
-            placeholder="Search flowers…"
+            placeholder="Search the collection…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="input-field pl-9"
+            className="input-field pl-12"
             aria-label="Search flowers"
           />
         </div>
@@ -119,7 +114,7 @@ export function ProductGrid({ products, loading, error, onRetry }) {
           }
         />
       ) : (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-gutter sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((product, idx) => {
             const staggerDelay = idx < 12 ? `${idx * 100}ms` : '0ms';
             return (

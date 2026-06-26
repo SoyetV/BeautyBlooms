@@ -31,43 +31,43 @@ export function ProductCard({ product }) {
       : null
 
   return (
-    <article className="card group flex flex-col overflow-hidden h-full">
+    <article className="glass-panel card group flex flex-col overflow-hidden h-full">
       {/* Product image */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-surface-container">
+      <div className="relative aspect-[4/3] overflow-hidden bg-surface-container-highest">
         <img
           src={imgError || !product.image_url ? PLACEHOLDER : product.image_url}
           alt={product.name}
           onError={() => setImgError(true)}
-          className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+          className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           loading="lazy"
         />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         {/* Category pill */}
-        <span className="absolute left-3 top-3 px-3 py-1 font-label-sm text-label-sm uppercase tracking-wider text-on-surface bg-surface/80 backdrop-blur-md rounded-full shadow-sm">
+        <span className="absolute left-3 top-3 px-3 py-1 font-label-md text-label-md uppercase tracking-wider text-on-primary-container bg-primary-container/80 backdrop-blur-md rounded-full shadow-sm">
           {product.category}
         </span>
         {/* Out of stock overlay */}
         {isOutOfStock && (
-          <div className="absolute inset-0 flex items-center justify-center bg-surface/50 backdrop-blur-[2px]">
+          <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-[2px]">
             <span className="font-label-md text-label-md text-on-surface tracking-wider uppercase">Sold Out</span>
           </div>
         )}
       </div>
 
       {/* Card body */}
-      <div className="flex flex-1 flex-col p-5 bg-surface">
+      <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-title-lg text-title-lg text-on-surface line-clamp-2">
+          <h3 className="font-headline-sm text-headline-sm text-primary line-clamp-2">
             {product.name}
           </h3>
-          <span className="font-label-lg text-label-lg text-primary shrink-0">
+          <span className="font-headline-sm text-headline-sm text-secondary shrink-0">
             {formatCurrency(product.price)}
           </span>
         </div>
 
         {product.description && (
-          <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mb-4">
+          <p className="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-4">
             {product.description}
           </p>
         )}
@@ -91,7 +91,7 @@ export function ProductCard({ product }) {
               : adding
                 ? 'bg-secondary text-on-secondary shadow-md'
                 : inCart
-                  ? 'bg-secondary-container text-on-secondary-container border border-secondary/20'
+                  ? 'bg-secondary-container/50 text-on-secondary-container border border-secondary/20'
                   : 'bg-primary text-on-primary shadow-sm hover:shadow-md hover:scale-[1.02]'
           }`}
         >

@@ -36,11 +36,11 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
       <div
         className={`relative z-10 w-full ${maxW[size]} max-h-[calc(100vh-2rem)] overflow-hidden rounded-2xl animate-fade-in-up sm:max-h-[calc(100vh-4rem)] sm:rounded-3xl`}
         style={{
-          background: 'rgba(253,242,248,0.88)',
-          backdropFilter: 'blur(32px) saturate(200%)',
-          WebkitBackdropFilter: 'blur(32px) saturate(200%)',
-          border: '1px solid rgba(249,168,212,0.35)',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.2), 0 8px 24px rgba(236,72,153,0.1), inset 0 1px 0 rgba(255,255,255,0.8)',
+          background: 'rgba(255, 247, 250, 0.92)',
+          backdropFilter: 'blur(32px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+          border: '1px solid rgba(255, 255, 255, 0.6)',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.18), 0 8px 24px rgba(177,14,107,0.08), inset 0 1px 0 rgba(255,255,255,0.85)',
         }}
       >
         {/* Header */}
@@ -49,24 +49,22 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
           style={{
             background: 'rgba(255,255,255,0.5)',
             backdropFilter: 'blur(12px)',
-            borderBottom: '1px solid rgba(249,168,212,0.2)',
+            borderBottom: '1px solid rgba(222, 190, 200, 0.4)',
           }}
         >
-          <h2 id="modal-title" className="font-display text-lg font-bold text-charcoal-900 sm:text-xl">
+          <h2 id="modal-title" className="font-headline-sm text-headline-sm text-on-surface">
             {title}
           </h2>
           <button
             onClick={onClose}
-            className="rounded-xl p-1.5 text-charcoal-400 transition-all hover:text-charcoal-700"
+            className="rounded-xl p-1.5 text-on-surface-variant transition-all hover:text-primary"
             style={{
               background: 'rgba(255,255,255,0.6)',
-              border: '1px solid rgba(249,168,212,0.25)',
+              border: '1px solid rgba(222, 190, 200, 0.4)',
             }}
             aria-label="Close modal"
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <span className="material-symbols-outlined text-sm">close</span>
           </button>
         </div>
 

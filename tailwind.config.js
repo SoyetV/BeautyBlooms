@@ -14,6 +14,7 @@ export default {
         'slide-in-right':'slideInRight 0.4s cubic-bezier(0.16,1,0.3,1) forwards',
         'marquee':       'marquee 30s linear infinite',
         'shimmer':       'shimmer 2s infinite',
+        'ping-soft':     'pingSoft 1.6s cubic-bezier(0.4,0,0.2,1) infinite',
       },
       keyframes: {
         fadeIn: {
@@ -44,137 +45,61 @@ export default {
           '0%':   { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
+        pingSoft: {
+          '75%, 100%': { transform: 'scale(1.6)', opacity: '0' },
+        },
       },
       colors: {
-  "error": "#ba1a1a",
-  "on-tertiary-container": "#fffbff",
-  "error-container": "#ffdad6",
-  "secondary": "#805618",
-  "on-primary-fixed": "#3e0022",
-  "on-primary-container": "#fffbff",
-  "on-error": "#ffffff",
-  "tertiary-container": "#7a7278",
-  "outline": "#8b7079",
-  "on-tertiary-fixed": "#1f1a1e",
-  "inverse-surface": "#3d2a3e",
-  "primary-container": "#d23284",
-  "on-secondary-fixed": "#2a1700",
-  "tertiary": "#615a5f",
-  "inverse-on-surface": "#ffebfb",
-  "surface-bright": "#fff7fa",
-  "surface-tint": "#b4136d",
-  "primary": "#b10e6b",
-  "on-tertiary": "#ffffff",
-  "primary-fixed-dim": "#ffb0cd",
-  "background": "#fff7fa",
-  "surface-container-highest": "#f7daf4",
-  "surface-container-low": "#ffeffb",
-  "on-primary-fixed-variant": "#8c0053",
-  "surface-variant": "#f7daf4",
-  "secondary-container": "#fec47d",
-  "tertiary-fixed-dim": "#cec4ca",
-  "on-background": "#271528",
-  "on-surface-variant": "#574048",
-  "secondary-fixed-dim": "#f5bc75",
-  "on-secondary-container": "#794f12",
-  "surface-dim": "#eed1ec",
-  "on-secondary": "#ffffff",
-  "surface-container": "#ffe7fb",
-  "tertiary-fixed": "#eae0e6",
-  "inverse-primary": "#ffb0cd",
-  "on-tertiary-fixed-variant": "#4b454a",
-  "on-primary": "#ffffff",
-  "outline-variant": "#debec8",
-  "surface-container-high": "#fddffa",
-  "surface-container-lowest": "#ffffff",
-  "primary-fixed": "#ffd9e4",
-  "on-secondary-fixed-variant": "#653e00",
-  "secondary-fixed": "#ffddb7",
-  "on-error-container": "#93000a",
-  "surface": "#fff7fa",
-  "on-surface": "#271528",
-        /* ── Rose / Primary ── */
-        rose: {
-          25:  '#fff5f7',
-          50:  '#fff1f4',
-          100: '#ffe4ea',
-          200: '#fecdd6',
-          300: '#fda4b5',
-          400: '#fb7093',
-          500: '#f43f6e',
-          600: '#e11d52',
-          700: '#be123f',
-          800: '#9f1239',
-          900: '#881337',
-          950: '#4c0519',
-        },
-        /* ── Blush / Surface tints ── */
-        blush: {
-          50:  '#fdf8f9',
-          100: '#faeef1',
-          200: '#f5dce3',
-          300: '#ecc2cf',
-          400: '#df9db3',
-          500: '#cf7593',
-          600: '#b85578',
-          700: '#9a3d5f',
-          800: '#7d3149',
-          900: '#682a3d',
-        },
-        /* ── Champagne / Accent ── */
-        champagne: {
-          50:  '#fefcf5',
-          100: '#fdf6e3',
-          200: '#faecc1',
-          300: '#f5db8e',
-          400: '#efc45a',
-          500: '#e8aa33',
-          600: '#d08c22',
-          700: '#ad6d1e',
-          800: '#8c571e',
-          900: '#73491d',
-        },
-        /* ── Stone / Neutrals ── */
-        stone: {
-          25:  '#fafaf9',
-          50:  '#f5f5f4',
-          100: '#e7e5e4',
-          200: '#d6d3d1',
-          300: '#a8a29e',
-          400: '#78716c',
-          500: '#57534e',
-          600: '#44403c',
-          700: '#292524',
-          800: '#1c1917',
-          900: '#0c0a09',
-        },
-        /* ── Charcoal / Deep neutrals ── */
-        charcoal: {
-          50:  '#f5f5f5',
-          100: '#e1e1e1',
-          200: '#c2c2c2',
-          300: '#9b9b9b',
-          400: '#707070',
-          500: '#565656',
-          600: '#3f3f3f',
-          700: '#2b2b2b',
-          800: '#1c1c1c',
-          900: '#101010',
-        },
-        /* ── Petal / Light pinks ── */
-        petal: {
-          50:  '#fdf2f8',
-          100: '#fbeaf3',
-          200: '#f4d2e9',
-          300: '#edadde',
-          400: '#eaafce',
-          500: '#dd82b7',
-          600: '#c55f94',
-          700: '#9f4b76',
-          800: '#7a3a5a',
-          900: '#5c2c44',
-        },
-        /* ── Bloom / Brand pinks ── */
+        // ── Petal & Gilded Material Design 3 tokens ──
+        "error": "#ba1a1a",
+        "on-tertiary-container": "#fffbff",
+        "error-container": "#ffdad6",
+        "secondary": "#805618",
+        "on-primary-fixed": "#3e0022",
+        "on-primary-container": "#fffbff",
+        "on-error": "#ffffff",
+        "tertiary-container": "#7a7278",
+        "outline": "#8b7079",
+        "on-tertiary-fixed": "#1f1a1e",
+        "inverse-surface": "#3d2a3e",
+        "primary-container": "#d23284",
+        "on-secondary-fixed": "#2a1700",
+        "tertiary": "#615a5f",
+        "inverse-on-surface": "#ffebfb",
+        "surface-bright": "#fff7fa",
+        "surface-tint": "#b4136d",
+        "primary": "#b10e6b",
+        "on-tertiary": "#ffffff",
+        "primary-fixed-dim": "#ffb0cd",
+        "background": "#fff7fa",
+        "surface-container-highest": "#f7daf4",
+        "surface-container-low": "#ffeffb",
+        "on-primary-fixed-variant": "#8c0053",
+        "surface-variant": "#f7daf4",
+        "secondary-container": "#fec47d",
+        "tertiary-fixed-dim": "#cec4ca",
+        "on-background": "#271528",
+        "on-surface-variant": "#574048",
+        "secondary-fixed-dim": "#f5bc75",
+        "on-secondary-container": "#794f12",
+        "surface-dim": "#eed1ec",
+        "on-secondary": "#ffffff",
+        "surface-container": "#ffe7fb",
+        "tertiary-fixed": "#eae0e6",
+        "inverse-primary": "#ffb0cd",
+        "on-tertiary-fixed-variant": "#4b454a",
+        "on-primary": "#ffffff",
+        "outline-variant": "#debec8",
+        "surface-container-high": "#fddffa",
+        "surface-container-lowest": "#ffffff",
+        "primary-fixed": "#ffd9e4",
+        "on-secondary-fixed-variant": "#653e00",
+        "secondary-fixed": "#ffddb7",
+        "on-error-container": "#93000a",
+        "surface": "#fff7fa",
+        "on-surface": "#271528",
+
+        /* ── Bloom / Brand pinks (kept for back-compat with existing components) ── */
         bloom: {
           50:  '#fff0f6',
           100: '#ffe3ec',
@@ -186,8 +111,9 @@ export default {
           700: '#be185d',
           800: '#9d174d',
           900: '#831843',
+          950: '#5e0a2e',
         },
-        /* ── Gold / Warm accents ── */
+        /* ── Gold / Warm accents (used by secondary buttons & premium signifiers) ── */
         gold: {
           50:  '#fff7ed',
           100: '#ffedd5',
@@ -200,7 +126,33 @@ export default {
           800: '#78350f',
           900: '#4c2409',
         },
-        /* ── Sage / Supporting ── */
+        /* ── Petal / Light pinks (back-compat) ── */
+        petal: {
+          50:  '#fdf2f8',
+          100: '#fbeaf3',
+          200: '#f4d2e9',
+          300: '#edadde',
+          400: '#eaafce',
+          500: '#dd82b7',
+          600: '#c55f94',
+          700: '#9f4b76',
+          800: '#7a3a5a',
+          900: '#5c2c44',
+        },
+        /* ── Charcoal / Deep neutrals (back-compat for legacy text-* classes) ── */
+        charcoal: {
+          50:  '#f5f5f5',
+          100: '#e1e1e1',
+          200: '#c2c2c2',
+          300: '#9b9b9b',
+          400: '#707070',
+          500: '#565656',
+          600: '#3f3f3f',
+          700: '#2b2b2b',
+          800: '#1c1c1c',
+          900: '#101010',
+        },
+        /* ── Sage / Supporting (back-compat) ── */
         sage: {
           100: '#ecf0ea',
           200: '#d5e0d1',
@@ -214,93 +166,31 @@ export default {
         },
       },
       fontFamily: {
-  "body-lg": [
-    "Inter"
-  ],
-  "body-md": [
-    "Inter"
-  ],
-  "headline-md": [
-    "Playfair Display"
-  ],
-  "display-lg-mobile": [
-    "Playfair Display"
-  ],
-  "headline-sm": [
-    "Playfair Display"
-  ],
-  "accent-italic": [
-    "Playfair Display"
-  ],
-  "display-lg": [
-    "Playfair Display"
-  ],
-  "label-md": [
-    "Inter"
-  ],
-        display: ['"Cormorant Garamond"', '"Playfair Display"', 'Georgia', 'serif'],
-        body:    ['"DM Sans"', '"Inter"', 'system-ui', 'sans-serif'],
-        mono:    ['"DM Mono"', 'monospace'],
+        // ── Petal & Gilded typography ──
+        "body-lg":           ['Inter', 'system-ui', 'sans-serif'],
+        "body-md":           ['Inter', 'system-ui', 'sans-serif'],
+        "headline-md":       ['"Playfair Display"', 'Georgia', 'serif'],
+        "display-lg-mobile": ['"Playfair Display"', 'Georgia', 'serif'],
+        "headline-sm":       ['"Playfair Display"', 'Georgia', 'serif'],
+        "accent-italic":     ['"Playfair Display"', 'Georgia', 'serif'],
+        "display-lg":        ['"Playfair Display"', 'Georgia', 'serif'],
+        "label-md":          ['Inter', 'system-ui', 'sans-serif'],
+
+        // Semantic aliases (kept for back-compat with existing components)
+        display: ['"Playfair Display"', 'Georgia', 'serif'],
+        body:    ['Inter', 'system-ui', 'sans-serif'],
+        mono:    ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
       fontSize: {
-  "body-lg": [
-    "18px",
-    {
-      "lineHeight": "1.6",
-      "fontWeight": "400"
-    }
-  ],
-  "body-md": [
-    "16px",
-    {
-      "lineHeight": "1.6",
-      "fontWeight": "400"
-    }
-  ],
-  "headline-md": [
-    "32px",
-    {
-      "lineHeight": "1.3",
-      "fontWeight": "600"
-    }
-  ],
-  "display-lg-mobile": [
-    "32px",
-    {
-      "lineHeight": "1.2",
-      "fontWeight": "700"
-    }
-  ],
-  "headline-sm": [
-    "24px",
-    {
-      "lineHeight": "1.4",
-      "fontWeight": "600"
-    }
-  ],
-  "accent-italic": [
-    "20px",
-    {
-      "lineHeight": "1.5",
-      "fontWeight": "400"
-    }
-  ],
-  "display-lg": [
-    "48px",
-    {
-      "lineHeight": "1.2",
-      "letterSpacing": "-0.02em",
-      "fontWeight": "700"
-    }
-  ],
-  "label-md": [
-    "14px",
-    {
-      "lineHeight": "1.2",
-      "letterSpacing": "0.05em",
-      "fontWeight": "600"
-    }
-  ],
+        "body-lg":           ['18px', { lineHeight: '1.6',   fontWeight: '400' }],
+        "body-md":           ['16px', { lineHeight: '1.6',   fontWeight: '400' }],
+        "headline-md":       ['32px', { lineHeight: '1.3',   fontWeight: '600' }],
+        "display-lg-mobile": ['32px', { lineHeight: '1.2',   fontWeight: '700' }],
+        "headline-sm":       ['24px', { lineHeight: '1.4',   fontWeight: '600' }],
+        "accent-italic":     ['20px', { lineHeight: '1.5',   fontWeight: '400' }],
+        "display-lg":        ['48px', { lineHeight: '1.2',   letterSpacing: '-0.02em', fontWeight: '700' }],
+        "label-md":          ['14px', { lineHeight: '1.2',   letterSpacing: '0.05em',  fontWeight: '600' }],
+
         '2xs': ['0.625rem', { lineHeight: '1rem' }],
         xs:    ['0.75rem',  { lineHeight: '1.125rem' }],
         sm:    ['0.875rem', { lineHeight: '1.375rem' }],
@@ -316,11 +206,11 @@ export default {
         '8xl': ['6rem',     { lineHeight: '1' }],
       },
       spacing: {
-  "margin-desktop": "64px",
-  "gutter": "24px",
-  "margin-mobile": "16px",
-  "container-max": "1280px",
-  "base": "8px",
+        "margin-desktop": "64px",
+        "gutter":         "24px",
+        "margin-mobile":  "16px",
+        "container-max":  "1280px",
+        "base":           "8px",
         '4.5':  '1.125rem',
         '13':   '3.25rem',
         '15':   '3.75rem',
@@ -331,35 +221,48 @@ export default {
         '34':   '8.5rem',
       },
       borderRadius: {
-        '4xl': '2rem',
-        '5xl': '2.5rem',
+        'DEFAULT': '0.25rem',
+        'lg':      '0.5rem',
+        'xl':      '0.75rem',
+        '2xl':     '1rem',
+        '3xl':     '1.5rem',
+        '4xl':     '2rem',
+        '5xl':     '2.5rem',
+        'full':    '9999px',
       },
       boxShadow: {
         'xs':    '0 1px 2px 0 rgb(0 0 0 / 0.04)',
         'card':  '0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04)',
         'card-hover': '0 8px 24px -4px rgb(0 0 0 / 0.1), 0 2px 8px -2px rgb(0 0 0 / 0.06)',
-        'rose':  '0 4px 24px -4px rgb(244 63 110 / 0.35)',
-        'rose-lg': '0 8px 32px -4px rgb(244 63 110 / 0.4)',
+        'rose':  '0 4px 24px -4px rgb(177 14 107 / 0.35)',
+        'rose-lg': '0 8px 32px -4px rgb(177 14 107 / 0.4)',
         'float': '0 24px 48px -12px rgb(0 0 0 / 0.18)',
         'inner-top': 'inset 0 1px 0 0 rgb(255 255 255 / 0.1)',
+        'petal': '0 8px 32px -12px rgba(177, 14, 107, 0.15)',
+        'petal-hover': '0 20px 40px -15px rgba(177, 14, 107, 0.2)',
+        'gold':  '0 8px 32px -12px rgba(128, 86, 24, 0.15)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':  'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
         'shimmer': 'linear-gradient(90deg, transparent 0%, rgb(255 255 255 / 0.4) 50%, transparent 100%)',
         'hero-mesh': `
-          radial-gradient(at 20% 50%, rgb(244 63 110 / 0.15) 0px, transparent 50%),
-          radial-gradient(at 80% 20%, rgb(232 170 51 / 0.12) 0px, transparent 50%),
-          radial-gradient(at 50% 80%, rgb(159 18 57 / 0.1) 0px, transparent 50%)
+          radial-gradient(at 20% 50%, rgb(177 14 107 / 0.18) 0px, transparent 50%),
+          radial-gradient(at 80% 20%, rgb(128 86 24 / 0.12) 0px, transparent 50%),
+          radial-gradient(at 50% 80%, rgb(140 0 83 / 0.12) 0px, transparent 50%)
         `,
+        'petal-radial': `radial-gradient(circle at 50% 0%, #fff7fa 0%, #ffe7fb 60%, #f7daf4 100%)`,
       },
       transitionTimingFunction: {
-        'spring': 'cubic-bezier(0.16, 1, 0.3, 1)',
-        'bounce-in': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'spring':     'cubic-bezier(0.16, 1, 0.3, 1)',
+        'bounce-in':  'cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'petal':      'cubic-bezier(0.4, 0, 0.2, 1)',
       },
       transitionDuration: {
         '250': '250ms',
         '400': '400ms',
+        '500': '500ms',
+        '700': '700ms',
       },
       letterSpacing: {
         'widest2': '0.2em',

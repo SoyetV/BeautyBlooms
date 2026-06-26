@@ -24,18 +24,18 @@ export function Navbar({ onCartOpen }) {
   }
 
   const navLink = ({ isActive }) =>
-    `font-body-lg text-body-lg cubic-bezier(0.4,0,0.2,1) duration-300 ${
+    `font-body-lg text-body-lg transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
       isActive
         ? 'text-primary border-b-2 border-primary pb-1'
-        : 'text-on-surface-variant hover:text-primary transition-colors hover:opacity-80'
+        : 'text-on-surface-variant hover:text-primary hover:opacity-80'
     }`
 
   return (
     <nav
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ease-in-out ${
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
         scrolled
-          ? 'bg-surface/80 shadow-md border-b border-outline/20 backdrop-blur-xl'
-          : 'bg-surface/40 shadow-sm border-b border-outline/10 backdrop-blur-xl'
+          ? 'bg-white/70 shadow-md border-b border-secondary/20 backdrop-blur-xl'
+          : 'bg-white/40 shadow-sm border-b border-secondary/20 backdrop-blur-xl'
       }`}
       id="navbar"
     >
@@ -44,7 +44,7 @@ export function Navbar({ onCartOpen }) {
         <div className="flex items-center gap-4">
           <Link
             to="/"
-            className="font-headline-md text-headline-md text-primary tracking-tight"
+            className="font-headline-md text-headline-md text-primary tracking-tight transition-opacity hover:opacity-80"
             onClick={() => setMenuOpen(false)}
           >
             Beauty Blooms
@@ -55,10 +55,7 @@ export function Navbar({ onCartOpen }) {
         <div className="hidden md:flex items-center gap-8" aria-label="Main navigation">
           <NavLink to="/catalog" className={navLink}>Shop</NavLink>
           {isAdmin && (
-            <NavLink
-              to="/admin"
-              className={navLink}
-            >
+            <NavLink to="/admin" className={navLink}>
               Admin
             </NavLink>
           )}
@@ -69,7 +66,7 @@ export function Navbar({ onCartOpen }) {
           {/* Cart button */}
           <button
             onClick={onCartOpen}
-            className="relative text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity p-2 rounded-full hover:bg-surface-variant/50"
+            className="relative text-primary hover:opacity-80 transition-opacity p-2 rounded-full hover:bg-surface-variant/50"
             aria-label={`Open cart, ${totalItems} items`}
           >
             <span className="material-symbols-outlined">shopping_cart</span>
@@ -112,7 +109,7 @@ export function Navbar({ onCartOpen }) {
       {/* Mobile dropdown */}
       {menuOpen && (
         <div
-          className="flex flex-col gap-4 px-margin-mobile pb-6 pt-2 bg-surface/95 backdrop-blur-xl border-t border-outline/20 md:hidden shadow-lg"
+          className="flex flex-col gap-4 px-margin-mobile pb-6 pt-2 bg-white/95 backdrop-blur-xl border-t border-secondary/20 md:hidden shadow-lg"
           aria-label="Mobile navigation"
         >
           <NavLink to="/catalog" className={({ isActive }) => `${navLink({ isActive })} block`} onClick={() => setMenuOpen(false)}>Shop</NavLink>
