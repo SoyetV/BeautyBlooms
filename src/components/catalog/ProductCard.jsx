@@ -61,7 +61,7 @@ export function ProductCard({ product }) {
           <h3 className="font-headline-sm text-headline-sm text-primary line-clamp-2">
             {product.name}
           </h3>
-          <span className="font-headline-sm text-headline-sm text-secondary shrink-0">
+          <span className="font-body-md text-body-md text-secondary shrink-0 font-semibold tabular-nums">
             {formatCurrency(product.price)}
           </span>
         </div>

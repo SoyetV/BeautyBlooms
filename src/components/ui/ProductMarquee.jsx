@@ -1,14 +1,16 @@
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useProducts } from '@/hooks/useProducts'
+import { formatCurrency } from '@/utils/formatCurrency'
+import { useCart } from '@/context/CartContext'
+import { Modal } from '@/components/ui/Modal'
+import { Badge } from '@/components/ui/Badge'
+import { ProductForm } from '@/components/admin/ProductForm'
 
 const Plus = ({ size = 24, className = '' }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
 )
 const Edit2 = ({ size = 24, className = '' }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-)
-const Check = ({ size = 24, className = '' }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20 6 9 17 4 12"></polyline></svg>
 )
 const X = ({ size = 24, className = '' }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -17,136 +19,105 @@ const ImageIcon = ({ size = 24, className = '' }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
 )
 
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024
+// Default export: if products/CRUD handlers are passed in, use them directly
+// (no internal useProducts call → no second Supabase subscription). Otherwise
+// fall back to an internal useProducts instance via the WithOwnProducts wrapper.
+export default function ProductMarquee(props) {
+  const hasInjection = Array.isArray(props.products)
+  if (hasInjection) {
+    return <ProductMarqueeInner {...props} />
+  }
+  return <WithOwnProducts {...props} />
+}
 
-export default function ProductMarquee({ isAdmin = false }) {
-  const {
-    products = [],
-    createProduct,
-    updateProduct,
-    deleteProduct,
-  } = useProducts({ adminMode: isAdmin })
-  const [editingId, setEditingId] = useState(null)
-  const [editForm, setEditForm] = useState({})
-  const [editErrors, setEditErrors] = useState({})
-  const [isAdding, setIsAdding] = useState(false)
-  const [newProduct, setNewProduct] = useState({ name: '', price: '', image_url: '', imageFile: null })
-  const [newProductErrors, setNewProductErrors] = useState({})
-  const [actionLoading, setActionLoading] = useState(false)
+function WithOwnProducts(props) {
+  const { isAdmin = false } = props
+  const local = useProducts({ adminMode: isAdmin })
+  return (
+    <ProductMarqueeInner
+      {...props}
+      products={local.products}
+      onCreate={local.createProduct}
+      onUpdate={local.updateProduct}
+      onDelete={local.deleteProduct}
+    />
+  )
+}
 
-  const marqueeItems = useMemo(() => [...products, ...products], [products])
+function ProductMarqueeInner({
+  isAdmin = false,
+  products,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+}) {
+  // ── Details modal + add-to-cart (customer-facing marquee only) ──
+  const { addItem, items: cartItems } = useCart()
+  const [detailsProduct, setDetailsProduct] = useState(null) // product being viewed
+  const [addingToCart, setAddingToCart] = useState(false)
+  const [justAdded, setJustAdded] = useState(false)
 
-  const handleImageUpload = (e, callback) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  // ── Admin: ProductForm modal (shared with ProductTable) ──
+  // Replaces the previous inline add + inline edit forms so the marquee
+  // admin gets the same full-featured form (description, stock_count,
+  // category, is_available toggle, image upload with preview) as the
+  // main Products Inventory tab.
+  const [formOpen,     setFormOpen]     = useState(false)
+  const [editProduct,  setEditProduct]  = useState(null) // null = "add new"
 
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      callback(null, '', 'Please select a JPG, PNG, or WebP image.')
-      e.target.value = ''
-      return
-    }
-
-    if (file.size > MAX_IMAGE_BYTES) {
-      callback(null, '', 'Image must be smaller than 5 MB.')
-      e.target.value = ''
-      return
-    }
-
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      callback(file, reader.result, null)
-    }
-    reader.readAsDataURL(file)
+  function handleOpenAdd() {
+    setEditProduct(null)
+    setFormOpen(true)
   }
 
-  const validateProduct = ({ name, price }) => {
-    const errors = {}
-    if (!name?.trim()) errors.name = 'Product name is required.'
-    if (!price || isNaN(Number(price)) || Number(price) <= 0) errors.price = 'Enter a valid price greater than 0.'
-    return errors
+  function handleOpenEdit(product) {
+    setEditProduct(product)
+    setFormOpen(true)
   }
 
-  const handleEditClick = (product) => {
-    setEditingId(product.id)
-    setEditErrors({})
-    setEditForm({
-      name: product.name ?? product.title ?? '',
-      price: String(product.price ?? ''),
-      image_url: product.image_url ?? product.image ?? '',
-      imageFile: null,
-    })
+  function handleCloseForm() {
+    setFormOpen(false)
+    setEditProduct(null)
   }
 
-  const handleSaveEdit = async () => {
-    if (!editingId) return
-    const errors = validateProduct(editForm)
-    if (Object.keys(errors).length) {
-      setEditErrors(errors)
-      return
-    }
-
-    setActionLoading(true)
-    try {
-      const fields = {
-        name: editForm.name,
-        price: Number(editForm.price),
-        image_url: editForm.image_url || null,
-      }
-      await updateProduct(editingId, fields, editForm.imageFile)
-      setEditingId(null)
-    } catch (err) {
-      console.error('[ProductMarquee] updateProduct failed:', err.message || err)
-      setEditErrors({ submit: err.message || 'Unable to save product.' })
-    } finally {
-      setActionLoading(false)
+  async function handleFormSubmit(fields, imageFile) {
+    if (editProduct) {
+      await updateProduct(editProduct.id, fields, imageFile)
+    } else {
+      await createProduct(fields, imageFile)
     }
   }
 
-  const handleDeleteProduct = async (id) => {
-    if (!window.confirm('Delete this product from the marquee?')) return
+  async function handleDeleteProduct(id) {
+    if (!window.confirm('Delete this product from the marquee? This will also remove it from the catalog.')) return
     try {
       await deleteProduct(id)
     } catch (err) {
       console.error('[ProductMarquee] deleteProduct failed:', err.message || err)
+      alert(`Failed to delete product: ${err.message || err}`)
     }
   }
 
-  const handleCancelEdit = () => {
-    setEditingId(null)
+  function handleViewDetails(product) {
+    setDetailsProduct(product)
+    setJustAdded(false)
   }
 
-  const handleAddProduct = async () => {
-    const errors = validateProduct(newProduct)
-    if (Object.keys(errors).length) {
-      setNewProductErrors(errors)
-      return
-    }
-
-    setActionLoading(true)
-    try {
-      await createProduct(
-        {
-          name: newProduct.name.trim(),
-          price: Number(newProduct.price),
-          image_url: newProduct.image_url || null,
-          category: 'Uncategorized',
-          stock_count: 0,
-          is_available: true,
-          description: null,
-        },
-        newProduct.imageFile,
-      )
-      setNewProduct({ name: '', price: '', image_url: '', imageFile: null })
-      setNewProductErrors({})
-      setIsAdding(false)
-    } catch (err) {
-      console.error('[ProductMarquee] createProduct failed:', err.message || err)
-      setNewProductErrors({ submit: err.message || 'Unable to add new product.' })
-    } finally {
-      setActionLoading(false)
-    }
+  function handleCloseDetails() {
+    setDetailsProduct(null)
+    setJustAdded(false)
   }
+
+  async function handleAddToCart(product) {
+    if (!product) return
+    setAddingToCart(true)
+    addItem(product)
+    await new Promise(r => setTimeout(r, 500))
+    setAddingToCart(false)
+    setJustAdded(true)
+  }
+
+  const marqueeItems = useMemo(() => [...products, ...products], [products])
 
   return (
     <div className="w-full flex flex-col items-center py-12 bg-background overflow-hidden">
@@ -178,8 +149,14 @@ export default function ProductMarquee({ isAdmin = false }) {
               <div className="p-5 bg-surface flex flex-col justify-between h-32">
                 <h3 className="font-headline-sm text-headline-sm text-primary truncate">{product.name || product.title}</h3>
                 <div className="flex items-center justify-between mt-auto">
-                  <span className="font-headline-sm text-headline-sm text-secondary">${product.price.toFixed(2)}</span>
-                  <button className="px-4 py-2 border ring-1 ring-outline text-on-surface rounded-full font-label-md text-label-md uppercase tracking-wider hover:bg-surface-variant transition-all duration-300">View Details</button>
+                  <span className="font-body-md text-body-md font-semibold text-secondary tabular-nums">{formatCurrency(product.price)}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleViewDetails(product)}
+                    className="px-4 py-2 border ring-1 ring-outline text-on-surface rounded-full font-label-md text-label-md uppercase tracking-wider hover:bg-surface-variant transition-all duration-300"
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
             </div>
@@ -187,165 +164,267 @@ export default function ProductMarquee({ isAdmin = false }) {
         </div>
       </div>
 
+      {/* ── Product details modal (customer-facing) ── */}
+      {!isAdmin && detailsProduct && (
+        <ProductDetailsModal
+          product={detailsProduct}
+          onClose={handleCloseDetails}
+          onAddToCart={handleAddToCart}
+          addingToCart={addingToCart}
+          justAdded={justAdded}
+          inCartCount={cartItems.find(i => i.id === detailsProduct.id)?.quantity ?? 0}
+        />
+      )}
+
       {isAdmin && (
-        <div className="w-full max-w-4xl mt-16 px-6">
-          <div className="glass-panel rounded-2xl shadow-petal p-8">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="font-headline-md text-headline-md text-on-surface">Admin: Manage Marquee</h2>
-              {!isAdding && (
-                <button onClick={() => setIsAdding(true)} className="btn-primary">
-                  <Plus size={18} /> Add New Product
-                </button>
-              )}
+        <div className="w-full max-w-5xl mt-16 px-6">
+          <div className="glass-panel rounded-2xl shadow-petal p-6 md:p-8">
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+              <div>
+                <h2 className="font-headline-md text-headline-md text-on-surface">Admin: Manage Marquee</h2>
+                <p className="font-body-md text-body-md text-on-surface-variant mt-1">
+                  Add, edit, or remove products featured in the scrolling marquee. Changes sync to the catalog in real time.
+                </p>
+              </div>
+              <button onClick={handleOpenAdd} className="btn-primary">
+                <Plus size={18} /> Add New Product
+              </button>
             </div>
 
-            {isAdding && (
-              <div className="mb-8 p-6 bg-surface-container-low/50 rounded-xl border border-secondary/15 animate-fade-in-up">
-                <h3 className="font-headline-sm text-headline-sm text-on-surface mb-4">Add New Marquee Item</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div>
-                    <label className="label">Product name</label>
-                    <input
-                      type="text"
-                      className={`input-field ${newProductErrors.name ? 'border-error/50 focus:ring-error/20' : ''}`}
-                      value={newProduct.name}
-                      onChange={(e) => {
-                        setNewProduct({ ...newProduct, name: e.target.value })
-                        if (newProductErrors.name) setNewProductErrors({ ...newProductErrors, name: null })
-                      }}
-                      placeholder="E.g., Radiant Sunflowers"
-                    />
-                    {newProductErrors.name && <p className="mt-1 text-xs text-error">{newProductErrors.name}</p>}
-                  </div>
-                  <div>
-                    <label className="label">Price ($)</label>
-                    <input
-                      type="number"
-                      className={`input-field ${newProductErrors.price ? 'border-error/50 focus:ring-error/20' : ''}`}
-                      value={newProduct.price}
-                      onChange={(e) => {
-                        setNewProduct({ ...newProduct, price: e.target.value })
-                        if (newProductErrors.price) setNewProductErrors({ ...newProductErrors, price: null })
-                      }}
-                      placeholder="0.00"
-                    />
-                    {newProductErrors.price && <p className="mt-1 text-xs text-error">{newProductErrors.price}</p>}
-                  </div>
-                  <div>
-                    <label className="label">Upload Image</label>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      className="input-field py-1.5 text-sm"
-                      onChange={(e) => handleImageUpload(e, (file, url, error) => {
-                        if (error) {
-                          setNewProductErrors({ ...newProductErrors, image: error })
-                          return
-                        }
-                        setNewProductErrors({ ...newProductErrors, image: null })
-                        setNewProduct({ ...newProduct, image_url: url, imageFile: file })
-                      })}
-                    />
-                    {newProductErrors.image && <p className="mt-1 text-xs text-error">{newProductErrors.image}</p>}
-                  </div>
+            {products.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-surface-container text-on-surface-variant mb-4">
+                  <ImageIcon size={32} />
                 </div>
-                {newProductErrors.submit && (
-                  <div className="rounded-lg bg-error-container/40 px-4 py-3 text-sm text-on-error-container mb-4 border border-error/20">
-                    {newProductErrors.submit}
-                  </div>
-                )}
-                <div className="flex justify-end gap-3">
-                  <button onClick={() => { setIsAdding(false); setNewProductErrors({}) }} className="btn-secondary">Cancel</button>
-                  <button
-                    onClick={handleAddProduct}
-                    className="btn-primary"
-                    disabled={actionLoading}
-                    type="button"
-                  >
-                    {actionLoading ? 'Saving…' : 'Save Product'}
-                  </button>
-                </div>
+                <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">No products yet</h3>
+                <p className="font-body-md text-body-md text-on-surface-variant mb-6">
+                  Add your first flower to start building the marquee.
+                </p>
+                <button onClick={handleOpenAdd} className="btn-primary">
+                  <Plus size={18} /> Add your first product
+                </button>
               </div>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <div key={product.id} className="relative p-4 rounded-xl border border-outline/15 bg-surface-container-low/50 hover:bg-surface-container-low transition-colors group">
-                  {editingId === product.id ? (
-                    <div className="space-y-3 animate-fade-in-up">
-                      <input
-                        type="text"
-                        className="input-field py-1.5 text-sm"
-                        value={editForm.name}
-                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                      />
-                      <input
-                        type="number"
-                        className={`input-field py-1.5 text-sm ${editErrors.price ? 'border-error/50 focus:ring-error/20' : ''}`}
-                        value={editForm.price}
-                        onChange={(e) => {
-                          setEditForm({ ...editForm, price: e.target.value })
-                          if (editErrors.price) setEditErrors({ ...editErrors, price: null })
-                        }}
-                      />
-                      {editErrors.price && <p className="mt-1 text-xs text-error">{editErrors.price}</p>}
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        className="input-field py-1.5 text-sm"
-                        onChange={(e) => handleImageUpload(e, (file, url, error) => {
-                          if (error) {
-                            setEditErrors({ ...editErrors, image: error })
-                            return
-                          }
-                          setEditErrors({ ...editErrors, image: null })
-                          setEditForm({ ...editForm, image_url: url, imageFile: file })
-                        })}
-                      />
-                      {editErrors.image && <p className="mt-1 text-xs text-error">{editErrors.image}</p>}
-                      {editErrors.submit && (
-                        <p className="text-sm text-error">{editErrors.submit}</p>
-                      )}
-                      <div className="flex gap-2 justify-end pt-2">
-                        <button onClick={handleCancelEdit} className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant rounded-md transition-colors"><X size={16} /></button>
-                        <button onClick={handleSaveEdit} className="p-1.5 text-primary hover:text-primary-container hover:bg-primary/10 rounded-md transition-colors"><Check size={16} /></button>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {products.map((product) => (
+                  <div
+                    key={product.id}
+                    className="relative p-4 rounded-xl border border-outline/15 bg-surface-container-low/50 hover:bg-surface-container-low hover:border-primary/20 transition-all duration-300 group"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-surface-container-highest">
+                        {product.image_url || product.image ? (
+                          <img
+                            src={product.image_url || product.image}
+                            alt={product.name || product.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-on-surface-variant">
+                            <ImageIcon size={20} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-semibold text-on-surface truncate">{product.name || product.title}</h4>
+                        <p className="text-sm text-primary font-semibold tabular-nums">{formatCurrency(product.price)}</p>
+                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                          {product.category && (
+                            <span className="text-[10px] uppercase tracking-wider text-on-surface-variant">
+                              {product.category}
+                            </span>
+                          )}
+                          {product.stock_count === 0 ? (
+                            <span className="text-[10px] uppercase tracking-wider text-error">· Out of stock</span>
+                          ) : (
+                            <span className="text-[10px] uppercase tracking-wider text-on-surface-variant">
+                              · {product.stock_count} in stock
+                            </span>
+                          )}
+                          {!product.is_available && (
+                            <span className="text-[10px] uppercase tracking-wider text-outline">· Hidden</span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0">
-                          <img src={product.image_url || product.image} alt={product.name || product.title} className="w-full h-full object-cover" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium text-on-surface truncate">{product.name || product.title}</h4>
-                          <p className="text-sm text-primary">${product.price.toFixed(2)}</p>
-                        </div>
-                      </div>
-                      <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                        <button
-                          onClick={() => handleDeleteProduct(product.id)}
-                          className="p-2 bg-surface rounded-full shadow-sm text-error hover:bg-error-container/50"
-                          type="button"
-                        >
-                          <X size={14} />
-                        </button>
-                        <button
-                          onClick={() => handleEditClick(product)}
-                          className="p-2 bg-surface rounded-full shadow-sm text-on-surface-variant hover:text-primary"
-                          type="button"
-                        >
-                          <Edit2 size={14} />
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
+
+                    {/* Hover actions */}
+                    <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                      <button
+                        onClick={() => handleOpenEdit(product)}
+                        className="p-2 bg-surface rounded-full shadow-sm text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors"
+                        type="button"
+                        aria-label={`Edit ${product.name || product.title}`}
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProduct(product.id)}
+                        className="p-2 bg-surface rounded-full shadow-sm text-error hover:bg-error-container/50 transition-colors"
+                        type="button"
+                        aria-label={`Delete ${product.name || product.title}`}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+
+                    {/* Mobile-friendly always-visible actions (since hover doesn't work on touch) */}
+                    <div className="mt-3 flex gap-2 sm:hidden">
+                      <button
+                        onClick={() => handleOpenEdit(product)}
+                        className="flex-1 rounded-full border border-outline-variant bg-surface px-3 py-1.5 font-label-md text-label-md text-on-surface hover:border-primary hover:text-primary transition-colors"
+                        type="button"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProduct(product.id)}
+                        className="flex-1 rounded-full border border-outline-variant bg-surface px-3 py-1.5 font-label-md text-label-md text-error hover:border-error hover:bg-error-container/30 transition-colors"
+                        type="button"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
+
+      {/* ── Shared ProductForm modal (add/edit) ── */}
+      <ProductForm
+        isOpen={formOpen}
+        onClose={handleCloseForm}
+        onSubmit={handleFormSubmit}
+        initialData={editProduct}
+      />
     </div>
+  )
+}
+
+// ── Product details modal (rendered when "View Details" is clicked) ──────
+function ProductDetailsModal({
+  product,
+  onClose,
+  onAddToCart,
+  addingToCart,
+  justAdded,
+  inCartCount,
+}) {
+  const name        = product.name || product.title || 'Untitled'
+  const price       = Number(product.price ?? 0)
+  const description = product.description
+  const category    = product.category
+  const stock       = Number(product.stock_count ?? 0)
+  const isOutOfStock = stock === 0
+  const isLowStock   = stock > 0 && stock <= 5
+
+  return (
+    <Modal isOpen={true} onClose={onClose} title={name} size="lg">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
+        {/* Image */}
+        <div className="aspect-[4/3] overflow-hidden rounded-2xl bg-surface-container-highest">
+          {product.image_url || product.image ? (
+            <img
+              src={product.image_url || product.image}
+              alt={name}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-on-surface-variant">
+              <ImageIcon size={64} />
+            </div>
+          )}
+        </div>
+
+        {/* Details */}
+        <div className="flex flex-col gap-4">
+          {/* Category + stock badges */}
+          <div className="flex flex-wrap items-center gap-2">
+            {category && (
+              <span className="inline-flex items-center rounded-full px-3 py-0.5 text-xs font-medium bg-primary-container/80 text-on-primary-container backdrop-blur-md">
+                {category}
+              </span>
+            )}
+            {isOutOfStock ? (
+              <Badge label="Out of stock" variant="outofstock" />
+            ) : isLowStock ? (
+              <Badge label={`Only ${stock} left`} variant="lowstock" />
+            ) : (
+              <Badge label={`${stock} in stock`} variant="instock" />
+            )}
+          </div>
+
+          {/* Price */}
+          <p className="font-body-md text-3xl font-bold text-secondary tabular-nums">
+            {formatCurrency(price)}
+          </p>
+
+          {/* Description */}
+          {description ? (
+            <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+              {description}
+            </p>
+          ) : (
+            <p className="font-body-md text-body-md text-outline italic">
+              No description available.
+            </p>
+          )}
+
+          {/* In-cart indicator */}
+          {inCartCount > 0 && (
+            <div className="flex items-center gap-2 rounded-lg bg-secondary-container/30 px-3 py-2 text-sm text-on-secondary-container border border-secondary/20">
+              <span className="material-symbols-outlined text-base">shopping_cart</span>
+              <span>{inCartCount} in your cart</span>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="mt-auto flex flex-col gap-2 pt-4 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              onClick={() => onAddToCart(product)}
+              disabled={isOutOfStock || addingToCart}
+              className={`inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 font-label-md text-label-md uppercase tracking-wider transition-all duration-300 sm:w-auto ${
+                isOutOfStock
+                  ? 'bg-surface-variant text-on-surface-variant cursor-not-allowed'
+                  : justAdded
+                    ? 'bg-secondary text-on-secondary shadow-md'
+                    : 'bg-primary text-on-primary shadow-sm hover:shadow-md hover:scale-[1.02]'
+              }`}
+            >
+              {isOutOfStock ? (
+                <>Out of stock</>
+              ) : addingToCart ? (
+                <>
+                  <span className="material-symbols-outlined text-sm">hourglass_empty</span>
+                  Adding…
+                </>
+              ) : justAdded ? (
+                <>
+                  <span className="material-symbols-outlined text-sm">check</span>
+                  Added to cart!
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-sm">shopping_cart</span>
+                  Add to cart
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 font-label-md text-label-md uppercase tracking-wider text-on-surface-variant transition-all duration-300 hover:text-primary sm:w-auto"
+            >
+              Continue browsing
+            </button>
+          </div>
+        </div>
+      </div>
+    </Modal>
   )
 }

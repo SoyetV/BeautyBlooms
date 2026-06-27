@@ -167,7 +167,7 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
               <td className="px-4 py-3 text-on-surface-variant hidden sm:table-cell">{product.category}</td>
 
               {/* Price */}
-              <td className="px-4 py-3 text-right font-headline-sm text-headline-sm text-secondary tabular-nums">
+              <td className="px-4 py-3 text-right font-body-md text-body-md font-semibold text-secondary tabular-nums">
                 {formatCurrency(product.price)}
               </td>
 

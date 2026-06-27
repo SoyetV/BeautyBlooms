@@ -41,7 +41,7 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 md:p-8 page-enter bg-pattern">
+    <div className="flex min-h-screen items-center justify-center p-4 md:p-8 pt-[96px] page-enter bg-pattern">
       <main className="w-full max-w-md">
         {/* Logo Header */}
         <div className="text-center mb-8 animate-fade-in-up">

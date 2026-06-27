@@ -48,35 +48,8 @@ export default function HomePage() {
       {/* Infinite Product Marquee */}
       <ProductMarquee />
 
-      {/* Trust Strip */}
-      <section className="bg-surface-container-highest py-16 px-margin-mobile md:px-margin-desktop">
-        <div className="max-w-container-max mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-outline-variant/40">
-          <div className="flex flex-col items-center pt-8 md:pt-0 animate-fade-in-up" style={{ animationDelay: '0ms' }}>
-            <div className="w-16 h-16 rounded-full bg-surface-bright flex items-center justify-center text-primary mb-4 shadow-sm ring-1 ring-primary/10">
-              <span className="material-symbols-outlined text-3xl icon-fill">local_florist</span>
-            </div>
-            <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">Always Fresh</h3>
-            <p className="font-body-md text-body-md text-on-surface-variant max-w-xs mx-auto">Sourced daily from premium local and international growers to ensure longevity.</p>
-          </div>
-          <div className="flex flex-col items-center pt-8 md:pt-0 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-            <div className="w-16 h-16 rounded-full bg-surface-bright flex items-center justify-center text-primary mb-4 shadow-sm ring-1 ring-primary/10">
-              <span className="material-symbols-outlined text-3xl icon-fill">local_shipping</span>
-            </div>
-            <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">Same-Day Delivery</h3>
-            <p className="font-body-md text-body-md text-on-surface-variant max-w-xs mx-auto">Available for Cebu City and surrounding metropolitan areas on orders placed before 2 PM.</p>
-          </div>
-          <div className="flex flex-col items-center pt-8 md:pt-0 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-            <div className="w-16 h-16 rounded-full bg-surface-bright flex items-center justify-center text-primary mb-4 shadow-sm ring-1 ring-primary/10">
-              <span className="material-symbols-outlined text-3xl icon-fill">handshake</span>
-            </div>
-            <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">Hand-Arranged</h3>
-            <p className="font-body-md text-body-md text-on-surface-variant max-w-xs mx-auto">Crafted with meticulous attention to detail by our master florists.</p>
-          </div>
-        </div>
-      </section>
-
       {/* Fresh Picks Grid */}
-      <section id="featured" className="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+      <section id="featured" className="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto scroll-mt-24">
         <div className="text-center mb-16 animate-fade-in-up">
           <h2 className="font-headline-md text-headline-md text-on-surface mb-4">Fresh Picks</h2>
           <div className="w-12 h-[1px] bg-secondary mx-auto"></div>

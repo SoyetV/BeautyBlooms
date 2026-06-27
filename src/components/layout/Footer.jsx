@@ -5,8 +5,36 @@ import { Link } from 'react-router-dom'
 export function Footer() {
   return (
     <footer className="mt-auto bg-surface-container-low backdrop-blur-lg border-t border-secondary/10">
-      <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop py-16">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
+      <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
+        {/* ── Compact trust strip (moved from homepage) ── */}
+        <div className="grid grid-cols-1 gap-6 py-8 border-b border-secondary/10 sm:grid-cols-3 sm:gap-4 md:py-10">
+          {[
+            { icon: 'local_florist',  title: 'Always Fresh',        text: 'Sourced daily from premium growers.' },
+            { icon: 'local_shipping', title: 'Same-Day Delivery',   text: 'Cebu City metro, order before 2 PM.' },
+            { icon: 'handshake',      title: 'Hand-Arranged',       text: 'Crafted by master florists.' },
+          ].map((item, i) => (
+            <div
+              key={item.title}
+              className={`flex items-center gap-3 ${
+                i < 2 ? 'sm:border-r sm:border-secondary/10' : ''
+              } ${i < 1 ? 'border-b border-secondary/10 pb-6 sm:border-b-0 sm:pb-0' : ''} sm:px-4`}
+            >
+              <span
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-bright text-primary shadow-sm ring-1 ring-primary/10"
+                aria-hidden="true"
+              >
+                <span className="material-symbols-outlined text-xl icon-fill">{item.icon}</span>
+              </span>
+              <div className="min-w-0">
+                <h3 className="font-label-md text-label-md uppercase tracking-wider text-on-surface">{item.title}</h3>
+                <p className="text-xs text-on-surface-variant leading-snug">{item.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Main footer grid ── */}
+        <div className="grid grid-cols-1 gap-12 py-16 md:grid-cols-3">
           {/* Brand */}
           <div className="flex flex-col gap-4">
             <Link
@@ -104,7 +132,7 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div
-          className="mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 font-label-md text-label-sm text-on-surface-variant border-t border-secondary/10"
+          className="mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 font-label-md text-sm text-on-surface-variant border-t border-secondary/10"
         >
           <p>© {new Date().getFullYear()} Beauty Blooms Cebu. All rights reserved.</p>
           <p className="flex items-center gap-1">

@@ -107,7 +107,7 @@ export default function CheckoutPage() {
   const glassCard = "glass-panel rounded-2xl"
 
   return (
-    <div className="page-enter mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop py-12 md:py-16">
+    <div className="page-enter mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop py-12 md:py-16 pt-[96px] md:pt-[112px]">
       <Link
         to="/catalog"
         className="group mb-7 inline-flex items-center gap-2 font-label-md text-label-md uppercase tracking-widest text-on-surface-variant transition-colors hover:text-primary sm:mb-10"

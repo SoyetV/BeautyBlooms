@@ -79,12 +79,12 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
             >
               {/* Customer name + ID */}
               <div className="min-w-0 flex-1">
-                <p className="font-headline-sm text-headline-sm text-on-surface truncate">{order.customer_name}</p>
+                <p className="font-body-md text-body-md font-semibold text-on-surface truncate">{order.customer_name}</p>
                 <p className="font-body-md text-body-md text-on-surface-variant font-mono">{order.id.slice(0, 8)}…</p>
               </div>
 
               {/* Total */}
-              <span className="font-headline-sm text-headline-sm text-secondary tabular-nums">
+              <span className="font-body-md text-body-md font-semibold text-secondary tabular-nums">
                 {formatCurrency(order.total_amount)}
               </span>
 

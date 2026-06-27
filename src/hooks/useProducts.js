@@ -37,6 +37,12 @@ export function useProducts({ adminMode = false } = {}) {
     setLoading(true)
     setError(null)
 
+    if (!supabase) {
+      setError('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env')
+      setLoading(false)
+      return
+    }
+
     try {
       let query = supabase
         .from('products')
@@ -76,6 +82,8 @@ export function useProducts({ adminMode = false } = {}) {
   }, [fetchProducts])
 
   useEffect(() => {
+    if (!supabase) return
+
     const channelName = `products-${Math.random().toString(36).slice(2)}`
     const channel = supabase.channel(channelName)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
@@ -91,6 +99,7 @@ export function useProducts({ adminMode = false } = {}) {
   // ── CREATE ────────────────────────────────────────────
   // imageFile is a File object (optional). Returns created product or throws.
   async function createProduct(fields, imageFile = null) {
+    if (!supabase) throw new Error('Supabase is not configured.')
     let image_url = null
 
     if (imageFile) {
@@ -124,6 +133,7 @@ export function useProducts({ adminMode = false } = {}) {
 
   // ── UPDATE ────────────────────────────────────────────
   async function updateProduct(id, fields, imageFile = null) {
+    if (!supabase) throw new Error('Supabase is not configured.')
     let image_url = fields.image_url ?? null
 
     if (imageFile) {
@@ -158,6 +168,7 @@ export function useProducts({ adminMode = false } = {}) {
 
   // ── DELETE ────────────────────────────────────────────
   async function deleteProduct(id) {
+    if (!supabase) throw new Error('Supabase is not configured.')
     const { error } = await supabase.from('products').delete().eq('id', id)
     if (error) throw error
     setProducts(prev => prev.filter(p => p.id !== id))

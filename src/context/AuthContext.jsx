@@ -14,6 +14,7 @@ export function AuthProvider({ children }) {
 
   // Fetch the profiles row for the logged-in user
   async function fetchProfile(userId) {
+    if (!supabase) return null
     const { data, error } = await supabase
       .from('profiles')
       .select('id,email,full_name,role,created_at')
@@ -28,6 +29,13 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
+    // If Supabase isn't configured, skip auth init entirely so the rest of
+    // the UI (catalog, marquee, etc.) can still render in a degraded state.
+    if (!supabase) {
+      setLoading(false)
+      return
+    }
+
     // Hydrate session on mount
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session)
@@ -56,12 +64,14 @@ export function AuthProvider({ children }) {
   }, [])
 
   async function signIn(email, password) {
+    if (!supabase) throw new Error('Supabase is not configured.')
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw error
     return data
   }
 
   async function signOut() {
+    if (!supabase) return
     const { error } = await supabase.auth.signOut()
     if (error) throw error
   }

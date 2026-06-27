@@ -135,7 +135,7 @@ export default function AdminDashboard() {
                   </span>
                 </span>
               </div>
-              <span className={`font-headline-md text-headline-md ${stat.tone === 'error' ? 'text-error' : 'text-primary'}`}>
+              <span className={`font-body-md text-headline-md font-semibold tabular-nums ${stat.tone === 'error' ? 'text-error' : 'text-primary'}`}>
                 {stat.value}
               </span>
             </div>
@@ -204,7 +204,13 @@ export default function AdminDashboard() {
             {activeTab === 'products' && (
               <>
                 {/* Product Marquee Management */}
-                <ProductMarquee isAdmin={true} />
+                <ProductMarquee
+                  isAdmin={true}
+                  products={products}
+                  onCreate={createProduct}
+                  onUpdate={updateProduct}
+                  onDelete={deleteProduct}
+                />
                 <div className="mt-8">
                   <ProductTable
                     products={products}

@@ -16,6 +16,21 @@ export function useOrders() {
     setLoading(true)
     setError(null)
 
+    if (!supabase) {
+      setError('Supabase is not configured.')
+      setLoading(false)
+      return
+    }
+
+    // Guests (no user, not admin) have no orders to list here.
+    // Order history for guests is accessed via /orders/:id?token=… which
+    // uses the get_order_status RPC; the list endpoint is for authenticated users / admins only.
+    if (!isAdmin && !user) {
+      setOrders([])
+      setLoading(false)
+      return
+    }
+
     try {
       let query = supabase
         .from('orders')
@@ -65,6 +80,7 @@ export function useOrders() {
 
   // ── CREATE (place order + items in one transaction) ──
   async function placeOrder(orderDetails, cartItems) {
+    if (!supabase) throw new Error('Supabase is not configured.')
     const safeOrder = {
       customer_name:     orderDetails.customer_name,
       customer_email:    orderDetails.customer_email,
@@ -101,6 +117,7 @@ export function useOrders() {
 
   // ── UPDATE (admin changes status) ─────────────────────
   async function updateOrderStatus(orderId, status) {
+    if (!supabase) throw new Error('Supabase is not configured.')
     const { data, error } = await supabase
       .from('orders')
       .update({ status })
