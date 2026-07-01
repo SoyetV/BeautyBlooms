@@ -78,6 +78,23 @@ export function useOrders() {
     if (user !== null) fetchOrders()
   }, [fetchOrders, user])
 
+  // ── Realtime subscription for admins ────────────────
+  // Refetch when any order is inserted or updated, so new customer
+  // orders appear in the admin dashboard without manual refresh.
+  useEffect(() => {
+    if (!supabase || !isAdmin) return
+    const channelName = `admin-orders-${Math.random().toString(36).slice(2)}`
+    const channel = supabase
+      .channel(channelName)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        () => { fetchOrders() }
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [isAdmin, fetchOrders])
+
   // ── CREATE (place order + items in one transaction) ──
   async function placeOrder(orderDetails, cartItems) {
     if (!supabase) throw new Error('Supabase is not configured.')

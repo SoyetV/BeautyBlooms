@@ -1,93 +1,82 @@
 // src/components/layout/Footer.jsx
+// Modern Flora — slim 3-col footer, no trust strip (moved to homepage).
+// Location locked: Cebu City metro (was inconsistent Cebu/Leyte before).
 
 import { Link } from 'react-router-dom'
 
 export function Footer() {
-  return (
-    <footer className="mt-auto bg-surface-container-low backdrop-blur-lg border-t border-secondary/10">
-      <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
-        {/* ── Compact trust strip (moved from homepage) ── */}
-        <div className="grid grid-cols-1 gap-6 py-8 border-b border-secondary/10 sm:grid-cols-3 sm:gap-4 md:py-10">
-          {[
-            { icon: 'local_florist',  title: 'Always Fresh',        text: 'Sourced daily from premium growers.' },
-            { icon: 'local_shipping', title: 'Same-Day Delivery',   text: 'Cebu City metro, order before 2 PM.' },
-            { icon: 'handshake',      title: 'Hand-Arranged',       text: 'Crafted by master florists.' },
-          ].map((item, i) => (
-            <div
-              key={item.title}
-              className={`flex items-center gap-3 ${
-                i < 2 ? 'sm:border-r sm:border-secondary/10' : ''
-              } ${i < 1 ? 'border-b border-secondary/10 pb-6 sm:border-b-0 sm:pb-0' : ''} sm:px-4`}
-            >
-              <span
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-bright text-primary shadow-sm ring-1 ring-primary/10"
-                aria-hidden="true"
-              >
-                <span className="material-symbols-outlined text-xl icon-fill">{item.icon}</span>
-              </span>
-              <div className="min-w-0">
-                <h3 className="font-label-md text-label-md uppercase tracking-wider text-on-surface">{item.title}</h3>
-                <p className="text-xs text-on-surface-variant leading-snug">{item.text}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+  const year = new Date().getFullYear()
 
-        {/* ── Main footer grid ── */}
-        <div className="grid grid-cols-1 gap-12 py-16 md:grid-cols-3">
-          {/* Brand */}
-          <div className="flex flex-col gap-4">
+  return (
+    <footer className="mt-auto bg-surface-2 border-t border-border">
+      <div className="mx-auto max-w-container px-margin-mobile md:px-margin-desktop py-14 md:py-20">
+
+        {/* Main grid */}
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-12">
+
+          {/* Brand — 5 cols */}
+          <div className="md:col-span-5 flex flex-col gap-4">
             <Link
               to="/"
-              className="flex items-center gap-2.5 font-headline-sm text-headline-sm text-primary tracking-tight transition-opacity hover:opacity-80"
+              className="group inline-flex items-center gap-2.5 w-fit"
+              aria-label="Beauty Blooms home"
             >
               <span
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-surface border border-secondary/20 shadow-sm"
+                className="material-symbols-outlined icon-fill text-primary-600 transition-transform duration-500 ease-spring group-hover:rotate-12"
+                style={{ fontSize: '22px' }}
                 aria-hidden="true"
               >
-                <span className="material-symbols-outlined text-primary text-lg icon-fill">local_florist</span>
+                local_florist
               </span>
-              Beauty Blooms
+              <span className="font-display text-display-sm font-semibold tracking-tight text-foreground">
+                Beauty Blooms
+              </span>
             </Link>
-            <p className="font-body-md text-body-md text-on-surface-variant max-w-sm leading-relaxed">
-              Bringing the delicate beauty of nature into your everyday moments. Luxury floral design in the heart of Cebu.
+            <p className="text-body-md text-muted max-w-sm leading-relaxed">
+              Bringing the delicate beauty of nature into your everyday moments.
+              Luxury floral design in the heart of Cebu.
             </p>
 
-            {/* Social icons */}
-            <div className="flex gap-3 mt-2">
+            {/* Social */}
+            <div className="flex gap-2 mt-2">
               {[
-                { icon: 'camera_alt', label: 'Instagram' },
-                { icon: 'mail',       label: 'Email' },
-                { icon: 'share',      label: 'Share' },
-              ].map((social, i) => (
+                { icon: 'photo_camera', label: 'Instagram', href: '#' },
+                { icon: 'mail',         label: 'Email',     href: 'mailto:hello@beautyblooms.ph' },
+                { icon: 'sms',          label: 'Messenger', href: '#' },
+              ].map((social) => (
                 <a
-                  key={i}
-                  href="#"
+                  key={social.label}
+                  href={social.href}
                   aria-label={social.label}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container text-primary hover:bg-primary hover:text-on-primary transition-all duration-300"
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-full
+                             bg-surface text-muted border border-border
+                             hover:text-primary-700 hover:border-primary-300 hover:bg-primary-50
+                             transition-all duration-250 ease-spring
+                             focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 >
-                  <span className="material-symbols-outlined text-sm">{social.icon}</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">
+                    {social.icon}
+                  </span>
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Links */}
-          <div>
-            <h3 className="font-label-md text-label-md uppercase tracking-widest text-on-surface-variant mb-4">Navigation</h3>
-            <ul className="flex flex-col gap-3 font-body-md text-body-md">
+          {/* Navigation — 3 cols */}
+          <div className="md:col-span-3">
+            <h3 className="text-eyebrow uppercase tracking-eyebrow text-foreground mb-4">Shop</h3>
+            <ul className="flex flex-col gap-2.5">
               {[
-                { to: '/catalog', label: 'Shop All' },
-                { to: '/catalog?category=Roses', label: 'Roses' },
-                { to: '/catalog?category=Mixed', label: 'Mixed Bouquets' },
-                { to: '/catalog?category=Dried+Flowers', label: 'Dried Flowers' },
+                { to: '/catalog',                          label: 'All Flowers' },
+                { to: '/catalog?category=Roses',           label: 'Roses' },
+                { to: '/catalog?category=Mixed+Bouquets',  label: 'Mixed Bouquets' },
+                { to: '/catalog?category=Dried+Flowers',   label: 'Dried Flowers' },
               ].map(link => (
                 <li key={link.label}>
                   <Link
                     to={link.to}
-                    className="text-on-surface-variant hover:text-primary transition-colors ease-in-out duration-200 flex items-center gap-1.5 group"
+                    className="text-body-md text-muted hover:text-primary-700 transition-colors duration-250 ease-smooth"
                   >
-                    <span className="w-0 group-hover:w-3 h-px bg-primary transition-all duration-200 rounded-full" />
                     {link.label}
                   </Link>
                 </li>
@@ -95,48 +84,67 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Contact */}
-          <div>
-            <h3 className="font-label-md text-label-md uppercase tracking-widest text-on-surface-variant mb-4">Contact</h3>
-            <ul className="flex flex-col gap-3 font-body-md text-body-md text-on-surface-variant">
-              <li className="flex items-center gap-3">
+          {/* Contact — 4 cols */}
+          <div className="md:col-span-4">
+            <h3 className="text-eyebrow uppercase tracking-eyebrow text-foreground mb-4">Contact</h3>
+            <ul className="flex flex-col gap-3">
+              <li className="flex items-start gap-3">
                 <span
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface/80 border border-secondary/20"
+                  className="inline-flex items-center justify-center h-8 w-8 shrink-0 rounded-md bg-surface border border-border text-primary-600"
                   aria-hidden="true"
                 >
-                  <span className="material-symbols-outlined text-sm text-primary">location_on</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>location_on</span>
                 </span>
-                Bato, Leyte, Philippines
+                <span className="text-body-md text-muted leading-relaxed pt-1">
+                  Cebu City, Philippines
+                </span>
               </li>
-              <li className="flex items-center gap-3">
+              <li className="flex items-start gap-3">
                 <span
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface/80 border border-secondary/20"
+                  className="inline-flex items-center justify-center h-8 w-8 shrink-0 rounded-md bg-surface border border-border text-primary-600"
                   aria-hidden="true"
                 >
-                  <span className="material-symbols-outlined text-sm text-primary">call</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>call</span>
                 </span>
-                <a href="tel:+639001234567" className="hover:text-primary transition-colors">+63 900 123 4567</a>
+                <a
+                  href="tel:+639001234567"
+                  className="text-body-md text-muted hover:text-primary-700 transition-colors duration-250 ease-smooth pt-1"
+                >
+                  +63 900 123 4567
+                </a>
               </li>
-              <li className="flex items-center gap-3">
+              <li className="flex items-start gap-3">
                 <span
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface/80 border border-secondary/20"
+                  className="inline-flex items-center justify-center h-8 w-8 shrink-0 rounded-md bg-surface border border-border text-primary-600"
                   aria-hidden="true"
                 >
-                  <span className="material-symbols-outlined text-sm text-primary">mail</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>mail</span>
                 </span>
-                <a href="mailto:hello@bloomflowers.ph" className="hover:text-primary transition-colors">hello@bloomflowers.ph</a>
+                <a
+                  href="mailto:hello@beautyblooms.ph"
+                  className="text-body-md text-muted hover:text-primary-700 transition-colors duration-250 ease-smooth pt-1"
+                >
+                  hello@beautyblooms.ph
+                </a>
               </li>
             </ul>
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div
-          className="mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 font-label-md text-sm text-on-surface-variant border-t border-secondary/10"
-        >
-          <p>© {new Date().getFullYear()} Beauty Blooms Cebu. All rights reserved.</p>
-          <p className="flex items-center gap-1">
-            Made with <span className="material-symbols-outlined text-sm text-primary icon-fill">favorite</span> in Cebu City
+        <div className="mt-14 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-body-xs text-subtle">
+            © {year} Beauty Blooms. All rights reserved.
+          </p>
+          <p className="text-body-xs text-subtle flex items-center gap-1.5">
+            Hand-arranged in Cebu City
+            <span
+              className="material-symbols-outlined icon-fill text-primary-500"
+              style={{ fontSize: '14px' }}
+              aria-hidden="true"
+            >
+              favorite
+            </span>
           </p>
         </div>
       </div>
