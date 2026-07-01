@@ -1,12 +1,11 @@
 // src/components/catalog/ProductGrid.jsx
-// Renders the full customer-facing product catalog with search,
-// category filtering, and loading / error / empty states.
+// Modern Flora — skeleton loaders, quiet filter bar, staggered grid.
 
 import { useMemo, useState } from 'react'
 import { ProductCard } from './ProductCard'
 import { CategoryFilter } from './CategoryFilter'
-import { Spinner } from '@/components/ui/Spinner'
 import { EmptyState } from '@/components/ui/EmptyState'
+import Skeleton, { SkeletonCard } from '@/components/ui/Skeleton'
 
 export function ProductGrid({ products, loading, error, onRetry }) {
   const [search,   setSearch]   = useState('')
@@ -18,7 +17,7 @@ export function ProductGrid({ products, loading, error, onRetry }) {
     [products]
   )
 
-  // Client-side filter (fast; avoids extra DB round-trips for simple browsing)
+  // Client-side filter
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase()
     return products.filter(p => {
@@ -30,21 +29,35 @@ export function ProductGrid({ products, loading, error, onRetry }) {
     })
   }, [products, search, category])
 
-  // ── Loading ──────────────────────────────────────────
+  // ── Loading (skeleton grid) ─────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 gap-4" aria-live="polite" aria-busy="true">
-        <Spinner size="lg" />
-        <p className="font-body-md text-body-md text-on-surface-variant">Loading flowers…</p>
+      <div aria-live="polite" aria-busy="true">
+        {/* Skeleton filter bar */}
+        <div className="mb-8 flex flex-col gap-3">
+          <Skeleton variant="block" className="h-11 w-full max-w-md" />
+          <div className="flex gap-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} variant="block" className="h-9 w-20" />
+            ))}
+          </div>
+        </div>
+
+        {/* Skeleton grid */}
+        <div className="grid grid-cols-1 gap-gutter sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
       </div>
     )
   }
 
-  // ── Error ────────────────────────────────────────────
+  // ── Error ───────────────────────────────────────────
   if (error) {
     return (
       <EmptyState
-        icon="⚠️"
+        icon="error"
         title="Couldn't load products"
         message={error}
         action={
@@ -61,10 +74,14 @@ export function ProductGrid({ products, loading, error, onRetry }) {
   return (
     <section aria-label="Flower catalog">
       {/* Search + filter bar */}
-      <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:gap-4">
+      <div className="mb-8 flex flex-col gap-3">
         {/* Search input */}
         <div className="relative">
-          <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
+          <span
+            className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-subtle"
+            style={{ fontSize: '20px' }}
+            aria-hidden="true"
+          >
             search
           </span>
           <input
@@ -85,9 +102,16 @@ export function ProductGrid({ products, loading, error, onRetry }) {
             onChange={setCategory}
           />
         )}
+
+        {/* Result count */}
+        <p className="text-body-sm text-subtle mt-1">
+          {filtered.length} {filtered.length === 1 ? 'arrangement' : 'arrangements'}
+          {category !== 'All' && <> in {category}</>}
+          {search && <> matching “{search}”</>}
+        </p>
       </div>
 
-      {/* Results summary (for screen readers) */}
+      {/* SR-only live region */}
       <p className="sr-only" aria-live="polite">
         {filtered.length} {filtered.length === 1 ? 'flower' : 'flowers'} found
       </p>
@@ -95,7 +119,7 @@ export function ProductGrid({ products, loading, error, onRetry }) {
       {/* Grid */}
       {filtered.length === 0 ? (
         <EmptyState
-          icon="🌷"
+          icon="search_off"
           title="No flowers found"
           message={
             search
@@ -116,9 +140,13 @@ export function ProductGrid({ products, loading, error, onRetry }) {
       ) : (
         <div className="grid grid-cols-1 gap-gutter sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((product, idx) => {
-            const staggerDelay = idx < 12 ? `${idx * 100}ms` : '0ms';
+            const staggerDelay = idx < 8 ? `${idx * 60}ms` : '0ms';
             return (
-              <div key={product.id} className="opacity-0 animate-fade-in-up" style={{ animationDelay: staggerDelay }}>
+              <div
+                key={product.id}
+                className="opacity-0 animate-fade-in-up"
+                style={{ animationDelay: staggerDelay }}
+              >
                 <ProductCard product={product} />
               </div>
             )

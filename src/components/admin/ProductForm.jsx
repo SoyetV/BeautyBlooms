@@ -1,10 +1,11 @@
 // src/components/admin/ProductForm.jsx
-// Modal form used for both creating and editing a product.
-// Handles image file upload preview and all validation states.
+// Modern Flora — Modal form using Input primitive, accessible error states,
+// image upload with preview, switch toggle for availability.
 
 import { useEffect, useRef, useState } from 'react'
 import { Modal } from '@/components/ui/Modal'
 import { Spinner } from '@/components/ui/Spinner'
+import Input from '@/components/ui/Input'
 
 const CATEGORIES = ['Roses', 'Sunflowers', 'Lilies', 'Orchids', 'Tulips', 'Mixed', 'Dried Flowers', 'Uncategorized']
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
@@ -27,7 +28,6 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
   const [errors,    setErrors]    = useState({})
   const fileRef = useRef(null)
 
-  // Populate form when editing an existing product
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
@@ -73,11 +73,12 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
 
   function validate() {
     const errs = {}
-    if (!form.name.trim())               errs.name        = 'Product name is required.'
+    if (!form.name.trim())
+      errs.name = 'Product name is required.'
     if (!form.price || isNaN(Number(form.price)) || Number(form.price) < 0)
-                                         errs.price       = 'Enter a valid price (e.g. 850).'
+      errs.price = 'Enter a valid price (e.g. 850).'
     if (!form.stock_count || isNaN(Number(form.stock_count)) || Number(form.stock_count) < 0)
-                                         errs.stock_count = 'Enter a valid stock count (0 or more).'
+      errs.stock_count = 'Enter a valid stock count (0 or more).'
     return errs
   }
 
@@ -96,7 +97,6 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
           stock_count:  parseInt(form.stock_count, 10),
           category:     form.category,
           is_available: form.is_available,
-          // Keep existing image_url if no new file was chosen
           ...(isEdit && !imageFile ? { image_url: initialData?.image_url ?? null } : {}),
         },
         imageFile
@@ -111,133 +111,189 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Edit product' : 'Add new product'} size="md">
-      <form onSubmit={handleSubmit} noValidate className="space-y-4 sm:space-y-5">
+      <form onSubmit={handleSubmit} noValidate className="space-y-5">
 
         {/* Submit-level error */}
         {errors.submit && (
-          <div role="alert" className="rounded-lg bg-error-container/50 px-4 py-3 font-body-md text-body-md text-on-error-container border border-error/20">
-            {errors.submit}
+          <div
+            role="alert"
+            className="flex items-start gap-3 rounded-lg bg-error-soft px-4 py-3 border border-error/20"
+          >
+            <span
+              className="material-symbols-outlined icon-fill text-error-fg shrink-0 mt-0.5"
+              style={{ fontSize: '18px' }}
+              aria-hidden="true"
+            >
+              error
+            </span>
+            <p className="text-body-sm text-error-fg">{errors.submit}</p>
           </div>
         )}
 
         {/* Image upload */}
         <div>
-          <label className="label">Product photo</label>
+          <span className="label">Product photo</span>
           <div
-            className="mt-1 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-outline-variant/40 bg-surface-container-low/50 p-4 transition-colors hover:border-primary hover:bg-surface-variant/30 sm:p-5"
+            className="mt-1 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-border bg-surface-2/50 p-5 transition-colors duration-250 ease-smooth hover:border-primary-300 hover:bg-primary-50/40"
             onClick={() => fileRef.current?.click()}
-            onKeyDown={e => e.key === 'Enter' && fileRef.current?.click()}
+            onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), fileRef.current?.click())}
             tabIndex={0}
             role="button"
             aria-label="Upload product image"
           >
             {preview ? (
-              <img src={preview} alt="Product preview" className="h-36 w-full object-cover rounded-lg" />
+              <img src={preview} alt="Product preview" className="h-32 w-full object-cover rounded-md" />
             ) : (
               <>
-                <span className="material-symbols-outlined h-8 w-8 text-on-surface-variant/60">add_photo_alternate</span>
-                <p className="text-center font-body-md text-body-md text-on-surface-variant">Click to upload a photo <span className="text-on-surface-variant/70">(JPG, PNG, WebP - max 5 MB)</span></p>
+                <span
+                  className="material-symbols-outlined text-subtle"
+                  style={{ fontSize: '32px' }}
+                  aria-hidden="true"
+                >
+                  add_photo_alternate
+                </span>
+                <p className="text-center text-body-sm text-muted">
+                  Click to upload a photo
+                  <span className="block text-body-xs text-subtle mt-0.5">JPG, PNG, or WebP · max 5 MB</span>
+                </p>
               </>
             )}
-            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={handleImageChange} tabIndex={-1} />
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="sr-only"
+              onChange={handleImageChange}
+              tabIndex={-1}
+            />
           </div>
           {preview && (
-            <button type="button" onClick={() => { setPreview(null); setImageFile(null) }}
-              className="mt-1 font-label-md text-label-md text-on-surface-variant hover:text-error transition-colors">
+            <button
+              type="button"
+              onClick={() => { setPreview(null); setImageFile(null) }}
+              className="mt-2 text-body-xs text-muted hover:text-error-fg transition-colors duration-250 ease-smooth"
+            >
               Remove image
             </button>
           )}
-          {errors.image && <p role="alert" className="mt-1 font-body-md text-body-md text-error">{errors.image}</p>}
+          {errors.image && (
+            <p role="alert" className="mt-1 text-body-xs text-error-fg">{errors.image}</p>
+          )}
         </div>
 
         {/* Name */}
-        <div>
-          <label htmlFor="pf-name" className="label">Product name <span aria-hidden="true" className="text-error">*</span></label>
-          <input
-            id="pf-name" name="name" type="text"
-            value={form.name} onChange={handleChange}
-            placeholder="e.g. Red Velvet Roses"
-            className={`input-field ${errors.name ? 'border-error/50' : ''}`}
-            aria-required="true"
-            aria-describedby={errors.name ? 'pf-name-error' : undefined}
-          />
-          {errors.name && <p id="pf-name-error" role="alert" className="mt-1 font-body-md text-body-md text-error">{errors.name}</p>}
-        </div>
+        <Input
+          id="pf-name"
+          name="name"
+          label="Product name"
+          type="text"
+          required
+          placeholder="e.g. Red Velvet Roses"
+          value={form.name}
+          onChange={handleChange}
+          error={errors.name}
+        />
 
         {/* Description */}
-        <div>
-          <label htmlFor="pf-desc" className="label">Description</label>
-          <textarea
-            id="pf-desc" name="description" rows={3}
-            value={form.description} onChange={handleChange}
-            placeholder="Describe this arrangement…"
-            className="input-field resize-none"
-          />
-        </div>
+        <Input
+          id="pf-desc"
+          name="description"
+          label="Description"
+          as="textarea"
+          rows={3}
+          placeholder="Describe this arrangement…"
+          value={form.description}
+          onChange={handleChange}
+        />
 
         {/* Price + Stock row */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="pf-price" className="label">Price (₱) <span aria-hidden="true" className="text-error">*</span></label>
-            <input
-              id="pf-price" name="price" type="number" min="0" step="0.01"
-              value={form.price} onChange={handleChange}
-              placeholder="850.00"
-              className={`input-field ${errors.price ? 'border-error/50' : ''}`}
-              aria-required="true"
-              aria-describedby={errors.price ? 'pf-price-error' : undefined}
-            />
-            {errors.price && <p id="pf-price-error" role="alert" className="mt-1 font-body-md text-body-md text-error">{errors.price}</p>}
-          </div>
-          <div>
-            <label htmlFor="pf-stock" className="label">Stock count <span aria-hidden="true" className="text-error">*</span></label>
-            <input
-              id="pf-stock" name="stock_count" type="number" min="0" step="1"
-              value={form.stock_count} onChange={handleChange}
-              placeholder="20"
-              className={`input-field ${errors.stock_count ? 'border-error/50' : ''}`}
-              aria-required="true"
-              aria-describedby={errors.stock_count ? 'pf-stock-error' : undefined}
-            />
-            {errors.stock_count && <p id="pf-stock-error" role="alert" className="mt-1 font-body-md text-body-md text-error">{errors.stock_count}</p>}
-          </div>
+          <Input
+            id="pf-price"
+            name="price"
+            label="Price (₱)"
+            type="number"
+            min="0"
+            step="0.01"
+            required
+            placeholder="850.00"
+            value={form.price}
+            onChange={handleChange}
+            error={errors.price}
+          />
+          <Input
+            id="pf-stock"
+            name="stock_count"
+            label="Stock count"
+            type="number"
+            min="0"
+            step="1"
+            required
+            placeholder="20"
+            value={form.stock_count}
+            onChange={handleChange}
+            error={errors.stock_count}
+          />
         </div>
 
         {/* Category */}
-        <div>
-          <label htmlFor="pf-category" className="label">Category</label>
-          <select id="pf-category" name="category" value={form.category} onChange={handleChange} className="input-field">
-            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </div>
+        <Input
+          id="pf-category"
+          name="category"
+          label="Category"
+          as="select"
+          value={form.category}
+          onChange={handleChange}
+        >
+          {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+        </Input>
 
         {/* Available toggle */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 pt-1">
           <button
             type="button"
             role="switch"
             aria-checked={form.is_available}
+            aria-label="Toggle product availability"
             onClick={() => setForm(prev => ({ ...prev, is_available: !prev.is_available }))}
-            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200
-              ${form.is_available ? 'bg-primary' : 'bg-surface-variant'}`}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent
+                        transition-colors duration-250 ease-smooth
+                        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+                        ${form.is_available ? 'bg-primary-500' : 'bg-border-strong'}`}
           >
             <span
-              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200
-                ${form.is_available ? 'translate-x-5' : 'translate-x-0'}`}
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm
+                          transition-transform duration-250 ease-spring
+                          ${form.is_available ? 'translate-x-5' : 'translate-x-0'}`}
             />
           </button>
-          <span className="font-body-md text-body-md text-on-surface">
+          <span className="text-body-sm text-foreground">
             {form.is_available ? 'Listed in catalog' : 'Hidden from catalog'}
           </span>
         </div>
 
         {/* Actions */}
-        <div className="grid grid-cols-2 gap-2 border-t border-outline-variant/30 pt-2 sm:flex sm:justify-end sm:gap-3">
-          <button type="button" onClick={onClose} className="btn-secondary" disabled={saving}>
+        <div className="grid grid-cols-2 gap-2 border-t border-border pt-4 sm:flex sm:justify-end sm:gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn-secondary justify-center"
+            disabled={saving}
+          >
             Cancel
           </button>
-          <button type="submit" className="btn-primary min-w-[110px]" disabled={saving}>
-            {saving ? <><Spinner size="sm" /> Saving…</> : isEdit ? 'Save changes' : 'Add product'}
+          <button
+            type="submit"
+            className="btn-primary min-w-[120px] justify-center"
+            disabled={saving}
+            aria-busy={saving || undefined}
+          >
+            {saving ? (
+              <>
+                <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                Saving…
+              </>
+            ) : isEdit ? 'Save changes' : 'Add product'}
           </button>
         </div>
       </form>

@@ -1,16 +1,18 @@
 // src/components/admin/ProductTable.jsx
-// Responsive inventory table with inline Edit / Delete actions.
-// On mobile, each product collapses into a card-style row.
+// Modern Flora — Card outline variant container, table per ui-ux-pro-max spec:
+// cell padding 12px 16px, row hover = light surface wash, numbers right-aligned,
+// status badges centered, actions right-aligned. Skeleton loaders during fetch.
 
 import { useState } from 'react'
 import { Badge } from '@/components/ui/Badge'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { Spinner } from '@/components/ui/Spinner'
 import { EmptyState } from '@/components/ui/EmptyState'
+import Skeleton from '@/components/ui/Skeleton'
 
 export function ProductTable({ products, loading, error, onEdit, onDelete }) {
   const [deletingId, setDeletingId] = useState(null)
-  const [confirmId,  setConfirmId]  = useState(null) // ID pending delete confirm
+  const [confirmId,  setConfirmId]  = useState(null)
 
   async function handleDelete(id) {
     setDeletingId(id)
@@ -28,29 +30,78 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
     return <Badge label={`${count} in stock`} variant="instock" />
   }
 
-  // ── Loading ──────────────────────────────────────────
+  // ── Loading (skeleton rows) ─────────────────────────
   if (loading) {
     return (
-      <div className="flex justify-center py-16" aria-live="polite" aria-busy="true">
-        <Spinner size="lg" />
+      <div aria-live="polite" aria-busy="true">
+        {/* Mobile skeleton cards */}
+        <div className="space-y-3 md:hidden">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="card p-4 flex gap-3">
+              <Skeleton variant="block" className="h-16 w-16 rounded-lg shrink-0" />
+              <div className="flex-1 flex flex-col gap-2">
+                <Skeleton variant="title" />
+                <Skeleton variant="text" />
+                <div className="flex gap-2 mt-1">
+                  <Skeleton variant="block" className="h-5 w-20" />
+                  <Skeleton variant="block" className="h-5 w-16" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop skeleton table */}
+        <div className="hidden md:block">
+          <div className="border border-border rounded-xl overflow-hidden">
+            <div className="bg-surface-2 px-5 py-3.5 flex gap-4 border-b border-border">
+              <span className="flex-1"><Skeleton variant="text" /></span>
+              <span className="w-24"><Skeleton variant="text" /></span>
+              <span className="w-20"><Skeleton variant="text" /></span>
+              <span className="w-24"><Skeleton variant="text" /></span>
+              <span className="w-24"><Skeleton variant="text" /></span>
+              <span className="w-24"><Skeleton variant="text" /></span>
+            </div>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="px-5 py-3.5 flex gap-4 items-center border-b border-border last:border-b-0">
+                <div className="flex items-center gap-3 flex-1">
+                  <Skeleton variant="block" className="h-10 w-10 rounded-md shrink-0" />
+                  <Skeleton variant="text" />
+                </div>
+                <Skeleton variant="text" className="w-24" />
+                <Skeleton variant="text" className="w-20" />
+                <Skeleton variant="block" className="h-5 w-20 rounded-full" />
+                <Skeleton variant="block" className="h-5 w-16 rounded-full" />
+                <Skeleton variant="text" className="w-24" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     )
   }
 
-  // ── Error ────────────────────────────────────────────
+  // ── Error ───────────────────────────────────────────
   if (error) {
     return (
-      <div role="alert" className="rounded-xl bg-error-container/50 px-5 py-4 text-sm text-on-error-container border border-error/20">
-        Failed to load products: {error}
+      <div
+        role="alert"
+        className="rounded-lg bg-error-soft px-5 py-4 text-body-sm text-error-fg border border-error/20 flex items-start gap-3"
+      >
+        <span className="material-symbols-outlined icon-fill text-error-fg shrink-0 mt-0.5" style={{ fontSize: '18px' }} aria-hidden="true">error</span>
+        <div>
+          <p className="font-semibold">Failed to load products</p>
+          <p className="text-body-xs mt-0.5">{error}</p>
+        </div>
       </div>
     )
   }
 
-  // ── Empty ────────────────────────────────────────────
+  // ── Empty ───────────────────────────────────────────
   if (products.length === 0) {
     return (
       <EmptyState
-        icon="🌱"
+        icon="eco"
         title="No products yet"
         message="Add your first flower to start building the catalog."
       />
@@ -59,27 +110,32 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
 
   return (
     <>
+      {/* Mobile — card rows */}
       <div className="space-y-3 md:hidden" aria-label="Product inventory">
         {products.map((product, idx) => (
           <article
             key={product.id}
-            className="glass-panel rounded-2xl p-4 opacity-0 animate-fade-in-up"
+            className="card p-4 opacity-0 animate-fade-in-up"
             style={{ animationDelay: `${idx * 50}ms` }}
           >
             <div className="flex gap-3">
-              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-surface-container-highest">
+              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-surface-2 border border-border">
                 {product.image_url
                   ? <img src={product.image_url} alt="" className="h-full w-full object-cover" aria-hidden="true" />
-                  : <div className="flex h-full w-full items-center justify-center text-lg" aria-hidden="true">BB</div>
+                  : (
+                    <div className="flex h-full w-full items-center justify-center" aria-hidden="true">
+                      <span className="material-symbols-outlined text-primary-300" style={{ fontSize: '20px' }}>local_florist</span>
+                    </div>
+                  )
                 }
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h3 className="truncate font-semibold text-on-surface">{product.name}</h3>
-                    <p className="font-body-md text-body-md text-on-surface-variant">{product.category}</p>
+                    <h3 className="font-display text-display-sm font-semibold text-foreground truncate">{product.name}</h3>
+                    <p className="text-body-xs text-muted mt-0.5">{product.category}</p>
                   </div>
-                  <p className="shrink-0 font-label-md text-label-md tabular-nums text-on-surface">
+                  <p className="price text-price-sm text-foreground shrink-0">
                     {formatCurrency(product.price)}
                   </p>
                 </div>
@@ -98,13 +154,13 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
                 <button
                   onClick={() => handleDelete(product.id)}
                   disabled={deletingId === product.id}
-                  className="btn-danger px-3 py-2 text-xs"
+                  className="btn-danger px-3 py-2 text-body-xs justify-center"
                 >
                   {deletingId === product.id ? <Spinner size="sm" /> : 'Yes, delete'}
                 </button>
                 <button
                   onClick={() => setConfirmId(null)}
-                  className="btn-secondary px-3 py-2 text-xs"
+                  className="btn-secondary px-3 py-2 text-body-xs justify-center"
                 >
                   Cancel
                 </button>
@@ -113,16 +169,22 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <button
                   onClick={() => onEdit(product)}
-                  className="rounded-full border border-outline-variant bg-surface px-3 py-2 font-label-md text-label-md text-on-surface transition-colors hover:border-primary hover:text-primary"
+                  className="btn-secondary px-3 py-2 text-body-xs justify-center"
                   aria-label={`Edit ${product.name}`}
                 >
+                  <span className="material-symbols-outlined" style={{ fontSize: '14px' }} aria-hidden="true">edit</span>
                   Edit
                 </button>
                 <button
                   onClick={() => setConfirmId(product.id)}
-                  className="rounded-full border border-outline-variant bg-surface px-3 py-2 font-label-md text-label-md text-error transition-colors hover:border-error hover:bg-error-container/30"
+                  className="rounded-full border border-border bg-surface px-3 py-2 text-body-xs font-medium text-error-fg
+                             transition-all duration-250 ease-spring
+                             hover:border-error hover:bg-error-soft
+                             focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+                             inline-flex items-center justify-center gap-1.5"
                   aria-label={`Delete ${product.name}`}
                 >
+                  <span className="material-symbols-outlined" style={{ fontSize: '14px' }} aria-hidden="true">delete</span>
                   Delete
                 </button>
               </div>
@@ -131,103 +193,114 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
         ))}
       </div>
 
-      <div className="glass-panel rounded-2xl hidden overflow-x-auto md:block">
-      <table className="min-w-full divide-y divide-outline-variant/30 font-body-md text-body-md" aria-label="Product inventory">
-        <thead className="bg-surface-container-low/50 font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
-          <tr>
-            <th scope="col" className="px-5 py-4 text-left">Product</th>
-            <th scope="col" className="px-5 py-4 text-left hidden sm:table-cell">Category</th>
-            <th scope="col" className="px-5 py-4 text-right">Price</th>
-            <th scope="col" className="px-5 py-4 text-left hidden md:table-cell">Stock</th>
-            <th scope="col" className="px-5 py-4 text-left hidden lg:table-cell">Status</th>
-            <th scope="col" className="px-5 py-4 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-outline-variant/20">
-          {products.map((product, idx) => (
-            <tr key={product.id} className="group hover:bg-surface-container-highest/30 transition-colors duration-500 opacity-0 animate-fade-in-up" style={{ animationDelay: `${idx * 50}ms` }}>
-              {/* Product name + image */}
-              <td className="px-5 py-4">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-surface-container-highest">
-                    {product.image_url
-                      ? <img src={product.image_url} alt="" className="h-full w-full object-cover" aria-hidden="true" />
-                      : <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-primary" aria-hidden="true">BB</div>
-                    }
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-headline-sm text-headline-sm text-on-surface truncate max-w-[160px]">{product.name}</p>
-                    {/* Show category inline on mobile */}
-                    <p className="font-body-md text-body-md text-on-surface-variant sm:hidden">{product.category}</p>
-                  </div>
-                </div>
-              </td>
-
-              {/* Category (hidden on mobile — shown inline above) */}
-              <td className="px-4 py-3 text-on-surface-variant hidden sm:table-cell">{product.category}</td>
-
-              {/* Price */}
-              <td className="px-4 py-3 text-right font-body-md text-body-md font-semibold text-secondary tabular-nums">
-                {formatCurrency(product.price)}
-              </td>
-
-              {/* Stock */}
-              <td className="px-4 py-3 hidden md:table-cell">
-                {stockBadge(product.stock_count)}
-              </td>
-
-              {/* Availability */}
-              <td className="px-4 py-3 hidden lg:table-cell">
-                <Badge
-                  label={product.is_available ? 'Listed' : 'Hidden'}
-                  variant={product.is_available ? 'instock' : 'default'}
-                />
-              </td>
-
-              {/* Actions */}
-              <td className="px-4 py-3 text-right">
-                {confirmId === product.id ? (
-                  // Inline delete confirmation
-                  <div className="flex items-center justify-end gap-2">
-                    <span className="font-label-md text-label-md text-on-surface-variant hidden sm:inline">Delete?</span>
-                    <button
-                      onClick={() => handleDelete(product.id)}
-                      disabled={deletingId === product.id}
-                      className="btn-danger py-1 px-3 text-xs"
-                    >
-                      {deletingId === product.id ? <Spinner size="sm" /> : 'Yes, delete'}
-                    </button>
-                    <button
-                      onClick={() => setConfirmId(null)}
-                      className="btn-secondary py-1 px-3 text-xs"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-end gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => onEdit(product)}
-                      className="rounded-full border border-outline-variant bg-surface px-3 py-1 font-label-md text-label-md text-on-surface hover:border-primary hover:text-primary transition-colors"
-                      aria-label={`Edit ${product.name}`}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => setConfirmId(product.id)}
-                      className="rounded-full border border-outline-variant bg-surface px-3 py-1 font-label-md text-label-md text-error hover:border-error hover:bg-error-container/30 transition-colors"
-                      aria-label={`Delete ${product.name}`}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
-              </td>
+      {/* Desktop — table */}
+      <div className="hidden md:block border border-border rounded-xl overflow-hidden bg-surface">
+        <table className="min-w-full" aria-label="Product inventory">
+          <thead className="bg-surface-2 text-eyebrow uppercase tracking-eyebrow text-muted">
+            <tr>
+              <th scope="col" className="px-4 py-3 text-left font-semibold">Product</th>
+              <th scope="col" className="px-4 py-3 text-left font-semibold hidden lg:table-cell">Category</th>
+              <th scope="col" className="px-4 py-3 text-right font-semibold">Price</th>
+              <th scope="col" className="px-4 py-3 text-center font-semibold hidden md:table-cell">Stock</th>
+              <th scope="col" className="px-4 py-3 text-center font-semibold hidden lg:table-cell">Status</th>
+              <th scope="col" className="px-4 py-3 text-right font-semibold">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {products.map((product, idx) => (
+              <tr
+                key={product.id}
+                className="group hover:bg-surface-2/50 transition-colors duration-250 ease-smooth opacity-0 animate-fade-in-up"
+                style={{ animationDelay: `${idx * 40}ms` }}
+              >
+                {/* Product name + image */}
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md bg-surface-2 border border-border">
+                      {product.image_url
+                        ? <img src={product.image_url} alt="" className="h-full w-full object-cover" aria-hidden="true" />
+                        : (
+                          <div className="flex h-full w-full items-center justify-center" aria-hidden="true">
+                            <span className="material-symbols-outlined text-primary-300" style={{ fontSize: '16px' }}>local_florist</span>
+                          </div>
+                        )
+                      }
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-body-sm font-medium text-foreground truncate max-w-[180px]">{product.name}</p>
+                      {/* Show category inline on tablet */}
+                      <p className="text-body-xs text-muted lg:hidden">{product.category}</p>
+                    </div>
+                  </div>
+                </td>
+
+                {/* Category (hidden on tablet — shown inline above) */}
+                <td className="px-4 py-3 text-body-sm text-muted hidden lg:table-cell">{product.category}</td>
+
+                {/* Price — right-aligned numbers */}
+                <td className="px-4 py-3 text-right price text-price-sm text-foreground tabular-nums">
+                  {formatCurrency(product.price)}
+                </td>
+
+                {/* Stock — centered badge */}
+                <td className="px-4 py-3 hidden md:table-cell text-center">
+                  <span className="inline-flex">{stockBadge(product.stock_count)}</span>
+                </td>
+
+                {/* Availability — centered badge */}
+                <td className="px-4 py-3 hidden lg:table-cell text-center">
+                  <Badge
+                    label={product.is_available ? 'Listed' : 'Hidden'}
+                    variant={product.is_available ? 'instock' : 'default'}
+                  />
+                </td>
+
+                {/* Actions — right-aligned */}
+                <td className="px-4 py-3 text-right">
+                  {confirmId === product.id ? (
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => handleDelete(product.id)}
+                        disabled={deletingId === product.id}
+                        className="btn-danger py-1.5 px-3 text-body-xs"
+                      >
+                        {deletingId === product.id ? <Spinner size="sm" /> : 'Yes, delete'}
+                      </button>
+                      <button
+                        onClick={() => setConfirmId(null)}
+                        className="btn-secondary py-1.5 px-3 text-body-xs"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100 transition-opacity duration-250 ease-smooth">
+                      <button
+                        onClick={() => onEdit(product)}
+                        className="inline-flex items-center justify-center h-8 w-8 rounded-full text-muted
+                                   hover:text-primary-700 hover:bg-primary-50 transition-colors duration-250 ease-smooth
+                                   focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        aria-label={`Edit ${product.name}`}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">edit</span>
+                      </button>
+                      <button
+                        onClick={() => setConfirmId(product.id)}
+                        className="inline-flex items-center justify-center h-8 w-8 rounded-full text-muted
+                                   hover:text-error-fg hover:bg-error-soft transition-colors duration-250 ease-smooth
+                                   focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        aria-label={`Delete ${product.name}`}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">delete</span>
+                      </button>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   )
 }

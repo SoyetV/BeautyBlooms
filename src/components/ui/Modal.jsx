@@ -1,4 +1,6 @@
 // src/components/ui/Modal.jsx
+// Modern Flora — solid surface panel (not glass), portal-rendered to dodge
+// ancestor transforms, accessible focus + escape behavior.
 
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
@@ -25,51 +27,38 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }) {
   const modalContent = (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-3 py-4 sm:items-center sm:px-4 sm:py-8"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-3 py-4 sm:items-center sm:px-4 sm:py-8
+                 bg-foreground/40 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
       onClick={(e) => { if (e.target === overlayRef.current) onClose() }}
-      style={{ background: 'rgba(45,27,46,0.5)', backdropFilter: 'blur(8px)' }}
     >
       {/* Panel */}
       <div
-        className={`relative z-10 w-full ${maxW[size]} max-h-[calc(100vh-2rem)] overflow-hidden rounded-2xl animate-fade-in-up sm:max-h-[calc(100vh-4rem)] sm:rounded-3xl`}
-        style={{
-          background: 'rgba(255, 247, 250, 0.92)',
-          backdropFilter: 'blur(32px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(32px) saturate(180%)',
-          border: '1px solid rgba(255, 255, 255, 0.6)',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.18), 0 8px 24px rgba(177,14,107,0.08), inset 0 1px 0 rgba(255,255,255,0.85)',
-        }}
+        className={`relative z-10 w-full ${maxW[size]} max-h-[calc(100vh-2rem)] overflow-hidden
+                    rounded-2xl bg-surface border border-border shadow-xl
+                    animate-fade-in-up
+                    sm:max-h-[calc(100vh-4rem)]`}
       >
         {/* Header */}
-        <div
-          className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4"
-          style={{
-            background: 'rgba(255,255,255,0.5)',
-            backdropFilter: 'blur(12px)',
-            borderBottom: '1px solid rgba(222, 190, 200, 0.4)',
-          }}
-        >
-          <h2 id="modal-title" className="font-headline-sm text-headline-sm text-on-surface">
+        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-surface border-b border-border">
+          <h2 id="modal-title" className="font-display text-display-sm font-semibold text-foreground">
             {title}
           </h2>
           <button
             onClick={onClose}
-            className="rounded-xl p-1.5 text-on-surface-variant transition-all hover:text-primary"
-            style={{
-              background: 'rgba(255,255,255,0.6)',
-              border: '1px solid rgba(222, 190, 200, 0.4)',
-            }}
+            className="inline-flex items-center justify-center h-9 w-9 rounded-full text-muted
+                       hover:bg-surface-2 hover:text-foreground transition-colors duration-250 ease-smooth
+                       focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             aria-label="Close modal"
           >
-            <span className="material-symbols-outlined text-sm">close</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }} aria-hidden="true">close</span>
           </button>
         </div>
 
         {/* Content */}
-        <div className="max-h-[calc(100vh-7rem)] overflow-y-auto px-4 py-4 sm:max-h-[calc(100vh-9rem)] sm:px-6 sm:py-5">
+        <div className="max-h-[calc(100vh-9rem)] overflow-y-auto px-5 py-5">
           {children}
         </div>
       </div>

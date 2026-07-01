@@ -1,41 +1,34 @@
 // src/pages/customer/CatalogPage.jsx
+// Modern Flora — compact header, no banner image, no marquee (kept on HomePage only).
 
 import { useProducts } from '@/hooks/useProducts'
 import { ProductGrid } from '@/components/catalog/ProductGrid'
-import ProductMarquee from '@/components/ui/ProductMarquee'
 
 export default function CatalogPage() {
   const { products, loading, error, fetchProducts } = useProducts()
 
   return (
-    <div className="page-enter bg-background pt-[80px]">
-      {/* Shop Banner */}
-      <section className="relative mb-8 flex h-[409px] min-h-[300px] items-center justify-center overflow-hidden sm:mb-12">
-        <div className="absolute inset-0 z-0 bg-surface-container-highest">
-          <img
-            src="https://images.pexels.com/photos/10772718/pexels-photo-10772718.jpeg"
-            alt="Beautiful pink flowers"
-            className="w-full h-full object-cover object-center opacity-40"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
-        </div>
-        <div className="relative z-10 text-center px-margin-mobile md:px-margin-desktop animate-fade-in-up">
-          <h1 className="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-primary mb-4">
-            The Collection
-          </h1>
-          <p className="font-accent-italic text-accent-italic text-on-surface-variant">
-            {!loading && !error
-              ? `Curated floral artistry. ${products.length} arrangements available.`
-              : 'Curated floral artistry — explore our luxurious floral arrangements.'}
-          </p>
-        </div>
-      </section>
+    <div className="page-enter bg-background pt-24 md:pt-32">
 
-      {/* Infinite Product Marquee */}
-      <ProductMarquee />
+      {/* Compact header */}
+      <header className="px-margin-mobile md:px-margin-desktop pb-10 md:pb-14">
+        <div className="mx-auto max-w-container">
+          <p className="eyebrow-strip mb-3"><span>Floral Atelier</span></p>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+            <h1 className="font-display text-display-xl md:text-display-2xl text-foreground tracking-tight leading-[1.05]">
+              The Collection
+            </h1>
+            <p className="text-body-md text-muted max-w-sm md:text-right">
+              {!loading && !error
+                ? `${products.length} ${products.length === 1 ? 'arrangement' : 'arrangements'} available, hand-arranged to order.`
+                : 'Curated floral artistry, hand-arranged to order in Cebu City.'}
+            </p>
+          </div>
+        </div>
+      </header>
 
-      {/* Grid Container */}
-      <main className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop py-12 md:py-20">
+      {/* Grid */}
+      <main className="mx-auto max-w-container px-margin-mobile md:px-margin-desktop pb-section-y">
         <ProductGrid
           products={products}
           loading={loading}

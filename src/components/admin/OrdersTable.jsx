@@ -1,10 +1,12 @@
 // src/components/admin/OrdersTable.jsx
-// Incoming orders dashboard with inline status update dropdown.
+// Modern Flora — Card default variant per row, expanded detail panel,
+// status dropdown with inline spinner, skeleton loaders during fetch.
 
 import { useState } from 'react'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/ui/Spinner'
 import { EmptyState } from '@/components/ui/EmptyState'
+import Skeleton from '@/components/ui/Skeleton'
 import { formatCurrency } from '@/utils/formatCurrency'
 
 const ORDER_STATUSES = ['Pending', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled']
@@ -29,74 +31,100 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
     }
   }
 
+  // ── Loading ─────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex justify-center py-16" aria-live="polite" aria-busy="true">
-        <Spinner size="lg" />
+      <div aria-live="polite" aria-busy="true" className="space-y-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="card p-4 flex items-center gap-3">
+            <div className="flex-1 flex flex-col gap-2">
+              <Skeleton variant="title" />
+              <Skeleton variant="text" />
+            </div>
+            <Skeleton variant="block" className="h-5 w-20" />
+            <Skeleton variant="block" className="h-6 w-24 rounded-full" />
+          </div>
+        ))}
       </div>
     )
   }
 
+  // ── Error ───────────────────────────────────────────
   if (error) {
     return (
-      <div role="alert" className="rounded-xl bg-error-container/50 px-5 py-4 text-sm text-on-error-container border border-error/20">
-        Failed to load orders: {error}
+      <div
+        role="alert"
+        className="rounded-lg bg-error-soft px-5 py-4 text-body-sm text-error-fg border border-error/20 flex items-start gap-3"
+      >
+        <span className="material-symbols-outlined icon-fill text-error-fg shrink-0 mt-0.5" style={{ fontSize: '18px' }} aria-hidden="true">error</span>
+        <div>
+          <p className="font-semibold">Failed to load orders</p>
+          <p className="text-body-xs mt-0.5">{error}</p>
+        </div>
       </div>
     )
   }
 
+  // ── Empty ───────────────────────────────────────────
   if (orders.length === 0) {
     return (
       <EmptyState
-        icon="📋"
+        icon="receipt_long"
         title="No orders yet"
-        message="Orders placed by customers will appear here."
+        message="Orders placed by customers will appear here in real time."
       />
     )
   }
 
   return (
-    <div className="space-y-3">
+    <ul className="space-y-3" aria-label="Recent orders">
       {orders.map((order, idx) => {
         const isExpanded = expandedId === order.id
         const isUpdating = updatingId === order.id
 
         return (
-          <article
+          <li
             key={order.id}
-            className="glass-panel rounded-2xl overflow-hidden opacity-0 animate-fade-in-up"
-            style={{ animationDelay: `${idx * 75}ms` }}
+            className="card overflow-hidden opacity-0 animate-fade-in-up"
+            style={{ animationDelay: `${idx * 60}ms` }}
             aria-label={`Order from ${order.customer_name}`}
           >
             {/* Order header row */}
             <div
-              className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-2 px-4 py-4 transition-colors duration-500 hover:bg-surface-container-highest/30 sm:gap-x-4 sm:px-5"
+              className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-2 px-4 py-4
+                         transition-colors duration-250 ease-smooth hover:bg-surface-2/40
+                         sm:gap-x-4 sm:px-5
+                         focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary"
               onClick={() => setExpandedId(isExpanded ? null : order.id)}
               role="button"
               aria-expanded={isExpanded}
               tabIndex={0}
-              onKeyDown={e => e.key === 'Enter' && setExpandedId(isExpanded ? null : order.id)}
+              onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setExpandedId(isExpanded ? null : order.id))}
             >
               {/* Customer name + ID */}
               <div className="min-w-0 flex-1">
-                <p className="font-body-md text-body-md font-semibold text-on-surface truncate">{order.customer_name}</p>
-                <p className="font-body-md text-body-md text-on-surface-variant font-mono">{order.id.slice(0, 8)}…</p>
+                <p className="text-body-sm font-semibold text-foreground truncate">{order.customer_name}</p>
+                <p className="text-body-xs text-muted font-mono">{order.id.slice(0, 8)}…</p>
               </div>
 
-              {/* Total */}
-              <span className="font-body-md text-body-md font-semibold text-secondary tabular-nums">
+              {/* Total — right-aligned number */}
+              <span className="price text-price-sm text-foreground tabular-nums">
                 {formatCurrency(order.total_amount)}
               </span>
 
-              {/* Status badge */}
+              {/* Status badge — centered */}
               <Badge label={order.status} />
 
-              {/* Date */}
-              <span className="font-body-md text-body-md text-on-surface-variant hidden sm:inline">{formatDate(order.created_at)}</span>
+              {/* Date — hidden on mobile */}
+              <span className="text-body-xs text-muted hidden sm:inline tabular-nums">
+                {formatDate(order.created_at)}
+              </span>
 
               {/* Chevron */}
               <span
-                className={`material-symbols-outlined h-4 w-4 text-on-surface-variant transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                className={`material-symbols-outlined text-muted transition-transform duration-250 ease-spring
+                  ${isExpanded ? 'rotate-180' : ''}`}
+                style={{ fontSize: '18px' }}
                 aria-hidden="true"
               >
                 expand_more
@@ -105,20 +133,30 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
 
             {/* Expanded detail panel */}
             {isExpanded && (
-              <div className="animate-fade-in space-y-5 border-t border-outline-variant/20 bg-surface/40 px-4 py-5 sm:space-y-6 sm:px-5 sm:py-6">
+              <div className="animate-fade-in space-y-5 border-t border-border bg-surface-2/30 px-4 py-5 sm:space-y-6 sm:px-5 sm:py-6">
                 {/* Customer details */}
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <p className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mb-1">Customer</p>
-                    <p className="font-body-md text-body-md text-on-surface">{order.customer_name}</p>
-                    <p className="font-body-md text-body-md text-on-surface-variant">Messenger: {order.customer_email}</p>
-                    {order.customer_phone && <p className="font-body-md text-body-md text-on-surface-variant">{order.customer_phone}</p>}
+                    <p className="text-eyebrow uppercase tracking-eyebrow text-muted mb-2">Customer</p>
+                    <p className="text-body-sm text-foreground font-medium">{order.customer_name}</p>
+                    <p className="text-body-sm text-muted mt-0.5">
+                      Messenger: <span className="font-mono">{order.customer_email}</span>
+                    </p>
+                    {order.customer_phone && (
+                      <p className="text-body-sm text-muted mt-0.5">
+                        <a href={`tel:${order.customer_phone}`} className="hover:text-foreground transition-colors">
+                          {order.customer_phone}
+                        </a>
+                      </p>
+                    )}
                   </div>
                   <div>
-                    <p className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mb-1">Delivery address</p>
-                    <p className="font-body-md text-body-md text-on-surface">{order.delivery_address}</p>
+                    <p className="text-eyebrow uppercase tracking-eyebrow text-muted mb-2">Delivery address</p>
+                    <p className="text-body-sm text-foreground leading-relaxed">{order.delivery_address}</p>
                     {order.notes && (
-                      <p className="mt-1 font-body-md text-body-md italic text-on-surface-variant">Note: {order.notes}</p>
+                      <p className="mt-1.5 text-body-sm italic text-muted leading-relaxed">
+                        Note: {order.notes}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -126,14 +164,16 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
                 {/* Order items */}
                 {order.order_items?.length > 0 && (
                   <div>
-                    <p className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mb-2">Items</p>
-                    <ul className="divide-y divide-outline-variant/20 rounded-lg bg-surface ring-1 ring-outline-variant/30">
+                    <p className="text-eyebrow uppercase tracking-eyebrow text-muted mb-2">Items</p>
+                    <ul className="divide-y divide-border rounded-lg bg-surface border border-border">
                       {order.order_items.map(item => (
-                        <li key={item.id} className="flex items-center justify-between gap-3 px-3 py-2 font-body-md text-body-md">
-                          <span className="min-w-0 text-on-surface">
-                            <span className="font-semibold text-on-surface">{item.quantity}×</span> {item.product_name}
+                        <li key={item.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
+                          <span className="min-w-0 text-body-sm text-foreground">
+                            <span className="font-semibold">{item.quantity}×</span> {item.product_name}
                           </span>
-                          <span className="text-on-surface-variant tabular-nums">{formatCurrency(item.subtotal)}</span>
+                          <span className="price text-price-sm text-muted tabular-nums">
+                            {formatCurrency(item.subtotal)}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -143,7 +183,10 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
                 {/* Status update */}
                 <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <label htmlFor={`status-${order.id}`} className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
+                    <label
+                      htmlFor={`status-${order.id}`}
+                      className="text-eyebrow uppercase tracking-eyebrow text-muted"
+                    >
                       Update status
                     </label>
                     <div className="relative">
@@ -152,30 +195,37 @@ export function OrdersTable({ orders, loading, error, onStatusChange }) {
                         value={order.status}
                         onChange={e => handleStatusChange(order.id, e.target.value)}
                         disabled={isUpdating}
-                        className="input-field py-2 pr-8 font-body-md text-body-md sm:py-1.5"
+                        className="input-field py-2 pr-9 text-body-sm sm:py-1.5 appearance-none cursor-pointer"
                         aria-label={`Change order status for ${order.customer_name}`}
                       >
                         {ORDER_STATUSES.map(s => (
                           <option key={s} value={s}>{s}</option>
                         ))}
                       </select>
+                      <span
+                        className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-subtle pointer-events-none"
+                        style={{ fontSize: '18px' }}
+                        aria-hidden="true"
+                      >
+                        expand_more
+                      </span>
                       {isUpdating && (
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                        <div className="absolute right-9 top-1/2 -translate-y-1/2">
                           <Spinner size="sm" />
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <p className="font-body-md text-body-md text-on-surface-variant">
+                  <p className="text-body-xs text-muted tabular-nums">
                     Placed {formatDate(order.created_at)}
                   </p>
                 </div>
               </div>
             )}
-          </article>
+          </li>
         )
       })}
-    </div>
+    </ul>
   )
 }
