@@ -1,3 +1,8 @@
+// src/components/ui/ProductMarquee.jsx
+// Modern Flora — auto-scrolling draggable carousel.
+// Two sizes: 'compact' (customer pages, small cards) and 'full' (admin, larger).
+// Admin mode adds the management grid below the marquee.
+
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useProducts } from '@/hooks/useProducts'
 import { formatCurrency } from '@/utils/formatCurrency'
@@ -6,6 +11,7 @@ import { Modal } from '@/components/ui/Modal'
 import { Badge } from '@/components/ui/Badge'
 import { ProductForm } from '@/components/admin/ProductForm'
 
+// ── Inline icons (kept for admin grid hover actions) ──────────────────────
 const Plus = ({ size = 24, className = '' }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
 )
@@ -43,6 +49,7 @@ function WithOwnProducts(props) {
 
 function ProductMarqueeInner({
   isAdmin = false,
+  size = 'compact', // 'compact' (customer pages) or 'full' (admin)
   products,
   createProduct,
   updateProduct,
@@ -54,33 +61,25 @@ function ProductMarqueeInner({
   const [justAdded, setJustAdded] = useState(false)
 
   // ── Marquee drag/swipe + auto-scroll ──────────────────────
-  // IMPORTANT: We deliberately do NOT use `setPointerCapture()` here.
-  // Capturing the pointer on the track would steal click events from the
-  // "View Details" / "Add to cart" buttons inside the marquee cards,
-  // making them unclickable. Instead we listen on `window` during a drag.
-  //
-  // Drag only starts after the pointer moves past a 5px threshold, so plain
-  // clicks pass through untouched. After a real drag, the next click is
-  // suppressed via `handleCardClickCapture` so the user doesn't accidentally
-  // trigger a button at the end of a swipe.
+  // Deliberately do NOT use setPointerCapture() — it would steal click events
+  // from buttons inside the cards. Listen on window during a drag instead.
   const scrollRef    = useRef(null)
   const rafRef       = useRef(null)
   const dragStateRef = useRef({ startX: 0, startScrollLeft: 0, active: false, hasMoved: false, pointerId: null })
   const [isHovered, setIsHovered] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
 
-  // Auto-scroll loop
+  // Auto-scroll speed: slower for compact, faster for full
+  const SPEED = size === 'compact' ? 25 : 35
+
   useEffect(() => {
     const container = scrollRef.current
     if (!container) return
 
-    const SPEED = 35
     let lastTime = performance.now()
-
     const tick = (now) => {
       const dt = (now - lastTime) / 1000
       lastTime = now
-
       if (!dragStateRef.current.active && !isHovered) {
         container.scrollLeft += SPEED * dt
         const halfWidth = container.scrollWidth / 2
@@ -92,14 +91,12 @@ function ProductMarqueeInner({
     }
     rafRef.current = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(rafRef.current)
-  }, [isHovered])
+  }, [isHovered, SPEED])
 
-  // ── Drag handlers ─────────────────────────────────────
   function handlePointerDown(e) {
     const container = scrollRef.current
     if (!container) return
     if (e.button !== undefined && e.button !== 0) return
-
     dragStateRef.current = {
       startX: e.clientX,
       startScrollLeft: container.scrollLeft,
@@ -114,15 +111,12 @@ function ProductMarqueeInner({
     if (st.pointerId == null) return
     const container = scrollRef.current
     if (!container) return
-
     const dx = e.clientX - st.startX
-
     if (!st.active && Math.abs(dx) > 5) {
       st.active = true
       st.hasMoved = true
       setIsDragging(true)
     }
-
     if (st.active) {
       container.scrollLeft = st.startScrollLeft - dx
       const halfWidth = container.scrollWidth / 2
@@ -149,7 +143,6 @@ function ProductMarqueeInner({
     }
   }, [])
 
-  // ── Click guard: suppress the click right after a drag ──
   function handleCardClickCapture(e) {
     if (dragStateRef.current.hasMoved) {
       e.preventDefault()
@@ -172,7 +165,7 @@ function ProductMarqueeInner({
   }
 
   async function handleDeleteProduct(id) {
-    if (!window.confirm('Delete this product from the marquee? This will also remove it from the catalog.')) return
+    if (!window.confirm('Delete this product? This will also remove it from the catalog.')) return
     try { await deleteProduct(id) }
     catch (err) {
       console.error('[ProductMarquee] deleteProduct failed:', err.message || err)
@@ -201,26 +194,36 @@ function ProductMarqueeInner({
 
   const marqueeItems = useMemo(() => [...products, ...products], [products])
 
+  // ── Size variants ──
+  const isCompact = size === 'compact'
+  const cardWidth   = isCompact ? 'w-48 sm:w-52' : 'w-72 md:w-80'
+  const imageHeight = isCompact ? 'h-32 sm:h-36' : 'h-64'
+  const bodyPad     = isCompact ? 'p-3'           : 'p-4'
+
+  if (products.length === 0 && !isAdmin) return null
+
   return (
-    <div className="w-full flex flex-col items-center py-12 bg-background overflow-hidden">
+    <div className={`w-full flex flex-col items-center ${isCompact ? 'py-6' : 'py-10'} bg-background overflow-hidden`}>
       <div
-        className="w-full relative py-8 overflow-hidden bg-surface-container-low border-y border-secondary/10 shadow-sm backdrop-blur-sm"
+        className="w-full relative py-4 overflow-hidden bg-surface-2/40 border-y border-border"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none"></div>
-        <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
+        {/* Edge fades */}
+        <div className="absolute inset-y-0 left-0 w-16 sm:w-24 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none"></div>
+        <div className="absolute inset-y-0 right-0 w-16 sm:w-24 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
 
+        {/* Drag hint */}
         {products.length > 0 && (
-          <div className="absolute top-2 right-4 z-20 flex items-center gap-1 font-label-md text-label-md text-on-surface-variant/60 select-none pointer-events-none">
-            <span className="material-symbols-outlined text-xs">swipe</span>
-            <span className="hidden sm:inline uppercase tracking-wider">Drag to browse</span>
+          <div className="absolute top-1.5 right-3 z-20 flex items-center gap-1 text-body-xs text-subtle select-none pointer-events-none">
+            <span className="material-symbols-outlined" style={{ fontSize: '12px' }} aria-hidden="true">swipe</span>
+            <span className="hidden sm:inline uppercase tracking-eyebrow">Drag to browse</span>
           </div>
         )}
 
         <div
           ref={scrollRef}
-          className={`flex gap-6 px-6 overflow-x-auto scrollbar-none select-none ${
+          className={`flex ${isCompact ? 'gap-3 px-4 sm:px-6' : 'gap-4 px-6'} overflow-x-auto scrollbar-none select-none ${
             isDragging ? 'cursor-grabbing' : 'cursor-grab'
           }`}
           style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}
@@ -230,34 +233,47 @@ function ProductMarqueeInner({
           {marqueeItems.map((product, idx) => (
             <div
               key={`${product.id}-${idx}`}
-              className="glass-panel rounded-2xl flex-shrink-0 w-72 md:w-80 overflow-hidden transition-all duration-500 hover:shadow-petal-hover hover:scale-[1.02]"
+              className={`card flex-shrink-0 ${cardWidth} overflow-hidden transition-all duration-500 ease-spring hover:shadow-card-hover hover:-translate-y-1`}
             >
-              <div className="relative h-80 overflow-hidden bg-surface-container-highest">
+              {/* Image */}
+              <button
+                type="button"
+                onClick={() => handleViewDetails(product)}
+                className={`relative ${imageHeight} w-full overflow-hidden bg-surface-2 block`}
+                aria-label={`View ${product.name || product.title} details`}
+              >
                 {product.image_url || product.image ? (
                   <img
                     src={product.image_url || product.image}
                     alt={product.name || product.title}
-                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-700 ease-spring hover:scale-105"
                     draggable={false}
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
-                    <ImageIcon size={48} />
+                  <div className="w-full h-full flex items-center justify-center text-subtle">
+                    <span className="material-symbols-outlined" style={{ fontSize: isCompact ? '28px' : '40px' }} aria-hidden="true">local_florist</span>
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
-              </div>
+              </button>
 
-              <div className="p-5 bg-surface flex flex-col justify-between h-32">
-                <h3 className="font-headline-sm text-headline-sm text-primary truncate">{product.name || product.title}</h3>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="font-body-md text-body-md font-semibold text-secondary tabular-nums">{formatCurrency(product.price)}</span>
+              {/* Body */}
+              <div className={`${bodyPad} flex flex-col gap-1`}>
+                <p className="text-body-xs uppercase tracking-eyebrow text-subtle truncate">
+                  {product.category || 'Uncategorized'}
+                </p>
+                <h3 className={`font-display ${isCompact ? 'text-sm' : 'text-base'} font-semibold text-foreground truncate leading-snug`}>
+                  {product.name || product.title}
+                </h3>
+                <div className="flex items-center justify-between mt-1">
+                  <span className={`price ${isCompact ? 'text-price-sm' : 'text-price-md'} text-foreground`}>
+                    {formatCurrency(product.price)}
+                  </span>
                   <button
                     type="button"
                     onClick={() => handleViewDetails(product)}
-                    className="px-4 py-2 border ring-1 ring-outline text-on-surface rounded-full font-label-md text-label-md uppercase tracking-wider hover:bg-surface-variant transition-all duration-300"
+                    className="text-body-xs font-medium text-primary-700 hover:text-primary-800 transition-colors duration-250 ease-smooth"
                   >
-                    View Details
+                    Details →
                   </button>
                 </div>
               </div>
@@ -266,6 +282,7 @@ function ProductMarqueeInner({
         </div>
       </div>
 
+      {/* Customer details modal */}
       {!isAdmin && detailsProduct && (
         <ProductDetailsModal
           product={detailsProduct}
@@ -277,92 +294,98 @@ function ProductMarqueeInner({
         />
       )}
 
+      {/* Admin management grid */}
       {isAdmin && (
-        <div className="w-full max-w-5xl mt-16 px-6">
-          <div className="glass-panel rounded-2xl shadow-petal p-6 md:p-8">
-            <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div className="w-full max-w-5xl mt-10 px-4 sm:px-6">
+          <div className="card p-5 md:p-7">
+            <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
               <div>
-                <h2 className="font-headline-md text-headline-md text-on-surface">Admin: Manage Marquee</h2>
-                <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-                  Add, edit, or remove products featured in the scrolling marquee. Changes sync to the catalog in real time.
+                <h2 className="font-display text-display-sm font-semibold text-foreground">
+                  Manage marquee
+                </h2>
+                <p className="text-body-sm text-muted mt-0.5">
+                  Add, edit, or remove products. Changes sync to the catalog in real time.
                 </p>
               </div>
               <button onClick={handleOpenAdd} className="btn-primary">
-                <Plus size={18} /> Add New Product
+                <Plus size={16} /> Add new product
               </button>
             </div>
 
             {products.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-surface-container text-on-surface-variant mb-4">
-                  <ImageIcon size={32} />
-                </div>
-                <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">No products yet</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant mb-6">
+              <div className="text-center py-12 flex flex-col items-center gap-3">
+                <span
+                  className="inline-flex items-center justify-center h-14 w-14 rounded-full bg-surface-2 text-subtle"
+                  aria-hidden="true"
+                >
+                  <ImageIcon size={28} />
+                </span>
+                <h3 className="font-display text-display-sm font-semibold text-foreground">No products yet</h3>
+                <p className="text-body-sm text-muted max-w-sm">
                   Add your first flower to start building the marquee.
                 </p>
                 <button onClick={handleOpenAdd} className="btn-primary">
-                  <Plus size={18} /> Add your first product
+                  <Plus size={16} /> Add your first product
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {products.map((product) => (
                   <div
                     key={product.id}
-                    className="relative p-4 rounded-xl border border-outline/15 bg-surface-container-low/50 hover:bg-surface-container-low hover:border-primary/20 transition-all duration-300 group"
+                    className="relative p-3 rounded-lg border border-border bg-surface hover:bg-surface-2 hover:border-primary-200 transition-all duration-250 ease-smooth group"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-surface-container-highest">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-md overflow-hidden shrink-0 bg-surface-2">
                         {product.image_url || product.image ? (
                           <img src={product.image_url || product.image} alt={product.name || product.title} className="w-full h-full object-cover" />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-on-surface-variant">
-                            <ImageIcon size={20} />
+                          <div className="flex h-full w-full items-center justify-center text-subtle">
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }} aria-hidden="true">local_florist</span>
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold text-on-surface truncate">{product.name || product.title}</h4>
-                        <p className="text-sm text-primary font-semibold tabular-nums">{formatCurrency(product.price)}</p>
-                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                        <h4 className="text-body-sm font-semibold text-foreground truncate">{product.name || product.title}</h4>
+                        <p className="price text-price-sm text-primary-700">{formatCurrency(product.price)}</p>
+                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                           {product.category && (
-                            <span className="text-[10px] uppercase tracking-wider text-on-surface-variant">{product.category}</span>
+                            <span className="text-body-xs uppercase tracking-eyebrow text-subtle">{product.category}</span>
                           )}
                           {product.stock_count === 0 ? (
-                            <span className="text-[10px] uppercase tracking-wider text-error">· Out of stock</span>
+                            <span className="text-body-xs uppercase tracking-eyebrow text-error-fg">· Out of stock</span>
                           ) : (
-                            <span className="text-[10px] uppercase tracking-wider text-on-surface-variant">· {product.stock_count} in stock</span>
+                            <span className="text-body-xs uppercase tracking-eyebrow text-subtle">· {product.stock_count} in stock</span>
                           )}
                           {!product.is_available && (
-                            <span className="text-[10px] uppercase tracking-wider text-outline">· Hidden</span>
+                            <span className="text-body-xs uppercase tracking-eyebrow text-subtle">· Hidden</span>
                           )}
                         </div>
                       </div>
                     </div>
 
-                    <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                    <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-250 ease-spring">
                       <button
                         onClick={() => handleOpenEdit(product)}
-                        className="p-2 bg-surface rounded-full shadow-sm text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors"
+                        className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-surface shadow-sm text-muted hover:text-primary-700 hover:bg-primary-50 transition-colors duration-250 ease-smooth"
                         type="button"
                         aria-label={`Edit ${product.name || product.title}`}
                       >
-                        <Edit2 size={14} />
+                        <Edit2 size={13} />
                       </button>
                       <button
                         onClick={() => handleDeleteProduct(product.id)}
-                        className="p-2 bg-surface rounded-full shadow-sm text-error hover:bg-error-container/50 transition-colors"
+                        className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-surface shadow-sm text-muted hover:text-error-fg hover:bg-error-soft transition-colors duration-250 ease-smooth"
                         type="button"
                         aria-label={`Delete ${product.name || product.title}`}
                       >
-                        <X size={14} />
+                        <X size={13} />
                       </button>
                     </div>
 
-                    <div className="mt-3 flex gap-2 sm:hidden">
-                      <button onClick={() => handleOpenEdit(product)} className="flex-1 rounded-full border border-outline-variant bg-surface px-3 py-1.5 font-label-md text-label-md text-on-surface hover:border-primary hover:text-primary transition-colors" type="button">Edit</button>
-                      <button onClick={() => handleDeleteProduct(product.id)} className="flex-1 rounded-full border border-outline-variant bg-surface px-3 py-1.5 font-label-md text-label-md text-error hover:border-error hover:bg-error-container/30 transition-colors" type="button">Delete</button>
+                    <div className="mt-2 flex gap-2 sm:hidden">
+                      <button onClick={() => handleOpenEdit(product)} className="flex-1 rounded-full border border-border bg-surface px-3 py-1.5 text-body-xs font-medium text-foreground hover:border-primary-300 hover:text-primary-700 transition-colors" type="button">Edit</button>
+                      <button onClick={() => handleDeleteProduct(product.id)} className="flex-1 rounded-full border border-border bg-surface px-3 py-1.5 text-body-xs font-medium text-error-fg hover:border-error hover:bg-error-soft transition-colors" type="button">Delete</button>
                     </div>
                   </div>
                 ))}
@@ -395,12 +418,12 @@ function ProductDetailsModal({ product, onClose, onAddToCart, addingToCart, just
   return (
     <Modal isOpen={true} onClose={onClose} title={name} size="lg">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
-        <div className="aspect-[4/3] overflow-hidden rounded-2xl bg-surface-container-highest">
+        <div className="aspect-square overflow-hidden rounded-xl bg-surface-2 border border-border">
           {product.image_url || product.image ? (
             <img src={product.image_url || product.image} alt={name} className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-on-surface-variant">
-              <ImageIcon size={64} />
+            <div className="flex h-full w-full items-center justify-center text-subtle">
+              <span className="material-symbols-outlined" style={{ fontSize: '48px' }} aria-hidden="true">local_florist</span>
             </div>
           )}
         </div>
@@ -408,7 +431,7 @@ function ProductDetailsModal({ product, onClose, onAddToCart, addingToCart, just
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-2">
             {category && (
-              <span className="inline-flex items-center rounded-full px-3 py-0.5 text-xs font-medium bg-primary-container/80 text-on-primary-container backdrop-blur-md">{category}</span>
+              <span className="tag">{category}</span>
             )}
             {isOutOfStock ? (
               <Badge label="Out of stock" variant="outofstock" />
@@ -419,18 +442,18 @@ function ProductDetailsModal({ product, onClose, onAddToCart, addingToCart, just
             )}
           </div>
 
-          <p className="font-body-md text-3xl font-bold text-secondary tabular-nums">{formatCurrency(price)}</p>
+          <p className="price text-price-lg text-primary-700">{formatCurrency(price)}</p>
 
           {description ? (
-            <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">{description}</p>
+            <p className="text-body-md text-muted leading-relaxed">{description}</p>
           ) : (
-            <p className="font-body-md text-body-md text-outline italic">No description available.</p>
+            <p className="text-body-md text-subtle italic">No description available.</p>
           )}
 
           {inCartCount > 0 && (
-            <div className="flex items-center gap-2 rounded-lg bg-secondary-container/30 px-3 py-2 text-sm text-on-secondary-container border border-secondary/20">
-              <span className="material-symbols-outlined text-base">shopping_cart</span>
-              <span>{inCartCount} in your cart</span>
+            <div className="flex items-center gap-2 rounded-lg bg-primary-50 px-3 py-2 text-body-sm text-primary-700 border border-primary-200">
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">shopping_bag</span>
+              <span>{inCartCount} {inCartCount === 1 ? 'item' : 'items'} in your cart</span>
             </div>
           )}
 
@@ -439,22 +462,25 @@ function ProductDetailsModal({ product, onClose, onAddToCart, addingToCart, just
               type="button"
               onClick={() => onAddToCart(product)}
               disabled={isOutOfStock || addingToCart}
-              className={`inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 font-label-md text-label-md uppercase tracking-wider transition-all duration-300 sm:w-auto ${
-                isOutOfStock ? 'bg-surface-variant text-on-surface-variant cursor-not-allowed'
-                : justAdded ? 'bg-secondary text-on-secondary shadow-md'
-                : 'bg-primary text-on-primary shadow-sm hover:shadow-md hover:scale-[1.02]'
-              }`}
+              className={`inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-2.5 text-body-sm font-semibold uppercase tracking-eyebrow transition-all duration-250 ease-spring sm:w-auto
+                ${isOutOfStock
+                  ? 'bg-surface-2 text-subtle cursor-not-allowed'
+                  : justAdded
+                    ? 'bg-sage-500 text-white'
+                    : 'btn-primary'
+                }`}
+              aria-busy={addingToCart || undefined}
             >
               {isOutOfStock ? <>Out of stock</>
-              : addingToCart ? <><span className="material-symbols-outlined text-sm">hourglass_empty</span>Adding…</>
-              : justAdded ? <><span className="material-symbols-outlined text-sm">check</span>Added to cart!</>
-              : <><span className="material-symbols-outlined text-sm">shopping_cart</span>Add to cart</>}
+              : addingToCart ? <><span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />Adding…</>
+              : justAdded ? <><span className="material-symbols-outlined icon-fill" style={{ fontSize: '16px' }} aria-hidden="true">check</span>Added to cart</>
+              : <><span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">shopping_bag</span>Add to cart</>}
             </button>
 
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 font-label-md text-label-md uppercase tracking-wider text-on-surface-variant transition-all duration-300 hover:text-primary sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-2.5 text-body-sm font-medium text-muted transition-colors duration-250 ease-smooth hover:text-foreground sm:w-auto"
             >
               Continue browsing
             </button>
