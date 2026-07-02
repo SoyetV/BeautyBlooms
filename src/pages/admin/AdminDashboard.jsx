@@ -406,6 +406,7 @@ export default function AdminDashboard() {
                   {activeTab === 'marquee' && (
                     <ProductMarquee
                       isAdmin={true}
+                      size="full"
                       products={products}
                       onCreate={createProduct}
                       onUpdate={updateProduct}

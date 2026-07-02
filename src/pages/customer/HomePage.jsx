@@ -5,6 +5,7 @@
 import { Link } from 'react-router-dom'
 import { useProducts } from '@/hooks/useProducts'
 import { ProductGrid } from '@/components/catalog/ProductGrid'
+import ProductMarquee from '@/components/ui/ProductMarquee'
 import Button from '@/components/ui/Button'
 
 export default function HomePage() {
@@ -95,6 +96,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ═══ MARQUEE — compact auto-scrolling carousel ═══ */}
+      <ProductMarquee size="compact" />
 
       {/* ═══ FEATURE BLOCK — 3 columns, was previously buried in footer ═══ */}
       <section className="px-margin-mobile md:px-margin-desktop py-section-y-sm">

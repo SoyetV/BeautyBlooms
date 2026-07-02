@@ -47,7 +47,7 @@ export default function Skeleton({ variant = 'text', className = '', count = 1 }
 }
 
 /**
- * SkeletonCard — composite loading card matching ProductCard layout.
+ * SkeletonCard — composite loading card matching compact ProductCard layout.
  */
 export function SkeletonCard() {
   return (
@@ -55,11 +55,11 @@ export function SkeletonCard() {
       className="card overflow-hidden p-0"
       aria-hidden="true"
     >
-      <div className="aspect-[4/3] bg-skeleton bg-[length:200%_100%] animate-shimmer" />
-      <div className="p-5 flex flex-col gap-2.5">
-        <Skeleton variant="title" />
+      <div className="aspect-square bg-skeleton bg-[length:200%_100%] animate-shimmer" />
+      <div className="p-3.5 flex flex-col gap-2">
         <Skeleton variant="text" />
-        <div className="h-4 w-20 mt-2 bg-skeleton bg-[length:200%_100%] animate-shimmer rounded-md" />
+        <Skeleton variant="title" />
+        <div className="h-3.5 w-16 mt-1 bg-skeleton bg-[length:200%_100%] animate-shimmer rounded-md" />
       </div>
     </div>
   );

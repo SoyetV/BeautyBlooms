@@ -1,5 +1,6 @@
 // src/components/catalog/ProductCard.jsx
 // Modern Flora — opaque card, image-first, hover quick-add overlay.
+// Compact size: 1:1 image aspect, tighter body padding, smaller title.
 
 import { useState } from 'react'
 import { useCart } from '@/context/CartContext'
@@ -33,8 +34,8 @@ export function ProductCard({ product }) {
 
   return (
     <article className="card group flex flex-col overflow-hidden h-full">
-      {/* Image */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-surface-2">
+      {/* Image — 1:1 square (was 4:5 portrait, too tall) */}
+      <div className="relative aspect-square overflow-hidden bg-surface-2">
         <img
           src={imgError || !product.image_url ? PLACEHOLDER : product.image_url}
           alt={product.name}
@@ -46,7 +47,7 @@ export function ProductCard({ product }) {
         {/* Out of stock overlay */}
         {isOutOfStock && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
-            <span className="px-4 py-1.5 rounded-full bg-foreground/90 text-background text-eyebrow uppercase tracking-eyebrow">
+            <span className="px-3 py-1 rounded-full bg-foreground/90 text-background text-eyebrow uppercase tracking-eyebrow">
               Sold out
             </span>
           </div>
@@ -54,7 +55,7 @@ export function ProductCard({ product }) {
 
         {/* Hover quick-add (desktop) */}
         {!isOutOfStock && (
-          <div className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-spring hidden sm:block">
+          <div className="absolute inset-x-2.5 bottom-2.5 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-spring hidden sm:block">
             <button
               onClick={handleAddToCart}
               disabled={adding}
@@ -63,26 +64,26 @@ export function ProductCard({ product }) {
                   ? `Add another ${product.name} to cart`
                   : `Add ${product.name} to cart`
               }
-              className="w-full px-4 py-2.5 rounded-full bg-surface text-foreground font-semibold text-body-sm
+              className="w-full px-3 py-2 rounded-full bg-surface text-foreground font-semibold text-body-xs
                          shadow-lg border border-border
                          hover:bg-primary-500 hover:text-white hover:border-primary-500
                          active:scale-[0.98]
                          transition-all duration-250 ease-spring
-                         flex items-center justify-center gap-2"
+                         flex items-center justify-center gap-1.5"
             >
               {adding ? (
                 <>
-                  <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-foreground/40 border-t-foreground" />
+                  <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-foreground/40 border-t-foreground" />
                   Adding…
                 </>
               ) : inCart ? (
                 <>
-                  <span className="material-symbols-outlined icon-fill" style={{ fontSize: '16px' }} aria-hidden="true">check</span>
-                  In cart · Add another
+                  <span className="material-symbols-outlined icon-fill" style={{ fontSize: '14px' }} aria-hidden="true">check</span>
+                  In cart
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">add</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '14px' }} aria-hidden="true">add</span>
                   Quick add
                 </>
               )}
@@ -91,30 +92,29 @@ export function ProductCard({ product }) {
         )}
       </div>
 
-      {/* Body */}
-      <div className="flex flex-1 flex-col p-5 gap-2">
-        {/* Category (as text label, NOT overlaid on image — taste-skill §14) */}
-        <p className="text-eyebrow uppercase tracking-eyebrow text-subtle">
+      {/* Body — tighter padding (p-3.5 was p-5), smaller title */}
+      <div className="flex flex-1 flex-col p-3.5 gap-1.5">
+        <p className="text-body-xs uppercase tracking-eyebrow text-subtle">
           {product.category}
         </p>
 
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="font-display text-display-sm font-semibold text-foreground leading-snug line-clamp-2">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-display text-base font-semibold text-foreground leading-snug line-clamp-2">
             {product.name}
           </h3>
-          <p className="price text-price-md shrink-0 mt-0.5">
+          <p className="price text-price-sm shrink-0 mt-0.5">
             {formatCurrency(product.price)}
           </p>
         </div>
 
         {product.description && (
-          <p className="text-body-sm text-muted line-clamp-2 leading-relaxed">
+          <p className="text-body-xs text-muted line-clamp-2 leading-relaxed">
             {product.description}
           </p>
         )}
 
         {stockBadge && (
-          <div className="pt-1">{stockBadge}</div>
+          <div className="pt-0.5">{stockBadge}</div>
         )}
 
         {/* Mobile add-to-cart (always visible, hover-disabled) */}
@@ -128,9 +128,9 @@ export function ProductCard({ product }) {
                 ? `Add another ${product.name} to cart`
                 : `Add ${product.name} to cart`
           }
-          className={`sm:hidden mt-2 w-full px-4 py-2.5 rounded-full font-semibold text-body-sm
+          className={`sm:hidden mt-1.5 w-full px-3 py-2 rounded-full font-semibold text-body-xs
                       transition-all duration-250 ease-spring
-                      flex items-center justify-center gap-2
+                      flex items-center justify-center gap-1.5
                       ${isOutOfStock
                         ? 'bg-surface-2 text-subtle cursor-not-allowed'
                         : adding
@@ -142,19 +142,19 @@ export function ProductCard({ product }) {
         >
           {adding ? (
             <>
-              <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+              <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-white" />
               Adding…
             </>
           ) : isOutOfStock ? (
             'Out of stock'
           ) : inCart ? (
             <>
-              <span className="material-symbols-outlined icon-fill" style={{ fontSize: '16px' }} aria-hidden="true">check</span>
+              <span className="material-symbols-outlined icon-fill" style={{ fontSize: '14px' }} aria-hidden="true">check</span>
               In cart
             </>
           ) : (
             <>
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">add</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '14px' }} aria-hidden="true">add</span>
               Add to cart
             </>
           )}
