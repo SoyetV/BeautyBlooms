@@ -145,6 +145,15 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
                     label={product.is_available ? 'Listed' : 'Hidden'}
                     variant={product.is_available ? 'instock' : 'default'}
                   />
+                  {product.is_featured && (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-body-xs font-medium bg-accent-50 text-accent-700 border border-accent-200"
+                      title="Featured in marquee"
+                    >
+                      <span className="material-symbols-outlined icon-fill" style={{ fontSize: '11px' }} aria-hidden="true">star</span>
+                      Featured
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -247,12 +256,23 @@ export function ProductTable({ products, loading, error, onEdit, onDelete }) {
                   <span className="inline-flex">{stockBadge(product.stock_count)}</span>
                 </td>
 
-                {/* Availability — centered badge */}
+                {/* Availability + Featured — centered badges */}
                 <td className="px-4 py-3 hidden lg:table-cell text-center">
-                  <Badge
-                    label={product.is_available ? 'Listed' : 'Hidden'}
-                    variant={product.is_available ? 'instock' : 'default'}
-                  />
+                  <div className="inline-flex flex-col gap-1 items-center">
+                    <Badge
+                      label={product.is_available ? 'Listed' : 'Hidden'}
+                      variant={product.is_available ? 'instock' : 'default'}
+                    />
+                    {product.is_featured && (
+                      <span
+                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-body-xs font-medium bg-accent-50 text-accent-700 border border-accent-200"
+                        title="Featured in marquee"
+                      >
+                        <span className="material-symbols-outlined icon-fill" style={{ fontSize: '11px' }} aria-hidden="true">star</span>
+                        Featured
+                      </span>
+                    )}
+                  </div>
                 </td>
 
                 {/* Actions — right-aligned */}

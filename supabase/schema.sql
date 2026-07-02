@@ -46,9 +46,30 @@ create table if not exists public.products (
   category      text not null default 'Uncategorized',
   image_url     text,
   is_available  boolean not null default true,
+  is_featured   boolean not null default false,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
 );
+
+-- ── Migration: add is_featured column if it doesn't exist ──
+-- Safe to run multiple times; uses a DO block to check first.
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'products'
+      and column_name = 'is_featured'
+  ) then
+    alter table public.products
+      add column is_featured boolean not null default false;
+  end if;
+end $$;
+
+-- Index for fast marquee queries
+create index if not exists idx_products_featured
+  on public.products(is_featured)
+  where is_featured = true;
 
 -- Auto-bump updated_at on every row update
 create or replace function public.set_updated_at()
@@ -429,10 +450,10 @@ create policy "Admins can read all order items"
   using (public.is_admin());
 
 -- ── 7. SAMPLE SEED DATA (optional — remove in production) ──
-insert into public.products (name, description, price, stock_count, category, image_url)
+insert into public.products (name, description, price, stock_count, category, image_url, is_featured)
 values
-  ('Red Velvet Roses', 'A dozen long-stemmed red roses, a timeless classic.', 850.00, 20, 'Roses', null),
-  ('Sunflower Burst', 'Bright arrangement of 6 sunflowers, perfect for birthdays.', 650.00, 15, 'Sunflowers', null),
-  ('Lavender Dreams', 'Fragrant dried lavender bundle tied with twine.', 480.00, 30, 'Dried Flowers', null),
-  ('White Lily Elegance', 'Pure white Oriental lilies — elegant and long-lasting.', 720.00, 10, 'Lilies', null),
-  ('Mixed Pastel Bouquet', 'Seasonal mix of pastel-toned blooms, hand-arranged.', 950.00, 8, 'Mixed', null);
+  ('Red Velvet Roses', 'A dozen long-stemmed red roses, a timeless classic.', 850.00, 20, 'Roses', null, true),
+  ('Sunflower Burst', 'Bright arrangement of 6 sunflowers, perfect for birthdays.', 650.00, 15, 'Sunflowers', null, true),
+  ('Lavender Dreams', 'Fragrant dried lavender bundle tied with twine.', 480.00, 30, 'Dried Flowers', null, true),
+  ('White Lily Elegance', 'Pure white Oriental lilies — elegant and long-lasting.', 720.00, 10, 'Lilies', null, false),
+  ('Mixed Pastel Bouquet', 'Seasonal mix of pastel-toned blooms, hand-arranged.', 950.00, 8, 'Mixed', null, true);

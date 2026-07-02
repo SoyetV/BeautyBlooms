@@ -39,7 +39,7 @@ export default function AdminDashboard() {
 
   const {
     products, loading: productsLoading, error: productsError,
-    createProduct, updateProduct, deleteProduct, fetchProducts,
+    createProduct, updateProduct, deleteProduct, toggleFeatured, fetchProducts,
   } = useProducts({ adminMode: true })
 
   const {
@@ -411,6 +411,7 @@ export default function AdminDashboard() {
                       onCreate={createProduct}
                       onUpdate={updateProduct}
                       onDelete={deleteProduct}
+                      toggleFeatured={toggleFeatured}
                     />
                   )}
                 </div>

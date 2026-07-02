@@ -35,14 +35,20 @@ export default function ProductMarquee(props) {
 
 function WithOwnProducts(props) {
   const { isAdmin = false } = props
+  // Customer-facing marquee: only fetch products marked is_featured = true.
+  // Admin marquee: show ALL products so admin can toggle the featured flag.
   const local = useProducts({ adminMode: isAdmin })
+  const products = isAdmin
+    ? local.products
+    : local.products.filter(p => p.is_featured === true)
   return (
     <ProductMarqueeInner
       {...props}
-      products={local.products}
+      products={products}
       onCreate={local.createProduct}
       onUpdate={local.updateProduct}
       onDelete={local.deleteProduct}
+      toggleFeatured={local.toggleFeatured}
     />
   )
 }
@@ -54,6 +60,7 @@ function ProductMarqueeInner({
   createProduct,
   updateProduct,
   deleteProduct,
+  toggleFeatured,
 }) {
   const { addItem, items: cartItems } = useCart()
   const [detailsProduct, setDetailsProduct] = useState(null)
@@ -76,11 +83,17 @@ function ProductMarqueeInner({
     const container = scrollRef.current
     if (!container) return
 
+    // Don't start the loop if there's nothing to scroll (e.g. few products
+    // that all fit on screen without overflow). Avoids the marquee sitting
+    // still looking broken.
     let lastTime = performance.now()
     const tick = (now) => {
       const dt = (now - lastTime) / 1000
       lastTime = now
-      if (!dragStateRef.current.active && !isHovered) {
+
+      // Only scroll when content actually overflows AND user isn't interacting
+      const hasOverflow = container.scrollWidth > container.clientWidth + 4
+      if (hasOverflow && !dragStateRef.current.active && !isHovered) {
         container.scrollLeft += SPEED * dt
         const halfWidth = container.scrollWidth / 2
         if (container.scrollLeft >= halfWidth) {
@@ -173,6 +186,16 @@ function ProductMarqueeInner({
     }
   }
 
+  async function handleToggleFeatured(product) {
+    if (!toggleFeatured) return
+    try {
+      await toggleFeatured(product.id, !product.is_featured)
+    } catch (err) {
+      console.error('[ProductMarquee] toggleFeatured failed:', err.message || err)
+      alert(`Failed to update featured status: ${err.message || err}`)
+    }
+  }
+
   function handleViewDetails(product) {
     setDetailsProduct(product)
     setJustAdded(false)
@@ -192,7 +215,13 @@ function ProductMarqueeInner({
     setJustAdded(true)
   }
 
-  const marqueeItems = useMemo(() => [...products, ...products], [products])
+  // Multiply items enough times to guarantee horizontal overflow even with
+  // just 1-2 products. 4 copies is enough for any viewport up to ~2400px wide
+  // when the smallest card is 192px (compact w-48).
+  const marqueeItems = useMemo(() => {
+    if (products.length === 0) return []
+    return [...products, ...products, ...products, ...products]
+  }, [products])
 
   // ── Size variants ──
   const isCompact = size === 'compact'
@@ -304,7 +333,14 @@ function ProductMarqueeInner({
                   Manage marquee
                 </h2>
                 <p className="text-body-sm text-muted mt-0.5">
-                  Add, edit, or remove products. Changes sync to the catalog in real time.
+                  Toggle the star to feature products in the customer-facing marquee.
+                  {' '}
+                  <span className="font-semibold text-foreground">
+                    {products.filter(p => p.is_featured).length}
+                  </span>
+                  {' '}of{' '}
+                  <span className="font-semibold text-foreground">{products.length}</span>
+                  {' '}featured.
                 </p>
               </div>
               <button onClick={handleOpenAdd} className="btn-primary">
@@ -330,65 +366,109 @@ function ProductMarqueeInner({
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {products.map((product) => (
-                  <div
-                    key={product.id}
-                    className="relative p-3 rounded-lg border border-border bg-surface hover:bg-surface-2 hover:border-primary-200 transition-all duration-250 ease-smooth group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-md overflow-hidden shrink-0 bg-surface-2">
-                        {product.image_url || product.image ? (
-                          <img src={product.image_url || product.image} alt={product.name || product.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-subtle">
-                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }} aria-hidden="true">local_florist</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-body-sm font-semibold text-foreground truncate">{product.name || product.title}</h4>
-                        <p className="price text-price-sm text-primary-700">{formatCurrency(product.price)}</p>
-                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                          {product.category && (
-                            <span className="text-body-xs uppercase tracking-eyebrow text-subtle">{product.category}</span>
-                          )}
-                          {product.stock_count === 0 ? (
-                            <span className="text-body-xs uppercase tracking-eyebrow text-error-fg">· Out of stock</span>
+                {products.map((product) => {
+                  const isFeatured = product.is_featured === true
+                  return (
+                    <div
+                      key={product.id}
+                      className={`relative p-3 rounded-lg border bg-surface transition-all duration-250 ease-smooth group
+                        ${isFeatured
+                          ? 'border-accent-300 bg-accent-50/40 ring-1 ring-accent-200'
+                          : 'border-border hover:bg-surface-2 hover:border-primary-200'
+                        }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-md overflow-hidden shrink-0 bg-surface-2">
+                          {product.image_url || product.image ? (
+                            <img src={product.image_url || product.image} alt={product.name || product.title} className="w-full h-full object-cover" />
                           ) : (
-                            <span className="text-body-xs uppercase tracking-eyebrow text-subtle">· {product.stock_count} in stock</span>
-                          )}
-                          {!product.is_available && (
-                            <span className="text-body-xs uppercase tracking-eyebrow text-subtle">· Hidden</span>
+                            <div className="flex h-full w-full items-center justify-center text-subtle">
+                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }} aria-hidden="true">local_florist</span>
+                            </div>
                           )}
                         </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <h4 className="text-body-sm font-semibold text-foreground truncate">{product.name || product.title}</h4>
+                            {isFeatured && (
+                              <span
+                                className="inline-flex items-center justify-center h-4 w-4 shrink-0"
+                                title="Featured in marquee"
+                                aria-label="Featured in marquee"
+                              >
+                                <span className="material-symbols-outlined icon-fill text-accent-500" style={{ fontSize: '14px' }} aria-hidden="true">star</span>
+                              </span>
+                            )}
+                          </div>
+                          <p className="price text-price-sm text-primary-700">{formatCurrency(product.price)}</p>
+                          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                            {product.category && (
+                              <span className="text-body-xs uppercase tracking-eyebrow text-subtle">{product.category}</span>
+                            )}
+                            {product.stock_count === 0 ? (
+                              <span className="text-body-xs uppercase tracking-eyebrow text-error-fg">· Out of stock</span>
+                            ) : (
+                              <span className="text-body-xs uppercase tracking-eyebrow text-subtle">· {product.stock_count} in stock</span>
+                            )}
+                            {!product.is_available && (
+                              <span className="text-body-xs uppercase tracking-eyebrow text-subtle">· Hidden</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Hover actions: Feature toggle + Edit + Delete */}
+                      <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-250 ease-spring">
+                        <button
+                          onClick={() => handleToggleFeatured(product)}
+                          className={`inline-flex items-center justify-center h-7 w-7 rounded-full bg-surface shadow-sm transition-colors duration-250 ease-smooth
+                            ${isFeatured
+                              ? 'text-accent-600 hover:bg-accent-100'
+                              : 'text-muted hover:text-accent-600 hover:bg-accent-50'
+                            }`}
+                          type="button"
+                          aria-label={isFeatured ? `Remove ${product.name || product.title} from marquee` : `Feature ${product.name || product.title} in marquee`}
+                          title={isFeatured ? 'Remove from marquee' : 'Feature in marquee'}
+                        >
+                          <span className="material-symbols-outlined icon-fill" style={{ fontSize: '16px' }} aria-hidden="true">star</span>
+                        </button>
+                        <button
+                          onClick={() => handleOpenEdit(product)}
+                          className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-surface shadow-sm text-muted hover:text-primary-700 hover:bg-primary-50 transition-colors duration-250 ease-smooth"
+                          type="button"
+                          aria-label={`Edit ${product.name || product.title}`}
+                        >
+                          <Edit2 size={13} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(product.id)}
+                          className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-surface shadow-sm text-muted hover:text-error-fg hover:bg-error-soft transition-colors duration-250 ease-smooth"
+                          type="button"
+                          aria-label={`Delete ${product.name || product.title}`}
+                        >
+                          <X size={13} />
+                        </button>
+                      </div>
+
+                      {/* Mobile actions: always visible */}
+                      <div className="mt-2 flex gap-2 sm:hidden">
+                        <button
+                          onClick={() => handleToggleFeatured(product)}
+                          className={`flex-1 rounded-full border px-3 py-1.5 text-body-xs font-medium transition-colors
+                            ${isFeatured
+                              ? 'border-accent-300 bg-accent-50 text-accent-700'
+                              : 'border-border bg-surface text-muted'
+                            }`}
+                          type="button"
+                        >
+                          {isFeatured ? '★ Featured' : '☆ Feature'}
+                        </button>
+                        <button onClick={() => handleOpenEdit(product)} className="flex-1 rounded-full border border-border bg-surface px-3 py-1.5 text-body-xs font-medium text-foreground hover:border-primary-300 hover:text-primary-700 transition-colors" type="button">Edit</button>
+                        <button onClick={() => handleDeleteProduct(product.id)} className="flex-1 rounded-full border border-border bg-surface px-3 py-1.5 text-body-xs font-medium text-error-fg hover:border-error hover:bg-error-soft transition-colors" type="button">Delete</button>
                       </div>
                     </div>
-
-                    <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-250 ease-spring">
-                      <button
-                        onClick={() => handleOpenEdit(product)}
-                        className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-surface shadow-sm text-muted hover:text-primary-700 hover:bg-primary-50 transition-colors duration-250 ease-smooth"
-                        type="button"
-                        aria-label={`Edit ${product.name || product.title}`}
-                      >
-                        <Edit2 size={13} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProduct(product.id)}
-                        className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-surface shadow-sm text-muted hover:text-error-fg hover:bg-error-soft transition-colors duration-250 ease-smooth"
-                        type="button"
-                        aria-label={`Delete ${product.name || product.title}`}
-                      >
-                        <X size={13} />
-                      </button>
-                    </div>
-
-                    <div className="mt-2 flex gap-2 sm:hidden">
-                      <button onClick={() => handleOpenEdit(product)} className="flex-1 rounded-full border border-border bg-surface px-3 py-1.5 text-body-xs font-medium text-foreground hover:border-primary-300 hover:text-primary-700 transition-colors" type="button">Edit</button>
-                      <button onClick={() => handleDeleteProduct(product.id)} className="flex-1 rounded-full border border-border bg-surface px-3 py-1.5 text-body-xs font-medium text-error-fg hover:border-error hover:bg-error-soft transition-colors" type="button">Delete</button>
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>

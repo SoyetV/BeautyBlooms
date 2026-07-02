@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 
-const PRODUCT_COLUMNS = 'id,name,description,price,stock_count,category,image_url,is_available,created_at,updated_at'
+const PRODUCT_COLUMNS = 'id,name,description,price,stock_count,category,image_url,is_available,is_featured,created_at,updated_at'
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = new Map([
   ['image/jpeg', 'jpg'],
@@ -52,6 +52,11 @@ export function useProducts({ adminMode = false } = {}) {
       // Public catalog shows only available products unless admin
       if (!adminMode) {
         query = query.eq('is_available', true)
+      }
+
+      // Optional: only products marked as featured (for customer-facing marquee)
+      if (filters.featuredOnly) {
+        query = query.eq('is_featured', true)
       }
 
       // Optional category filter
@@ -174,6 +179,28 @@ export function useProducts({ adminMode = false } = {}) {
     setProducts(prev => prev.filter(p => p.id !== id))
   }
 
+  // ── TOGGLE FEATURED (marquee) ─────────────────────────
+  // Quick flip of the is_featured flag — used by admin to curate
+  // which products appear in the customer-facing marquee.
+  async function toggleFeatured(id, nextValue) {
+    if (!supabase) throw new Error('Supabase is not configured.')
+    // Optimistic update
+    setProducts(prev => prev.map(p => p.id === id ? { ...p, is_featured: nextValue } : p))
+    const { data, error } = await supabase
+      .from('products')
+      .update({ is_featured: nextValue })
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) {
+      // Revert on error
+      setProducts(prev => prev.map(p => p.id === id ? { ...p, is_featured: !nextValue } : p))
+      throw error
+    }
+    setProducts(prev => prev.map(p => p.id === id ? data : p))
+    return data
+  }
+
   return {
     products,
     loading,
@@ -182,5 +209,6 @@ export function useProducts({ adminMode = false } = {}) {
     createProduct,
     updateProduct,
     deleteProduct,
+    toggleFeatured,
   }
 }

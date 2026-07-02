@@ -17,6 +17,7 @@ const EMPTY_FORM = {
   stock_count:  '',
   category:     'Uncategorized',
   is_available: true,
+  is_featured:  false,
 }
 
 export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
@@ -38,6 +39,7 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
           stock_count:  String(initialData.stock_count ?? ''),
           category:     initialData.category     ?? 'Uncategorized',
           is_available: initialData.is_available ?? true,
+          is_featured:  initialData.is_featured  ?? false,
         })
         setPreview(initialData.image_url ?? null)
       } else {
@@ -97,6 +99,7 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
           stock_count:  parseInt(form.stock_count, 10),
           category:     form.category,
           is_available: form.is_available,
+          is_featured:  form.is_featured,
           ...(isEdit && !imageFile ? { image_url: initialData?.image_url ?? null } : {}),
         },
         imageFile
@@ -270,6 +273,35 @@ export function ProductForm({ isOpen, onClose, onSubmit, initialData = null }) {
           <span className="text-body-sm text-foreground">
             {form.is_available ? 'Listed in catalog' : 'Hidden from catalog'}
           </span>
+        </div>
+
+        {/* Featured toggle (marquee) */}
+        <div className="flex items-center gap-3 pt-1">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={form.is_featured}
+            aria-label="Toggle featured in marquee"
+            onClick={() => setForm(prev => ({ ...prev, is_featured: !prev.is_featured }))}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent
+                        transition-colors duration-250 ease-smooth
+                        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+                        ${form.is_featured ? 'bg-accent-500' : 'bg-border-strong'}`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm
+                          transition-transform duration-250 ease-spring
+                          ${form.is_featured ? 'translate-x-5' : 'translate-x-0'}`}
+            />
+          </button>
+          <div className="flex flex-col">
+            <span className="text-body-sm text-foreground">
+              {form.is_featured ? 'Featured in marquee' : 'Not in marquee'}
+            </span>
+            <span className="text-body-xs text-subtle">
+              Featured products appear in the scrolling marquee on the homepage and catalog.
+            </span>
+          </div>
         </div>
 
         {/* Actions */}
