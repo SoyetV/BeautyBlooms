@@ -35,12 +35,17 @@ export default function ProductMarquee(props) {
 
 function WithOwnProducts(props) {
   const { isAdmin = false } = props
-  // Customer-facing marquee: only fetch products marked is_featured = true.
+  // Customer-facing marquee: show featured products. If NONE are featured
+  // (e.g. migration not run yet, or admin hasn't curated any), fall back to
+  // showing ALL available products so the marquee is never empty.
   // Admin marquee: show ALL products so admin can toggle the featured flag.
   const local = useProducts({ adminMode: isAdmin })
   const products = isAdmin
     ? local.products
-    : local.products.filter(p => p.is_featured === true)
+    : (() => {
+        const featured = local.products.filter(p => p.is_featured === true)
+        return featured.length > 0 ? featured : local.products
+      })()
   return (
     <ProductMarqueeInner
       {...props}
